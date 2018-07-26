@@ -15,6 +15,8 @@ Parameters
 
 ### Set default AWS profile
 
+**Note**: this command assumes `fzf` is setup and `fzf-tmux` executable is available in your shell
+
 ```
 aws-profile-utils set
 ```
