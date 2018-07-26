@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"github.com/hpcsc/aws-profile-utils/commands"
+	"github.com/hpcsc/aws-profile-utils/handlers"
 )
 
 func main() {
@@ -15,16 +15,16 @@ func main() {
 
 	switch os.Args[1] {
 	case "get":
-		getCommand := commands.NewGetCommand()
+		getCommand := handlers.NewGetHandler()
 		getCommand.Handle(os.Args[2:])
 	case "set":
-		setCommand := commands.NewSetCommand()
+		setCommand := handlers.NewSetHandler()
 		setCommand.Handle(os.Args[2:])
 	case "version":
-		versionCommand := commands.NewVersionCommand()
+		versionCommand := handlers.NewVersionHandler()
 		versionCommand.Handle(os.Args[2:])
 	default:
-		flag.PrintDefaults()
+		flag.Usage()
 		os.Exit(1)
 	}
 }

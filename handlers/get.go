@@ -1,4 +1,4 @@
-package commands
+package handlers
 
 import (
 	"gopkg.in/ini.v1"
@@ -8,37 +8,37 @@ import (
 	"flag"
 )
 
-type GetCommand struct {
-	Command *flag.FlagSet
-	Flags GetCommandFlags
+type GetHandler struct {
+	FlagSet *flag.FlagSet
+	Flags   GetHandlerFlags
 }
 
-type GetCommandFlags struct {
+type GetHandlerFlags struct {
 	CredentialsFilePath   *string
 	ConfigFilePath   *string
 }
 
-func NewGetCommand() GetCommand {
-	command := flag.NewFlagSet("get", flag.ExitOnError)
+func NewGetHandler() GetHandler {
+	flagSet := flag.NewFlagSet("get", flag.ExitOnError)
 
-	credentialsFilePath := command.String("credentials-path", "~/.aws/credentials", "Path to AWS Credentials file")
-	configFilePath := command.String("config-path", "~/.aws/config", "Path to AWS Config file")
+	credentialsFilePath := flagSet.String("credentials-path", "~/.aws/credentials", "Path to AWS Credentials file")
+	configFilePath := flagSet.String("config-path", "~/.aws/config", "Path to AWS Config file")
 
-	return GetCommand {
-		Command: command,
-		Flags:   GetCommandFlags{
+	return GetHandler{
+		FlagSet: flagSet,
+		Flags:   GetHandlerFlags{
 			CredentialsFilePath: credentialsFilePath,
 			ConfigFilePath: configFilePath,
 		},
 	}
 }
 
-func (getCommand GetCommand) Handle(arguments []string) {
-	command := getCommand.Command
-	command.Parse(arguments)
-	if command.Parsed() {
-		credentialsPath := ExpandHomeDirectory(*getCommand.Flags.CredentialsFilePath)
-		configPath := ExpandHomeDirectory(*getCommand.Flags.ConfigFilePath)
+func (handler GetHandler) Handle(arguments []string) {
+	flagSet := handler.FlagSet
+	flagSet.Parse(arguments)
+	if flagSet.Parsed() {
+		credentialsPath := ExpandHomeDirectory(*handler.Flags.CredentialsFilePath)
+		configPath := ExpandHomeDirectory(*handler.Flags.ConfigFilePath)
 
 		configFile, err := ini.Load(configPath)
 		if err != nil {

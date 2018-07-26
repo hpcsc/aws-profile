@@ -1,4 +1,4 @@
-package commands
+package handlers
 
 import (
 	"flag"
@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-type SetCommand struct {
-	Command *flag.FlagSet
+type SetHandler struct {
+	FlagSet *flag.FlagSet
 	Flags   SetCommandFlags
 }
 
@@ -20,15 +20,15 @@ type SetCommandFlags struct {
 	Pattern *string
 }
 
-func NewSetCommand() SetCommand {
-	command := flag.NewFlagSet("set", flag.ExitOnError)
+func NewSetHandler() SetHandler {
+	flagSet := flag.NewFlagSet("set", flag.ExitOnError)
 
-	credentialsFilePath := command.String("credentials-path", "~/.aws/credentials", "Path to AWS Credentials file")
-	configFilePath := command.String("config-path", "~/.aws/config", "Path to AWS Config file")
-	pattern := command.String("pattern", "", "Start the fzf finder with the given query")
+	credentialsFilePath := flagSet.String("credentials-path", "~/.aws/credentials", "Path to AWS Credentials file")
+	configFilePath := flagSet.String("config-path", "~/.aws/config", "Path to AWS Config file")
+	pattern := flagSet.String("pattern", "", "Start the fzf finder with the given query")
 
-	return SetCommand {
-		Command: command,
+	return SetHandler{
+		FlagSet: flagSet,
 		Flags:   SetCommandFlags{
 			CredentialsFilePath: credentialsFilePath,
 			ConfigFilePath: configFilePath,
@@ -37,10 +37,10 @@ func NewSetCommand() SetCommand {
 	}
 }
 
-func getAWSProfiles(setCommand SetCommand) []string {
+func getAWSProfiles(handler SetHandler) []string {
 	var profiles []string
 
-	credentialsPath := ExpandHomeDirectory(*setCommand.Flags.CredentialsFilePath)
+	credentialsPath := ExpandHomeDirectory(*handler.Flags.CredentialsFilePath)
 	credentialsFile, err := ini.Load(credentialsPath)
 	if err != nil {
 		fmt.Printf("Fail to read AWS credentials file: %v", err)
@@ -53,7 +53,7 @@ func getAWSProfiles(setCommand SetCommand) []string {
 		}
 	}
 
-	configPath := ExpandHomeDirectory(*setCommand.Flags.ConfigFilePath)
+	configPath := ExpandHomeDirectory(*handler.Flags.ConfigFilePath)
 	configFile, err := ini.Load(configPath)
 	if err != nil {
 		fmt.Printf("Fail to read AWS config file: %v", err)
@@ -71,17 +71,17 @@ func getAWSProfiles(setCommand SetCommand) []string {
 	return profiles
 }
 
-func (setCommand SetCommand) Handle(arguments []string) {
-	command := setCommand.Command
-	command.Parse(arguments)
-	if command.Parsed() {
-		fmt.Println(*setCommand.Flags.Pattern)
-		profiles := getAWSProfiles(setCommand)
+func (handler SetHandler) Handle(arguments []string) {
+	flagSet := handler.FlagSet
+	flagSet.Parse(arguments)
+	if flagSet.Parsed() {
+		fmt.Println(*handler.Flags.Pattern)
+		profiles := getAWSProfiles(handler)
 		joinedProfiles := strings.Join(profiles, "\n")
 
 		fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",
 								joinedProfiles,
-								*setCommand.Flags.Pattern)
+								*handler.Flags.Pattern)
 		shellCommand := exec.Command("bash", "-c", fzfCommand)
 		shellCommand.Stdin = os.Stdin
 		shellCommand.Stderr = os.Stderr
