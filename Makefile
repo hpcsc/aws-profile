@@ -3,3 +3,5 @@ build:
 
 run:
 	./bin/aws-profile-utils $(args)
+
+all: build run

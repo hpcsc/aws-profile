@@ -7,6 +7,8 @@ import (
 	"os"
 		"strings"
 	"gopkg.in/ini.v1"
+	"bytes"
+	"io/ioutil"
 )
 
 type SetHandler struct {
@@ -37,7 +39,7 @@ func NewSetHandler() SetHandler {
 	}
 }
 
-func getAWSProfiles(credentialsFile *ini.File, configFile *ini.File) []string {
+func getProfilesFromCredentialsFile(credentialsFile *ini.File) []string {
 	var profiles []string
 
 	for _, section := range credentialsFile.Sections() {
@@ -45,6 +47,12 @@ func getAWSProfiles(credentialsFile *ini.File, configFile *ini.File) []string {
 			profiles = append(profiles, section.Name())
 		}
 	}
+
+	return profiles
+}
+
+func getAssumedProfilesFromConfigFile(configFile *ini.File) []string {
+	var profiles []string
 
 	for _, section := range configFile.Sections() {
 		if !strings.EqualFold(section.Name(), "default") &&
@@ -55,6 +63,29 @@ func getAWSProfiles(credentialsFile *ini.File, configFile *ini.File) []string {
 	}
 
 	return profiles
+}
+
+func containsProfile(profiles []string, selected string) bool {
+	for _, profile := range profiles {
+		if strings.EqualFold(profile, selected) {
+			return true
+		}
+	}
+	return false
+}
+
+func writeToFile(file *ini.File, unexpandedFilePath string) {
+	var buffer bytes.Buffer
+	_, err := file.WriteTo(&buffer)
+
+	filePath := ExpandHomeDirectory(unexpandedFilePath)
+
+	if err != nil {
+		fmt.Printf("Fail to write to file %s: %v", filePath, err)
+		os.Exit(1)
+	}
+
+	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
 
 func (handler SetHandler) Handle(arguments []string) {
@@ -73,9 +104,10 @@ func (handler SetHandler) Handle(arguments []string) {
 			os.Exit(1)
 		}
 
-		profiles := getAWSProfiles(credentialsFile, configFile)
+		credentialsProfiles := getProfilesFromCredentialsFile(credentialsFile)
+		configAssumedProfiles := getAssumedProfilesFromConfigFile(configFile)
 
-		joinedProfiles := strings.Join(profiles, "\n")
+		joinedProfiles := strings.Join(append(credentialsProfiles, configAssumedProfiles...), "\n")
 
 		fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",
 								joinedProfiles,
@@ -91,7 +123,31 @@ func (handler SetHandler) Handle(arguments []string) {
 			os.Exit(0)
 		}
 
-		selectedProfile := string(shellOutput)
-		fmt.Printf("%s", selectedProfile)
+		selectedProfile := strings.TrimSuffix(string(shellOutput), "\n")
+
+		if containsProfile(credentialsProfiles, selectedProfile) {
+			fmt.Printf("=== setting AWS profile [%s] as default profile", selectedProfile)
+			selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
+			selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
+
+			credentialsFile.Section("default").Key("aws_access_key_id").SetValue(selectedKeyId)
+			credentialsFile.Section("default").Key("aws_secret_access_key").SetValue(selectedAccessKey)
+			configFile.Section("default").DeleteKey("role_arn")
+			configFile.Section("default").DeleteKey("source_profile")
+
+			writeToFile(credentialsFile, *handler.Flags.CredentialsFilePath)
+			writeToFile(configFile, *handler.Flags.ConfigFilePath)
+		} else if containsProfile(configAssumedProfiles, selectedProfile) {
+			fmt.Printf("=== assuming AWS profile [%s]", selectedProfile)
+			selectedRoleArn := configFile.Section(selectedProfile).Key("role_arn").Value()
+			selectedSourceProfile := configFile.Section(selectedProfile).Key("source_profile").Value()
+
+			configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
+			configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
+
+			writeToFile(configFile, *handler.Flags.ConfigFilePath)
+		} else {
+			fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedProfile)
+		}
 	}
 }
