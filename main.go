@@ -1,30 +1,38 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+		"fmt"
 	"os"
 	"github.com/hpcsc/aws-profile-utils/handlers"
+		"strings"
 )
+
+var handlerMap = map[string]handlers.Handler {
+	"get": handlers.NewGetHandler(),
+	"set": handlers.NewSetHandler(),
+	"version": handlers.NewVersionHandler(),
+}
+
+func printUsage() {
+	var commandNames []string
+
+	for name := range handlerMap {
+		commandNames = append(commandNames, name)
+	}
+
+	fmt.Printf("Usage: %s [%s] arguments... \n", os.Args[0], strings.Join(commandNames[:], "|"))
+}
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("sub command is required")
+		printUsage()
 		os.Exit(1)
 	}
 
-	switch os.Args[1] {
-	case "get":
-		getCommand := handlers.NewGetHandler()
-		getCommand.Handle(os.Args[2:])
-	case "set":
-		setCommand := handlers.NewSetHandler()
-		setCommand.Handle(os.Args[2:])
-	case "version":
-		versionCommand := handlers.NewVersionHandler()
-		versionCommand.Handle(os.Args[2:])
-	default:
-		flag.Usage()
+	if handler, ok := handlerMap[os.Args[1]]; ok {
+		handler.Handle(os.Args[2:])
+	} else {
+		printUsage()
 		os.Exit(1)
 	}
 }

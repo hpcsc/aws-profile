@@ -60,7 +60,7 @@ func (handler GetHandler) Handle(arguments []string) {
 					section.HasKey("source_profile") &&
 					strings.Compare(section.Key("role_arn").Value(), defaultRoleArn) == 0 &&
 					strings.Compare(section.Key("source_profile").Value(), defaultSourceProfile) == 0 {
-					fmt.Printf("%s", section.Name())
+					fmt.Printf("%s\n", section.Name())
 					os.Exit(0)
 				}
 			}
@@ -82,7 +82,7 @@ func (handler GetHandler) Handle(arguments []string) {
 				if strings.Compare(section.Name(), "default") != 0 &&
 					section.HasKey("aws_access_key_id") &&
 					strings.Compare(section.Key("aws_access_key_id").Value(), defaultAWSAccessKeyId) == 0 {
-					fmt.Printf("%s", section.Name())
+					fmt.Printf("%s\n", section.Name())
 					os.Exit(0)
 				}
 			}
