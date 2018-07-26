@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"os"
+		"strings"
 	"gopkg.in/ini.v1"
-	"strings"
 )
 
 type SetHandler struct {
@@ -37,27 +37,13 @@ func NewSetHandler() SetHandler {
 	}
 }
 
-func getAWSProfiles(handler SetHandler) []string {
+func getAWSProfiles(credentialsFile *ini.File, configFile *ini.File) []string {
 	var profiles []string
-
-	credentialsPath := ExpandHomeDirectory(*handler.Flags.CredentialsFilePath)
-	credentialsFile, err := ini.Load(credentialsPath)
-	if err != nil {
-		fmt.Printf("Fail to read AWS credentials file: %v", err)
-		os.Exit(1)
-	}
 
 	for _, section := range credentialsFile.Sections() {
 		if !strings.EqualFold(section.Name(), "default") {
 			profiles = append(profiles, section.Name())
 		}
-	}
-
-	configPath := ExpandHomeDirectory(*handler.Flags.ConfigFilePath)
-	configFile, err := ini.Load(configPath)
-	if err != nil {
-		fmt.Printf("Fail to read AWS config file: %v", err)
-		os.Exit(1)
 	}
 
 	for _, section := range configFile.Sections() {
@@ -75,8 +61,20 @@ func (handler SetHandler) Handle(arguments []string) {
 	flagSet := handler.FlagSet
 	flagSet.Parse(arguments)
 	if flagSet.Parsed() {
-		fmt.Println(*handler.Flags.Pattern)
-		profiles := getAWSProfiles(handler)
+		credentialsFile, err := ReadFile(*handler.Flags.CredentialsFilePath)
+		if err != nil {
+			fmt.Printf("Fail to read AWS credentials file: %v", err)
+			os.Exit(1)
+		}
+
+		configFile, err := ReadFile(*handler.Flags.ConfigFilePath)
+		if err != nil {
+			fmt.Printf("Fail to read AWS config file: %v", err)
+			os.Exit(1)
+		}
+
+		profiles := getAWSProfiles(credentialsFile, configFile)
+
 		joinedProfiles := strings.Join(profiles, "\n")
 
 		fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",

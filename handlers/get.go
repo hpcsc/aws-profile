@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"gopkg.in/ini.v1"
-	"fmt"
+		"fmt"
 	"os"
 	"strings"
 	"flag"
@@ -37,10 +36,7 @@ func (handler GetHandler) Handle(arguments []string) {
 	flagSet := handler.FlagSet
 	flagSet.Parse(arguments)
 	if flagSet.Parsed() {
-		credentialsPath := ExpandHomeDirectory(*handler.Flags.CredentialsFilePath)
-		configPath := ExpandHomeDirectory(*handler.Flags.ConfigFilePath)
-
-		configFile, err := ini.Load(configPath)
+		configFile, err := ReadFile(*handler.Flags.ConfigFilePath)
 		if err != nil {
 			fmt.Printf("Fail to read AWS config file: %v", err)
 			os.Exit(1)
@@ -66,7 +62,7 @@ func (handler GetHandler) Handle(arguments []string) {
 			}
 		}
 
-		credentialsFile, err := ini.Load(credentialsPath)
+		credentialsFile, err := ReadFile(*handler.Flags.CredentialsFilePath)
 		if err != nil {
 			fmt.Printf("Fail to read AWS credentials file: %v", err)
 			os.Exit(1)
