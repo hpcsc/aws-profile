@@ -1,0 +1,6 @@
+language: go
+
+go:
+- "1.9.x"
+install: make install
+script: make build version="${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}"
