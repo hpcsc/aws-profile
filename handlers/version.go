@@ -1,23 +1,22 @@
 package handlers
 
 import (
-	"flag"
-	"fmt"
-		)
+		"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
+)
 
 type VersionHandler struct {
-	FlagSet *flag.FlagSet
+	SubCommand *kingpin.CmdClause
 }
 
-func NewVersionHandler() VersionHandler {
-	flagSet := flag.NewFlagSet("version", flag.ExitOnError)
-
-	return VersionHandler{
-		FlagSet: flagSet,
+func NewVersionHandler(app *kingpin.Application) VersionHandler {
+	subCommand := app.Command("version", "show aws-profile-utils version")
+	return VersionHandler {
+		SubCommand: subCommand,
 	}
 }
 
 var version = "undefined"
-func (handler VersionHandler) Handle(arguments []string) {
+func (handler VersionHandler) Handle() {
 	fmt.Printf("aws-profile-utils (v%s)", version)
 }

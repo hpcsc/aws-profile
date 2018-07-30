@@ -23,5 +23,5 @@ func ExpandHomeDirectory(filePath string) string {
 }
 
 type Handler interface {
-	Handle(arguments []string)
+	Handle()
 }

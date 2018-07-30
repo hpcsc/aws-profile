@@ -1,37 +1,37 @@
 package handlers
 
 import (
-	"flag"
-	"fmt"
+		"fmt"
 	"os/exec"
 	"os"
 		"strings"
 	"gopkg.in/ini.v1"
 	"bytes"
 	"io/ioutil"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type SetHandler struct {
-	FlagSet *flag.FlagSet
-	Flags   SetCommandFlags
+	SubCommand *kingpin.CmdClause
+	Arguments  SetCommandArguments
 }
 
-type SetCommandFlags struct {
+type SetCommandArguments struct {
 	CredentialsFilePath   *string
 	ConfigFilePath   *string
 	Pattern *string
 }
 
-func NewSetHandler() SetHandler {
-	flagSet := flag.NewFlagSet("set", flag.ExitOnError)
+func NewSetHandler(app *kingpin.Application) SetHandler {
+	subCommand := app.Command("set", "set default profile with credentials of selected profile (this command assumes fzf is already setup)")
 
-	credentialsFilePath := flagSet.String("credentials-path", "~/.aws/credentials", "Path to AWS Credentials file")
-	configFilePath := flagSet.String("config-path", "~/.aws/config", "Path to AWS Config file")
-	pattern := flagSet.String("pattern", "", "Start the fzf finder with the given query")
+	credentialsFilePath := subCommand.Arg("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
+	configFilePath := subCommand.Arg("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
+	pattern := subCommand.Arg("pattern", "Start the fzf finder with the given query").String()
 
 	return SetHandler{
-		FlagSet: flagSet,
-		Flags:   SetCommandFlags{
+		SubCommand: subCommand,
+		Arguments:   SetCommandArguments{
 			CredentialsFilePath: credentialsFilePath,
 			ConfigFilePath: configFilePath,
 			Pattern: pattern,
@@ -88,66 +88,62 @@ func writeToFile(file *ini.File, unexpandedFilePath string) {
 	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
 
-func (handler SetHandler) Handle(arguments []string) {
-	flagSet := handler.FlagSet
-	flagSet.Parse(arguments)
-	if flagSet.Parsed() {
-		credentialsFile, err := ReadFile(*handler.Flags.CredentialsFilePath)
-		if err != nil {
-			fmt.Printf("Fail to read AWS credentials file: %v", err)
-			os.Exit(1)
-		}
+func (handler SetHandler) Handle() {
+	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
+	if err != nil {
+		fmt.Printf("Fail to read AWS credentials file: %v", err)
+		os.Exit(1)
+	}
 
-		configFile, err := ReadFile(*handler.Flags.ConfigFilePath)
-		if err != nil {
-			fmt.Printf("Fail to read AWS config file: %v", err)
-			os.Exit(1)
-		}
+	configFile, err := ReadFile(*handler.Arguments.ConfigFilePath)
+	if err != nil {
+		fmt.Printf("Fail to read AWS config file: %v", err)
+		os.Exit(1)
+	}
 
-		credentialsProfiles := getProfilesFromCredentialsFile(credentialsFile)
-		configAssumedProfiles := getAssumedProfilesFromConfigFile(configFile)
+	credentialsProfiles := getProfilesFromCredentialsFile(credentialsFile)
+	configAssumedProfiles := getAssumedProfilesFromConfigFile(configFile)
 
-		joinedProfiles := strings.Join(append(credentialsProfiles, configAssumedProfiles...), "\n")
+	joinedProfiles := strings.Join(append(credentialsProfiles, configAssumedProfiles...), "\n")
 
-		fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",
-								joinedProfiles,
-								*handler.Flags.Pattern)
-		shellCommand := exec.Command("bash", "-c", fzfCommand)
-		shellCommand.Stdin = os.Stdin
-		shellCommand.Stderr = os.Stderr
+	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",
+							joinedProfiles,
+							*handler.Arguments.Pattern)
+	shellCommand := exec.Command("bash", "-c", fzfCommand)
+	shellCommand.Stdin = os.Stdin
+	shellCommand.Stderr = os.Stderr
 
-		shellOutput, err := shellCommand.Output()
-		if err != nil {
-			// should only exit with code 0 when the error is caused by Ctrl+C
-			// temporarily assume all the errors are caused by Ctrl+C for now
-			os.Exit(0)
-		}
+	shellOutput, err := shellCommand.Output()
+	if err != nil {
+		// should only exit with code 0 when the error is caused by Ctrl+C
+		// temporarily assume all the errors are caused by Ctrl+C for now
+		os.Exit(0)
+	}
 
-		selectedProfile := strings.TrimSuffix(string(shellOutput), "\n")
+	selectedProfile := strings.TrimSuffix(string(shellOutput), "\n")
 
-		if containsProfile(credentialsProfiles, selectedProfile) {
-			fmt.Printf("=== setting AWS profile [%s] as default profile", selectedProfile)
-			selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
-			selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
+	if containsProfile(credentialsProfiles, selectedProfile) {
+		fmt.Printf("=== setting AWS profile [%s] as default profile", selectedProfile)
+		selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
+		selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
 
-			credentialsFile.Section("default").Key("aws_access_key_id").SetValue(selectedKeyId)
-			credentialsFile.Section("default").Key("aws_secret_access_key").SetValue(selectedAccessKey)
-			configFile.Section("default").DeleteKey("role_arn")
-			configFile.Section("default").DeleteKey("source_profile")
+		credentialsFile.Section("default").Key("aws_access_key_id").SetValue(selectedKeyId)
+		credentialsFile.Section("default").Key("aws_secret_access_key").SetValue(selectedAccessKey)
+		configFile.Section("default").DeleteKey("role_arn")
+		configFile.Section("default").DeleteKey("source_profile")
 
-			writeToFile(credentialsFile, *handler.Flags.CredentialsFilePath)
-			writeToFile(configFile, *handler.Flags.ConfigFilePath)
-		} else if containsProfile(configAssumedProfiles, selectedProfile) {
-			fmt.Printf("=== assuming AWS profile [%s]", selectedProfile)
-			selectedRoleArn := configFile.Section(selectedProfile).Key("role_arn").Value()
-			selectedSourceProfile := configFile.Section(selectedProfile).Key("source_profile").Value()
+		writeToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
+		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+	} else if containsProfile(configAssumedProfiles, selectedProfile) {
+		fmt.Printf("=== assuming AWS profile [%s]", selectedProfile)
+		selectedRoleArn := configFile.Section(selectedProfile).Key("role_arn").Value()
+		selectedSourceProfile := configFile.Section(selectedProfile).Key("source_profile").Value()
 
-			configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
-			configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
+		configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
+		configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
 
-			writeToFile(configFile, *handler.Flags.ConfigFilePath)
-		} else {
-			fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedProfile)
-		}
+		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+	} else {
+		fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedProfile)
 	}
 }

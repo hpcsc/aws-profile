@@ -1,38 +1,38 @@
 package main
 
 import (
-		"fmt"
-	"os"
+			"os"
 	"github.com/hpcsc/aws-profile-utils/handlers"
-		"strings"
-)
+			"gopkg.in/alecthomas/kingpin.v2"
+	)
 
-var handlerMap = map[string]handlers.Handler {
-	"get": handlers.NewGetHandler(),
-	"set": handlers.NewSetHandler(),
-	"version": handlers.NewVersionHandler(),
-}
+func createHandlerMap(app *kingpin.Application) map[string]handlers.Handler{
+	getHandler := handlers.NewGetHandler(app)
+	setHandler := handlers.NewSetHandler(app)
+	versionHandler := handlers.NewVersionHandler(app)
 
-func printUsage() {
-	var commandNames []string
-
-	for name := range handlerMap {
-		commandNames = append(commandNames, name)
+	return map[string]handlers.Handler {
+		getHandler.SubCommand.FullCommand(): getHandler,
+		setHandler.SubCommand.FullCommand(): setHandler,
+		versionHandler.SubCommand.FullCommand(): versionHandler,
 	}
-
-	fmt.Printf("Usage: %s [%s] arguments... \n", os.Args[0], strings.Join(commandNames[:], "|"))
 }
 
 func main() {
+	app := kingpin.New("aws-profile-utils", "simple tool to help switching among AWS profiles more easily")
+	app.HelpFlag.Short('h')
+	handlerMap := createHandlerMap(app)
+
 	if len(os.Args) < 2 {
-		printUsage()
+		app.Usage([]string {})
 		os.Exit(1)
 	}
 
-	if handler, ok := handlerMap[os.Args[1]]; ok {
-		handler.Handle(os.Args[2:])
+	parsedInput := kingpin.MustParse(app.Parse(os.Args[1:]))
+
+	if handler, ok := handlerMap[parsedInput]; ok {
+		handler.Handle()
 	} else {
-		printUsage()
-		os.Exit(1)
+		app.Usage([]string {})
 	}
 }
