@@ -123,7 +123,6 @@ func (handler SetHandler) Handle() {
 	selectedProfile := strings.TrimSuffix(string(shellOutput), "\n")
 
 	if containsProfile(credentialsProfiles, selectedProfile) {
-		fmt.Printf("=== setting AWS profile [%s] as default profile", selectedProfile)
 		selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
 		selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
 
@@ -134,8 +133,9 @@ func (handler SetHandler) Handle() {
 
 		writeToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+
+		fmt.Printf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedProfile)
 	} else if containsProfile(configAssumedProfiles, selectedProfile) {
-		fmt.Printf("=== assuming AWS profile [%s]", selectedProfile)
 		selectedRoleArn := configFile.Section(selectedProfile).Key("role_arn").Value()
 		selectedSourceProfile := configFile.Section(selectedProfile).Key("source_profile").Value()
 
@@ -143,6 +143,8 @@ func (handler SetHandler) Handle() {
 		configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
 
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+
+		fmt.Printf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedProfile)
 	} else {
 		fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedProfile)
 	}
