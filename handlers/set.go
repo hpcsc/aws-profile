@@ -25,8 +25,8 @@ type SetCommandArguments struct {
 func NewSetHandler(app *kingpin.Application) SetHandler {
 	subCommand := app.Command("set", "set default profile with credentials of selected profile (this command assumes fzf is already setup)")
 
-	credentialsFilePath := subCommand.Arg("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
-	configFilePath := subCommand.Arg("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
+	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
+	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 	pattern := subCommand.Arg("pattern", "Start the fzf finder with the given query").String()
 
 	return SetHandler{
@@ -58,7 +58,7 @@ func getAssumedProfilesFromConfigFile(configFile *ini.File) []string {
 		if !strings.EqualFold(section.Name(), "default") &&
 			section.HasKey("role_arn") &&
 			section.HasKey("source_profile") {
-			profiles = append(profiles, section.Name())
+			profiles = append(profiles, fmt.Sprintf("assume %s:%s", section.Name(), section.Name()))
 		}
 	}
 
@@ -72,6 +72,15 @@ func containsProfile(profiles []string, selected string) bool {
 		}
 	}
 	return false
+}
+
+func getProfileSectionNameFromColonDelimited(selected string) string {
+	if ! strings.Contains(selected, ":") {
+		return selected
+	}
+
+	elements := strings.Split(selected, ":")
+	return elements[1]
 }
 
 func writeToFile(file *ini.File, unexpandedFilePath string) {
@@ -106,7 +115,7 @@ func (handler SetHandler) Handle() {
 
 	joinedProfiles := strings.Join(append(credentialsProfiles, configAssumedProfiles...), "\n")
 
-	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --header 'Select AWS profile' --query '%s'",
+	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --with-nth=1 --delimiter=: --header 'Select AWS profile' --query '%s'",
 							joinedProfiles,
 							*handler.Arguments.Pattern)
 	shellCommand := exec.Command("bash", "-c", fzfCommand)
@@ -120,11 +129,11 @@ func (handler SetHandler) Handle() {
 		os.Exit(0)
 	}
 
-	selectedProfile := strings.TrimSuffix(string(shellOutput), "\n")
+	selectedValue := strings.TrimSuffix(string(shellOutput), "\n")
 
-	if containsProfile(credentialsProfiles, selectedProfile) {
-		selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
-		selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
+	if containsProfile(credentialsProfiles, selectedValue) {
+		selectedKeyId := credentialsFile.Section(selectedValue).Key("aws_access_key_id").Value()
+		selectedAccessKey := credentialsFile.Section(selectedValue).Key("aws_secret_access_key").Value()
 
 		credentialsFile.Section("default").Key("aws_access_key_id").SetValue(selectedKeyId)
 		credentialsFile.Section("default").Key("aws_secret_access_key").SetValue(selectedAccessKey)
@@ -134,8 +143,10 @@ func (handler SetHandler) Handle() {
 		writeToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
 
-		fmt.Printf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedProfile)
-	} else if containsProfile(configAssumedProfiles, selectedProfile) {
+		fmt.Printf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedValue)
+	} else if containsProfile(configAssumedProfiles, selectedValue) {
+		selectedProfile := getProfileSectionNameFromColonDelimited(selectedValue)
+
 		selectedRoleArn := configFile.Section(selectedProfile).Key("role_arn").Value()
 		selectedSourceProfile := configFile.Section(selectedProfile).Key("source_profile").Value()
 
@@ -144,8 +155,8 @@ func (handler SetHandler) Handle() {
 
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
 
-		fmt.Printf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedProfile)
+		fmt.Printf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedValue)
 	} else {
-		fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedProfile)
+		fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedValue)
 	}
 }

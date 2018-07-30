@@ -20,8 +20,8 @@ type GetHandlerArguments struct {
 func NewGetHandler(app *kingpin.Application) GetHandler {
 	subCommand := app.Command("get", "get current AWS profile (that is set to default profile)")
 
-	credentialsFilePath := subCommand.Arg("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
-	configFilePath := subCommand.Arg("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
+	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
+	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 
 	return GetHandler{
 		SubCommand: subCommand,
@@ -53,7 +53,7 @@ func (handler GetHandler) Handle() {
 				section.HasKey("source_profile") &&
 				strings.Compare(section.Key("role_arn").Value(), defaultRoleArn) == 0 &&
 				strings.Compare(section.Key("source_profile").Value(), defaultSourceProfile) == 0 {
-				fmt.Printf("%s\n", section.Name())
+				fmt.Printf("assuming %s\n", section.Name())
 				os.Exit(0)
 			}
 		}
