@@ -3,35 +3,48 @@
 ### Build Status
 [![Build Status](https://travis-ci.org/hpcsc/aws-profile-utils.png)](https://travis-ci.org/hpcsc/aws-profile-utils)
 
+### Installation
+
+**Following steps assumes jq is available**
+
+- Latest build from master branch
+
+
+```
+latest_build_number=$(curl https://api.travis-ci.org/repos/hpcsc/aws-profile-utils/branches/master | jq -r '.branch.number')
+curl https://storage.googleapis.com/aws-profile-utils-master/aws-profile-utils-osx-${latest_build_number} -o aws-profile-utils
+chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
+
+```
+
+- Release build
+
+```
+latest_release_tag=$(curl https://api.github.com/repos/hpcsc/aws-profile-utils/releases/latest | jq -r '.tag_name')
+curl https://github.com/hpcsc/aws-profile-utils/releases/download/${latest_release_tag}/aws-profile-utils -o aws-profile-utils
+chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
+```
+
+### Usage
+
+```
+usage: aws-profile-utils [<flags>] <command> [<args> ...]
+
+simple tool to help switching among AWS profiles more easily
+
+Flags:
+  -h, --help  Show context-sensitive help (also try --help-long and --help-man).
+
 Commands:
+  help [<command>...]
+    Show help.
 
-### Get current AWS profile
+  get [<flags>]
+    get current AWS profile (that is set to default profile)
 
-```
-aws-profile-utils get
-```
+  set [<flags>] [<pattern>]
+    set default profile with credentials of selected profile (this command assumes fzf is already setup)
 
-Parameters
-
-- `credentials-path` (optional, default to ~/.aws/credentials): path to AWS CLI credentials file
-- `config-path` (optional, default to ~/.aws/config): path to AWS CLI config file
-
-### Set default AWS profile
-
-**Note**: this command assumes `fzf` is setup and `fzf-tmux` executable is available in your shell
-
-```
-aws-profile-utils set
-```
-
-Parameters
-
-- `credentials-path` (optional, default to ~/.aws/credentials): path to AWS CLI credentials file
-- `config-path` (optional, default to ~/.aws/config): path to AWS CLI config file
-- `pattern` (optional, default to empty string): start the fzf finder with the given pattern
-
-### Get version of this util
-
-```
-aws-profile-utils version
+  version
+    show aws-profile-utils version
 ```
