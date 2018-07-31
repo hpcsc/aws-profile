@@ -1,5 +1,8 @@
 # AWS Profile Utils
 
+### Build Status
+[![Build Status](https://travis-ci.org/hpcsc/aws-profile-utils.png)](https://travis-ci.org/hpcsc/aws-profile-utils)
+
 Commands:
 
 ### Get current AWS profile
