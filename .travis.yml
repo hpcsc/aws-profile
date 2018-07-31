@@ -4,3 +4,15 @@ go:
 - "1.9.x"
 install: make install
 script: make build version="${TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}"
+before_deploy: mv bin/aws-profile-utils bin/aws-profile-utils-master-${TRAVIS_BUILD_NUMBER}
+deploy:
+  - provider: gcs
+    access_key_id: "GOOGXSXJIII432RYYGT7DNP5"
+    secret_access_key:
+      secure: "IqPBYctNlPMAKAn8VjLaq/HzZRNVP8kQ/6+6trvsqA1nO3B525QcKK+1efHOGIKt5K9u9wrvwAM2AC4wto438RoyeWiZxKlZtzHGJRKuxjdN/Q072kU1ndsdOhflLZQuWk5uVWk6EIJnh8vlMqe7e2asK7HEuyY6TC+rbfPjVFix7iKFY9yFD7aOORrG1HpyFHFIXf4mUWudfHqCq4RDrIFRQJd9MeLiVA6GUE0eC0m941lnHdSmQbcda5KYU7lHJta1op/CnRVhswb57ESs0KLVtS+uII3wp/TwYafw1ZGwzb4ekrX+p/glcGdFLXkyXXg8hKkOe2IM3zDWvrEhL10m3VILmLKUd8Wv4JdzWXb1Tgm+yNkhFkqtq+vTRWKP1pXaXW8cZYOpbzJjzsRnnfVeeSlpSzgmAtlSZI7qqcqMV/4BQN62ZEGldHFKZS3Yhcjd+am1CymlKEbvXq07yqOlzP5RC+B3lPCWgJPfKG4Rf3DvrpK4yc1qjCA0Uv24kZDSiLTE84hsNkLfjimOqyZR+6kBtXrXIhBeMWjdTKfVQ8iq12HhA9vORkYsN4XXqQ3y7SHQpP60tcaxAGFQgnFuUiZISRezr8oma7DReN2gNAE6WmuEgTHr7NpKmPd90Fp61Wkw+UKSHE62hTfngRnKICvdcm3sYwP09mjxE/E="
+    bucket: "aws-profile-utils-master"
+    skip_cleanup: true
+    acl: public-read
+    local-dir: bin
+    on:
+      branch: master
