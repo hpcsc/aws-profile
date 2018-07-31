@@ -20,3 +20,11 @@ deploy:
     local-dir: bin
     on:
       branch: master
+  - provider: releases
+    api_key:
+      secure: "rjIAHf2KXJkAGJhTTibjWHwJ8TQn7K+jYjMe6rMzPNvZ+nk7SDuso1r1ohRtNBHMaQfxESUZrPn7+H4/wBnJsgqnpTgF4xbRYftki7BcJUxD8etUr0iPMpraDpkwn4PmX5MO36VRtAgR51vQYl8eaNdsdE32xO3HTutVj/b51bjZrs/mx04t/rcG4Sv2Ce3P83B8W5H0uK3wCyVO7UbYEh3DQU3U90dyBeXV81CnzzUOL7JHn7t0PQ4WPbJfhR7RpJ1nJ66gL2W74DHemYKpn4mcnWd5N+q6o4Fn7l7O3ci6tgo1MzaAdoqaVCOJnaoC/AxUblZ1KxI0v1Ouv2uNqCzBCCPOcRSyvlhDnEjmqjDBGg9KowAH7TLBn+W0ZwN/2FfnsxLHMkLnk/amG9gAwqum28ryXcGPnYi5TAVV9HM3ZcHYIvNXfZmbCO61V3E8SKViXHaeJj9DvCt5WQqp2jI/nRyQ1+hL8mw+sLnxoFO61Wl9e9hkpe34nkxtyFy5IQdur4g9m1Se8YJySf+4iDQosQU1wr0okS5KNScNQYF3UX9qGmh6RNOR7melPxlAEBRPm7cJZInj4hInA1BHUNh170Cb092zgmvoaqPva/axCgkH0wZifirD+Fboe6Uk8S9PqyIVboMTW3KaE5YHdibTD2uX2S9kz69VnalmGPI="
+    file: "bin/aws-profile-utils-*"
+    skip_cleanup: true
+    on:
+      tags: true
+      condition: $TRAVIS_BRANCH =~ ^v[\d\.]+$
