@@ -11,17 +11,23 @@
 
 
 ```
+target_os=osx # or 'linux'
 latest_build_number=$(curl https://api.travis-ci.org/repos/hpcsc/aws-profile-utils/branches/master | jq -r '.branch.number')
-curl https://storage.googleapis.com/aws-profile-utils-master/aws-profile-utils-osx-${latest_build_number} -o aws-profile-utils
+curl -L https://storage.googleapis.com/aws-profile-utils-master/aws-profile-utils-${target_os}-${latest_build_number} -o aws-profile-utils
 chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
 
 ```
 
 - Release build
 
+Download executable from [Github Releases](https://github.com/hpcsc/aws-profile-utils/releases)
+
+or
+
 ```
+target_os=osx # or 'linux'
 latest_release_tag=$(curl https://api.github.com/repos/hpcsc/aws-profile-utils/releases/latest | jq -r '.tag_name')
-curl https://github.com/hpcsc/aws-profile-utils/releases/download/${latest_release_tag}/aws-profile-utils -o aws-profile-utils
+curl -L https://github.com/hpcsc/aws-profile-utils/releases/download/${latest_release_tag}/aws-profile-utils-${target_os} -o aws-profile-utils
 chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
 ```
 
