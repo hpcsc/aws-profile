@@ -2,7 +2,6 @@ package handlers
 
 import (
 		"fmt"
-	"os"
 	"strings"
 		"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -32,11 +31,10 @@ func NewGetHandler(app *kingpin.Application) GetHandler {
 	}
 }
 
-func (handler GetHandler) Handle() {
+func (handler GetHandler) Handle() (bool, string) {
 	configFile, err := ReadFile(*handler.Arguments.ConfigFilePath)
 	if err != nil {
-		fmt.Printf("Fail to read AWS config file: %v", err)
-		os.Exit(1)
+		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
 	configDefaultSection, err := configFile.GetSection("default")
@@ -54,15 +52,14 @@ func (handler GetHandler) Handle() {
 				strings.Compare(section.Key("role_arn").Value(), defaultRoleArn) == 0 &&
 				strings.Compare(section.Key("source_profile").Value(), defaultSourceProfile) == 0 {
 				fmt.Printf("assuming %s\n", section.Name())
-				os.Exit(0)
+				return true, ""
 			}
 		}
 	}
 
 	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
 	if err != nil {
-		fmt.Printf("Fail to read AWS credentials file: %v", err)
-		os.Exit(1)
+		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
 
 	credentialsDefaultSection, err := credentialsFile.GetSection("default")
@@ -76,8 +73,10 @@ func (handler GetHandler) Handle() {
 				section.HasKey("aws_access_key_id") &&
 				strings.Compare(section.Key("aws_access_key_id").Value(), defaultAWSAccessKeyId) == 0 {
 				fmt.Printf("%s\n", section.Name())
-				os.Exit(0)
+				return true, ""
 			}
 		}
 	}
+
+	return true, ""
 }

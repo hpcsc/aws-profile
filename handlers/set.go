@@ -97,17 +97,15 @@ func writeToFile(file *ini.File, unexpandedFilePath string) {
 	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
 
-func (handler SetHandler) Handle() {
+func (handler SetHandler) Handle() (bool, string) {
 	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
 	if err != nil {
-		fmt.Printf("Fail to read AWS credentials file: %v", err)
-		os.Exit(1)
+		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
 
 	configFile, err := ReadFile(*handler.Arguments.ConfigFilePath)
 	if err != nil {
-		fmt.Printf("Fail to read AWS config file: %v", err)
-		os.Exit(1)
+		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
 	credentialsProfiles := getProfilesFromCredentialsFile(credentialsFile)
@@ -126,7 +124,7 @@ func (handler SetHandler) Handle() {
 	if err != nil {
 		// should only exit with code 0 when the error is caused by Ctrl+C
 		// temporarily assume all the errors are caused by Ctrl+C for now
-		os.Exit(0)
+		return true, ""
 	}
 
 	selectedValue := strings.TrimSuffix(string(shellOutput), "\n")
@@ -143,7 +141,7 @@ func (handler SetHandler) Handle() {
 		writeToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
 
-		fmt.Printf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedValue)
+		return true, fmt.Sprintf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedValue)
 	} else if containsProfile(configAssumedProfiles, selectedValue) {
 		selectedProfile := getProfileSectionNameFromColonDelimited(selectedValue)
 
@@ -155,8 +153,8 @@ func (handler SetHandler) Handle() {
 
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
 
-		fmt.Printf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedValue)
+		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedValue)
 	} else {
-		fmt.Printf("=== profile [%s] not found in either credentials or config file", selectedValue)
+		return false, fmt.Sprintf("=== profile [%s] not found in either credentials or config file", selectedValue)
 	}
 }

@@ -4,7 +4,9 @@ import (
 			"os"
 	"github.com/hpcsc/aws-profile-utils/handlers"
 			"gopkg.in/alecthomas/kingpin.v2"
-	)
+	"strings"
+	"fmt"
+)
 
 func createHandlerMap(app *kingpin.Application) map[string]handlers.Handler{
 	getHandler := handlers.NewGetHandler(app)
@@ -31,7 +33,16 @@ func main() {
 	parsedInput := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	if handler, ok := handlerMap[parsedInput]; ok {
-		handler.Handle()
+		success, message := handler.Handle()
+		if !strings.EqualFold(message, "") {
+			fmt.Println(message)
+		}
+
+		if success {
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	} else {
 		app.Usage([]string {})
 	}

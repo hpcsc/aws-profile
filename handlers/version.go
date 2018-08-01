@@ -17,6 +17,7 @@ func NewVersionHandler(app *kingpin.Application) VersionHandler {
 }
 
 var version = "undefined"
-func (handler VersionHandler) Handle() {
+func (handler VersionHandler) Handle() (bool, string) {
 	fmt.Printf("aws-profile-utils (%s)", version)
+	return true, ""
 }
