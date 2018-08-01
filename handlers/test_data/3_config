@@ -1,0 +1,11 @@
+[default]
+role_arn = 3
+source_profile = 3
+
+[profile one_profile]
+role_arn = 1
+source_profile = 1
+
+[profile two_profile]
+role_arn = 2
+source_profile = 2
