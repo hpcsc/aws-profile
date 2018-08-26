@@ -153,7 +153,7 @@ func (handler SetHandler) Handle() (bool, string) {
 
 		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed profile [%s]", *handler.Arguments.ConfigFilePath, selectedValue)
+		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed [%s]", *handler.Arguments.ConfigFilePath, selectedProfile)
 	} else {
 		return false, fmt.Sprintf("=== profile [%s] not found in either credentials or config file", selectedValue)
 	}
