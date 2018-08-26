@@ -3,6 +3,8 @@
 ### Build Status
 [![Build Status](https://travis-ci.org/hpcsc/aws-profile-utils.png)](https://travis-ci.org/hpcsc/aws-profile-utils)
 
+[![Demo](https://github.com/hpcsc/aws-profile-utils/raw/master/aws-profile-utils.gif)](https://github.com/hpcsc/aws-profile-utils/raw/master/aws-profile-utils.gif)
+
 ### Installation
 
 **Following steps assumes jq is available**
