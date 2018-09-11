@@ -1,9 +1,9 @@
 package handlers
 
 import (
-		"fmt"
+	"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"strings"
-		"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type GetHandler struct {

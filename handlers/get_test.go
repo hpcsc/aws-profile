@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"testing"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
-				"github.com/stretchr/testify/assert"
 	"path/filepath"
+	"testing"
 )
 
 func setupHandler(credentialsName string, configName string) GetHandler {
@@ -19,7 +19,7 @@ func setupHandler(credentialsName string, configName string) GetHandler {
 }
 
 func TestReturnErrorIfCredentialsFileNotFound(t *testing.T) {
-	getHandler := setupHandler("credentials_not_exists", "2_config")
+	getHandler := setupHandler("credentials_not_exists", "get_profile_in_neither_file-config")
 
 	success, output := getHandler.Handle()
 
@@ -28,7 +28,7 @@ func TestReturnErrorIfCredentialsFileNotFound(t *testing.T) {
 }
 
 func TestReturnErrorIfConfigFileNotFound(t *testing.T) {
-	getHandler := setupHandler("2_credentials", "config_not_exists")
+	getHandler := setupHandler("get_profile_in_neither_file-credentials", "config_not_exists")
 
 	success, output := getHandler.Handle()
 
@@ -37,7 +37,7 @@ func TestReturnErrorIfConfigFileNotFound(t *testing.T) {
 }
 
 func TestConfigProfileHasPriorityOverCredentialsProfile(t *testing.T) {
-	getHandler := setupHandler("1_credentials", "1_config")
+	getHandler := setupHandler("get_config_priority_over_credentials-credentials", "get_config_priority_over_credentials-config")
 
 	success, output := getHandler.Handle()
 
@@ -46,7 +46,7 @@ func TestConfigProfileHasPriorityOverCredentialsProfile(t *testing.T) {
 }
 
 func TestReturnEmptyIfProfileInNeitherConfigNorCredentials(t *testing.T) {
-	getHandler := setupHandler("2_credentials", "2_config")
+	getHandler := setupHandler("get_profile_in_neither_file-credentials", "get_profile_in_neither_file-config")
 
 	success, output := getHandler.Handle()
 
@@ -55,7 +55,7 @@ func TestReturnEmptyIfProfileInNeitherConfigNorCredentials(t *testing.T) {
 }
 
 func TestReturnCredentialsProfileIfNotFoundInConfig(t *testing.T) {
-	getHandler := setupHandler("3_credentials", "3_config")
+	getHandler := setupHandler("get_profile_not_in_config-credentials", "get_profile_not_in_config-config")
 
 	success, output := getHandler.Handle()
 
