@@ -1,16 +1,16 @@
 package main
 
 import (
-			"os"
-	"github.com/hpcsc/aws-profile-utils/handlers"
-			"gopkg.in/alecthomas/kingpin.v2"
-	"strings"
 	"fmt"
+	"github.com/hpcsc/aws-profile-utils/handlers"
+	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
+	"strings"
 )
 
 func createHandlerMap(app *kingpin.Application) map[string]handlers.Handler{
 	getHandler := handlers.NewGetHandler(app)
-	setHandler := handlers.NewSetHandler(app)
+	setHandler := handlers.NewSetHandler(app, nil, nil)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]handlers.Handler {

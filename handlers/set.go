@@ -1,19 +1,21 @@
 package handlers
 
 import (
-		"fmt"
-	"os/exec"
-	"os"
-		"strings"
-	"gopkg.in/ini.v1"
 	"bytes"
-	"io/ioutil"
+	"fmt"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/ini.v1"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 type SetHandler struct {
 	SubCommand *kingpin.CmdClause
 	Arguments  SetCommandArguments
+	SelectProfile SelectProfileFn
+	WriteToFile WriteToFileFn
 }
 
 type SetCommandArguments struct {
@@ -22,12 +24,25 @@ type SetCommandArguments struct {
 	Pattern *string
 }
 
-func NewSetHandler(app *kingpin.Application) SetHandler {
+type SelectProfileFn func([]string, string) ([]byte, error)
+type WriteToFileFn func(*ini.File, string)
+
+func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
 	subCommand := app.Command("set", "set default profile with credentials of selected profile (this command assumes fzf is already setup)")
 
 	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
 	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 	pattern := subCommand.Arg("pattern", "Start the fzf finder with the given query").String()
+
+	finalSelectProfileFn := selectProfileByFzf
+	if selectProfileFn != nil {
+		finalSelectProfileFn = selectProfileFn
+	}
+
+	finalWriteToFileFn := writeToFile
+	if writeToFileFn != nil {
+		finalWriteToFileFn = writeToFileFn
+	}
 
 	return SetHandler{
 		SubCommand: subCommand,
@@ -36,6 +51,8 @@ func NewSetHandler(app *kingpin.Application) SetHandler {
 			ConfigFilePath: configFilePath,
 			Pattern: pattern,
 		},
+		SelectProfile: finalSelectProfileFn,
+		WriteToFile: finalWriteToFileFn,
 	}
 }
 
@@ -97,6 +114,18 @@ func writeToFile(file *ini.File, unexpandedFilePath string) {
 	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
 
+func selectProfileByFzf(combinedProfiles []string, pattern string) ([]byte, error) {
+	joinedProfiles := strings.Join(combinedProfiles, "\n")
+
+	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --with-nth=1 --delimiter=: --header 'Select AWS profile' --query '%s'",
+		joinedProfiles,
+		pattern)
+	shellCommand := exec.Command("bash", "-c", fzfCommand)
+	shellCommand.Stdin = os.Stdin
+	shellCommand.Stderr = os.Stderr
+	return shellCommand.Output()
+}
+
 func (handler SetHandler) Handle() (bool, string) {
 	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
 	if err != nil {
@@ -111,16 +140,8 @@ func (handler SetHandler) Handle() (bool, string) {
 	credentialsProfiles := getProfilesFromCredentialsFile(credentialsFile)
 	configAssumedProfiles := getAssumedProfilesFromConfigFile(configFile)
 
-	joinedProfiles := strings.Join(append(credentialsProfiles, configAssumedProfiles...), "\n")
-
-	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --with-nth=1 --delimiter=: --header 'Select AWS profile' --query '%s'",
-							joinedProfiles,
-							*handler.Arguments.Pattern)
-	shellCommand := exec.Command("bash", "-c", fzfCommand)
-	shellCommand.Stdin = os.Stdin
-	shellCommand.Stderr = os.Stderr
-
-	shellOutput, err := shellCommand.Output()
+	combinedProfiles := append(credentialsProfiles, configAssumedProfiles...)
+	shellOutput, err := handler.SelectProfile(combinedProfiles, *handler.Arguments.Pattern)
 	if err != nil {
 		// should only exit with code 0 when the error is caused by Ctrl+C
 		// temporarily assume all the errors are caused by Ctrl+C for now
@@ -138,8 +159,8 @@ func (handler SetHandler) Handle() (bool, string) {
 		configFile.Section("default").DeleteKey("role_arn")
 		configFile.Section("default").DeleteKey("source_profile")
 
-		writeToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
-		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+		handler.WriteToFile(credentialsFile, *handler.Arguments.CredentialsFilePath)
+		handler.WriteToFile(configFile, *handler.Arguments.ConfigFilePath)
 
 		return true, fmt.Sprintf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, selectedValue)
 	} else if containsProfile(configAssumedProfiles, selectedValue) {
@@ -151,7 +172,7 @@ func (handler SetHandler) Handle() (bool, string) {
 		configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
 		configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
 
-		writeToFile(configFile, *handler.Arguments.ConfigFilePath)
+		handler.WriteToFile(configFile, *handler.Arguments.ConfigFilePath)
 
 		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed [%s]", *handler.Arguments.ConfigFilePath, selectedProfile)
 	} else {
