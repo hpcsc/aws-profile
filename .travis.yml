@@ -12,14 +12,12 @@ after_success:
 - if [[ "$TRAVIS_BRANCH" == "master" ]]; then mv bin/aws-profile-utils bin/aws-profile-utils-${TRAVIS_OS_NAME}-${TRAVIS_BUILD_NUMBER} ; fi
 - if [[ "$TRAVIS_BRANCH" != "master" ]]; then mv bin/aws-profile-utils bin/aws-profile-utils-${TRAVIS_OS_NAME} ; fi
 deploy:
-  - provider: gcs
-    access_key_id: "GOOGXSXJIII432RYYGT7DNP5"
-    secret_access_key:
-      secure: "IqPBYctNlPMAKAn8VjLaq/HzZRNVP8kQ/6+6trvsqA1nO3B525QcKK+1efHOGIKt5K9u9wrvwAM2AC4wto438RoyeWiZxKlZtzHGJRKuxjdN/Q072kU1ndsdOhflLZQuWk5uVWk6EIJnh8vlMqe7e2asK7HEuyY6TC+rbfPjVFix7iKFY9yFD7aOORrG1HpyFHFIXf4mUWudfHqCq4RDrIFRQJd9MeLiVA6GUE0eC0m941lnHdSmQbcda5KYU7lHJta1op/CnRVhswb57ESs0KLVtS+uII3wp/TwYafw1ZGwzb4ekrX+p/glcGdFLXkyXXg8hKkOe2IM3zDWvrEhL10m3VILmLKUd8Wv4JdzWXb1Tgm+yNkhFkqtq+vTRWKP1pXaXW8cZYOpbzJjzsRnnfVeeSlpSzgmAtlSZI7qqcqMV/4BQN62ZEGldHFKZS3Yhcjd+am1CymlKEbvXq07yqOlzP5RC+B3lPCWgJPfKG4Rf3DvrpK4yc1qjCA0Uv24kZDSiLTE84hsNkLfjimOqyZR+6kBtXrXIhBeMWjdTKfVQ8iq12HhA9vORkYsN4XXqQ3y7SHQpP60tcaxAGFQgnFuUiZISRezr8oma7DReN2gNAE6WmuEgTHr7NpKmPd90Fp61Wkw+UKSHE62hTfngRnKICvdcm3sYwP09mjxE/E="
-    bucket: "aws-profile-utils-master"
+  - provider: bintray
+    file: bintray-descriptor.json
+    user: hpcsc
+    key:
+      secure: eRZjMIrHJnvcUj+ldh8WHN3WVElVah4FJIsUlYouQR+fT1t0SXJpOUOml9UdR9gSe4alD7GIrMpkMrF3s9mI7o5/jGTYeuY2vB6n2mqWtJZEBcWy+mFWzH1wMbsqTsLVx5CHWVymXGYDyTjqZsqVsPLK8ZR3y9NKDp3YnPZtb8u/bAdCh4KphBMqVH23uAn/dGAUq4I9b6F16nMGQzAcPM+oH90xn2ek9wPQTCsqbe1jzlFmUjZqYypAjZ6MPaVaWpFAWXzo0syYxrLG8sRTIN3rinAlgF4g+XMXJgb1B2L/Qw+FmK+kCRS5Fjg1Jgb9HyBiK+54bS/rP6VQf4n6BhmW+2II68Swokdd+QKsautWO3umh9Ho1v8n21nkyCukLY4TH428246KrQu+hPemZ5zswXRC0hyvEeUUcg/yewYBGS7Ty+nKXADk7oKvGXBo87kbUTICUGxQ/AbhSkyf0qT0U2WxGxCLQNH52BMlM624bIw6EW35E+LWDGA5KwHCZay/QZThcikK1KM0jrGPZ8RYDRw4zOT2ygMjTsmzWX3NSFa2F1bPOzUqM83vLacadXgjqvJoGzhHLeSYf5D8Muy7gMERiIzyWOKVqtDp4GD59Cz2vWCkEB0/ACHYF5PEc3TY45kJ2plQD0H2obOAfctJCMwWvp8u25F5991i3KQ=
     skip_cleanup: true
-    acl: public-read
-    local-dir: bin
     on:
       branch: master
   - provider: releases

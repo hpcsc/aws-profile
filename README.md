@@ -7,29 +7,13 @@
 
 ### Installation
 
-**Following steps assumes jq is available**
+- Latest build from master branch: [Bintray](https://dl.bintray.com/hpcsc/aws-profile-utils)
 
-- Latest build from master branch
+- Release build [Github Releases](https://github.com/hpcsc/aws-profile-utils/releases)
 
-
-```
-target_os=osx # or 'linux'
-latest_build_number=$(curl https://api.travis-ci.org/repos/hpcsc/aws-profile-utils/branches/master | jq -r '.branch.number')
-curl -L https://storage.googleapis.com/aws-profile-utils-master/aws-profile-utils-${target_os}-${latest_build_number} -o aws-profile-utils
-chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
+After downloading binary file, rename it to `aws-profile-utils`, `chmod +x` and move the executable to `/usr/local/bin`:
 
 ```
-
-- Release build
-
-Download executable from [Github Releases](https://github.com/hpcsc/aws-profile-utils/releases)
-
-or
-
-```
-target_os=osx # or 'linux'
-latest_release_tag=$(curl https://api.github.com/repos/hpcsc/aws-profile-utils/releases/latest | jq -r '.tag_name')
-curl -L https://github.com/hpcsc/aws-profile-utils/releases/download/${latest_release_tag}/aws-profile-utils-${target_os} -o aws-profile-utils
 chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
 ```
 
