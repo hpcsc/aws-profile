@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/hpcsc/aws-profile-utils/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
-	"io/ioutil"
-	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -34,16 +31,6 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, wr
 	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 	pattern := subCommand.Arg("pattern", "Start the fzf finder with the given query").String()
 
-	finalSelectProfileFn := selectProfileByFzf
-	if selectProfileFn != nil {
-		finalSelectProfileFn = selectProfileFn
-	}
-
-	finalWriteToFileFn := writeToFile
-	if writeToFileFn != nil {
-		finalWriteToFileFn = writeToFileFn
-	}
-
 	return SetHandler{
 		SubCommand: subCommand,
 		Arguments:   SetCommandArguments{
@@ -51,8 +38,8 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, wr
 			ConfigFilePath: configFilePath,
 			Pattern: pattern,
 		},
-		SelectProfile: finalSelectProfileFn,
-		WriteToFile: finalWriteToFileFn,
+		SelectProfile: selectProfileFn,
+		WriteToFile: writeToFileFn,
 	}
 }
 
@@ -100,39 +87,13 @@ func getProfileSectionNameFromColonDelimited(selected string) string {
 	return elements[1]
 }
 
-func writeToFile(file *ini.File, unexpandedFilePath string) {
-	var buffer bytes.Buffer
-	_, err := file.WriteTo(&buffer)
-
-	filePath := ExpandHomeDirectory(unexpandedFilePath)
-
-	if err != nil {
-		fmt.Printf("Fail to write to file %s: %v", filePath, err)
-		os.Exit(1)
-	}
-
-	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
-}
-
-func selectProfileByFzf(combinedProfiles []string, pattern string) ([]byte, error) {
-	joinedProfiles := strings.Join(combinedProfiles, "\n")
-
-	fzfCommand := fmt.Sprintf("echo -e '%s' | fzf-tmux --height 30%% --reverse -1 -0 --with-nth=1 --delimiter=: --header 'Select AWS profile' --query '%s'",
-		joinedProfiles,
-		pattern)
-	shellCommand := exec.Command("bash", "-c", fzfCommand)
-	shellCommand.Stdin = os.Stdin
-	shellCommand.Stderr = os.Stderr
-	return shellCommand.Output()
-}
-
 func (handler SetHandler) Handle() (bool, string) {
-	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
+	credentialsFile, err := utils.ReadFile(*handler.Arguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
 
-	configFile, err := ReadFile(*handler.Arguments.ConfigFilePath)
+	configFile, err := utils.ReadFile(*handler.Arguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}

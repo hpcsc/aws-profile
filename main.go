@@ -3,17 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/hpcsc/aws-profile-utils/handlers"
+	"github.com/hpcsc/aws-profile-utils/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"strings"
 )
 
-func createHandlerMap(app *kingpin.Application) map[string]handlers.Handler{
+func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 	getHandler := handlers.NewGetHandler(app)
-	setHandler := handlers.NewSetHandler(app, nil, nil)
+	setHandler := handlers.NewSetHandler(app, utils.SelectProfileByFzf, utils.WriteToFile)
 	versionHandler := handlers.NewVersionHandler(app)
 
-	return map[string]handlers.Handler {
+	return map[string]utils.Handler{
 		getHandler.SubCommand.FullCommand(): getHandler,
 		setHandler.SubCommand.FullCommand(): setHandler,
 		versionHandler.SubCommand.FullCommand(): versionHandler,

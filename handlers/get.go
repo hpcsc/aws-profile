@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile-utils/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"strings"
 )
@@ -32,7 +33,7 @@ func NewGetHandler(app *kingpin.Application) GetHandler {
 }
 
 func (handler GetHandler) Handle() (bool, string) {
-	configFile, err := ReadFile(*handler.Arguments.ConfigFilePath)
+	configFile, err := utils.ReadFile(*handler.Arguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
@@ -56,7 +57,7 @@ func (handler GetHandler) Handle() (bool, string) {
 		}
 	}
 
-	credentialsFile, err := ReadFile(*handler.Arguments.CredentialsFilePath)
+	credentialsFile, err := utils.ReadFile(*handler.Arguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}

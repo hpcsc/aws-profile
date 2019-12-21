@@ -1,4 +1,4 @@
-package handlers
+package utils
 
 import (
 	"gopkg.in/ini.v1"
