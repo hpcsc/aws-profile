@@ -1,7 +1,7 @@
 # AWS Profile Utils
 
 ### Build Status
-[![Build Status](https://travis-ci.org/hpcsc/aws-profile-utils.png)](https://travis-ci.org/hpcsc/aws-profile-utils)
+![Build Status](https://github.com/hpcsc/aws-profile-utils/workflows/Pipeline/badge.svg)
 
 [![Demo](https://github.com/hpcsc/aws-profile-utils/raw/master/aws-profile-utils.gif)](https://github.com/hpcsc/aws-profile-utils/raw/master/aws-profile-utils.gif)
 
