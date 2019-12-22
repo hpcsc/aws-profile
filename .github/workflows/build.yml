@@ -1,0 +1,69 @@
+name: Pipeline
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-latest, windows-latest]
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+
+    - name: Build
+      run: |
+        go build -i -ldflags="-X github.com/hpcsc/aws-profile-utils/handlers.version=${{github.sha}}" -o bin/aws-profile-utils-${{runner.os}}-${{github.sha}} github.com/hpcsc/aws-profile-utils
+
+    - name: Test
+      run: make test
+        go test -v ./...
+
+    - name: Upload binary as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: aws-profile-utils-${{runner.os}}-${{github.sha}}
+        path: ./bin/aws-profile-utils-${{runner.os}}-${{github.sha}}
+
+  release:
+    name: Release
+    runs-on: ubuntu-18.04
+    needs: build
+    steps:
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: aws-profile-utils-Linux-${{github.sha}}
+        path: ./bin
+    - name: Download MacOS artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: aws-profile-utils-macOS-${{github.sha}}
+        path: ./bin
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: aws-profile-utils-Windows-${{github.sha}}
+        path: ./bin
+    - name: List downloaded artifacts
+      run: ls -la ./bin
+    - name: Upload to Bintray
+      uses: hpcsc/upload-bintray-docker-action@v1
+      with:
+        repository: aws-profile-utils
+        package: aws-profile-utils-master
+        version: ${{github.sha}}
+        sourcePath: ./bin/aws-profile-utils*
+        username: hpcsc
+        apiKey: ${{secrets.BINTRAY_API_KEY}}
