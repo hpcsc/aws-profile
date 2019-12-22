@@ -40,14 +40,23 @@ func SelectProfileFromList(combinedProfiles []string, pattern string) ([]byte, e
 	filteredProfiles := filterProfiles(combinedProfiles, pattern)
 	labels := getDisplayableLabels(filteredProfiles)
 
-	l := widgets.NewList()
-	l.Title = "Select a AWS profile"
-	l.Rows = labels
-	l.TextStyle = ui.NewStyle(ui.ColorYellow)
-	l.WrapText = true
-	l.SetRect(0, 0, 100, 15)
+	list := widgets.NewList()
+	list.Title = "Select a AWS profile"
+	list.Rows = labels
+	list.TextStyle = ui.NewStyle(ui.ColorYellow)
+	list.WrapText = true
 
-	ui.Render(l)
+	grid := ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+
+	grid.Set(
+		ui.NewRow(1.0/3,
+			ui.NewCol(1.0, list),
+		),
+	)
+
+	ui.Render(grid)
 
 	uiEvents := ui.PollEvents()
 	for {
@@ -56,13 +65,13 @@ func SelectProfileFromList(combinedProfiles []string, pattern string) ([]byte, e
 		case "q", "<C-c>":
 			return nil, errors.New("cancelled by user")
 		case "j", "<Down>":
-			l.ScrollDown()
+			list.ScrollDown()
 		case "k", "<Up>":
-			l.ScrollUp()
+			list.ScrollUp()
 		case "<Enter>":
-			return []byte(filteredProfiles[l.SelectedRow]), nil
+			return []byte(filteredProfiles[list.SelectedRow]), nil
 		}
 
-		ui.Render(l)
+		ui.Render(grid)
 	}
 }
