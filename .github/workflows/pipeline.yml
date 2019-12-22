@@ -37,7 +37,7 @@ jobs:
         path: ./bin/aws-profile-utils-${{runner.os}}-${{github.sha}}
 
   release:
-    name: Release
+    name: Publish
     runs-on: ubuntu-18.04
     needs: build
     steps:
