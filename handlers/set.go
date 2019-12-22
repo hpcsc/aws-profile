@@ -25,11 +25,11 @@ type SelectProfileFn func([]string, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
 
 func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
-	subCommand := app.Command("set", "set default profile with credentials of selected profile (this command assumes fzf is already setup)")
+	subCommand := app.Command("set", "set default profile with credentials of selected profile")
 
 	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
 	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
-	pattern := subCommand.Arg("pattern", "Start the fzf finder with the given query").String()
+	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
 
 	return SetHandler{
 		SubCommand: subCommand,
