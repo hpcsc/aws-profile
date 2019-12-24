@@ -12,11 +12,13 @@ import (
 func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 	getHandler := handlers.NewGetHandler(app)
 	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
+	exportHandler := handlers.NewExportHandler(app)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]utils.Handler{
 		getHandler.SubCommand.FullCommand(): getHandler,
 		setHandler.SubCommand.FullCommand(): setHandler,
+		exportHandler.SubCommand.FullCommand(): exportHandler,
 		versionHandler.SubCommand.FullCommand(): versionHandler,
 	}
 }
