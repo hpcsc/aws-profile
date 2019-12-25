@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/hpcsc/aws-profile-utils/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -9,7 +10,7 @@ import (
 	"testing"
 )
 
-func noopWriteToFileMock(file *ini.File, unexpandedFilePath string) {
+func noopWriteToFileMock(_ *ini.File, _ string) {
 	// noop
 }
 
@@ -55,15 +56,15 @@ func TestSetHandlerReturnErrorIfConfigFileNotFound(t *testing.T) {
 func TestSelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 	called := false
 
-	selectProfileMock := func (combinedProfiles []string, pattern string) ([]byte, error) {
+	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		assert.ElementsMatch(
 			t,
-			combinedProfiles,
+			profiles.GetAllDisplayProfileNames(),
 			[]string {
 				"credentials_profile_1",
 				"credentials_profile_2",
-				"assume profile config_profile_1:profile config_profile_1",
-				"assume profile config_profile_2:profile config_profile_2",
+				"assume profile config_profile_1",
+				"assume profile config_profile_2",
 			},
 			)
 
@@ -87,7 +88,7 @@ func TestSelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 }
 
 func TestReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t *testing.T) {
-	selectProfileMock := func (combinedProfiles []string, pattern string) ([]byte, error) {
+	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("a_random_profile"), nil
 	}
 
@@ -105,7 +106,7 @@ func TestReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t *testing.T)
 }
 
 func TestDefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected(t *testing.T) {
-	selectProfileMock := func (combinedProfiles []string, pattern string) ([]byte, error) {
+	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("credentials_profile_2"), nil
 	}
 
@@ -136,8 +137,8 @@ func TestDefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected
 }
 
 func TestDefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testing.T) {
-	selectProfileMock := func (combinedProfiles []string, pattern string) ([]byte, error) {
-		return []byte("assume profile config_profile_2:profile config_profile_2"), nil
+	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+		return []byte("profile config_profile_2"), nil
 	}
 
 	writeToFileMock := func (file *ini.File, unexpandedFilePath string) {

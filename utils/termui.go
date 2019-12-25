@@ -2,42 +2,29 @@ package utils
 
 import (
 	"errors"
-	"log"
-	"strings"
-
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"log"
 )
 
-func filterProfiles(combinedProfiles []string, pattern string) []string {
-	var filteredProfiles []string
 
-	for _, profile := range combinedProfiles {
-		if pattern == "" || strings.Contains(profile, pattern) {
-			filteredProfiles = append(filteredProfiles, profile)
-		}
-	}
-
-	return filteredProfiles
-}
-
-func getDisplayableLabels(profiles []string) []string {
+func getDisplayableLabels(profiles []AWSProfile) []string {
 	var labels []string
 
 	for _, profile := range profiles {
-		labels = append(labels, strings.Split(profile, ":")[0])
+		labels = append(labels, profile.DisplayProfileName)
 	}
 
 	return labels
 }
 
-func SelectProfileFromList(combinedProfiles []string, pattern string) ([]byte, error) {
+func SelectProfileFromList(profiles AWSProfiles, pattern string) ([]byte, error) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
-	filteredProfiles := filterProfiles(combinedProfiles, pattern)
+	filteredProfiles := profiles.Filter(pattern)
 	labels := getDisplayableLabels(filteredProfiles)
 
 	list := widgets.NewList()
@@ -69,7 +56,7 @@ func SelectProfileFromList(combinedProfiles []string, pattern string) ([]byte, e
 		case "k", "<Up>":
 			list.ScrollUp()
 		case "<Enter>":
-			return []byte(filteredProfiles[list.SelectedRow]), nil
+			return []byte(filteredProfiles[list.SelectedRow].ProfileName), nil
 		}
 
 		ui.Render(grid)

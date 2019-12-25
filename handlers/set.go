@@ -21,7 +21,7 @@ type SetCommandArguments struct {
 	Pattern *string
 }
 
-type SelectProfileFn func([]string, string) ([]byte, error)
+type SelectProfileFn func(utils.AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
 
 func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
@@ -61,9 +61,8 @@ func (handler SetHandler) Handle() (bool, string) {
 	}
 
 	profiles := processor.GetProfilesFromCredentialsAndConfig()
-	combinedProfiles := append(profiles.CredentialsProfiles, profiles.ConfigAssumedProfiles...)
 
-	selectProfileResult, err := handler.SelectProfile(combinedProfiles, *handler.Arguments.Pattern)
+	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
 	if err != nil {
 		// should only exit with code 0 when the error is caused by Ctrl+C
 		// temporarily assume all the errors are caused by Ctrl+C for now
@@ -72,21 +71,19 @@ func (handler SetHandler) Handle() (bool, string) {
 
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 
-	if profiles.CredentialsFileContains(trimmedSelectedProfileResult) {
+	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
 		processor.SetSelectedProfileAsDefault(trimmedSelectedProfileResult)
 
 		handler.WriteToFile(processor.CredentialsFile, *handler.Arguments.CredentialsFilePath)
 		handler.WriteToFile(processor.ConfigFile, *handler.Arguments.ConfigFilePath)
 
 		return true, fmt.Sprintf("=== profile [default] in [%s] is set with credentials from profile [%s]", *handler.Arguments.CredentialsFilePath, trimmedSelectedProfileResult)
-	} else if profiles.ConfigFileContains(trimmedSelectedProfileResult) {
-		selectedAssumedProfile := processor.GetProfileSectionNameFromColonDelimited(trimmedSelectedProfileResult)
-
-		processor.SetSelectedAssumedProfileAsDefault(selectedAssumedProfile)
+	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
+		processor.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName)
 
 		handler.WriteToFile(processor.ConfigFile, *handler.Arguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed [%s]", *handler.Arguments.ConfigFilePath, selectedAssumedProfile)
+		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed [%s]", *handler.Arguments.ConfigFilePath, assumedProfile.ProfileName)
 	} else {
 		return false, fmt.Sprintf("=== profile [%s] not found in either credentials or config file", trimmedSelectedProfileResult)
 	}

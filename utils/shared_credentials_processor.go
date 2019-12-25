@@ -11,26 +11,32 @@ type AWSSharedCredentialsProcessor struct {
 	ConfigFile *ini.File
 }
 
-func (processor AWSSharedCredentialsProcessor) getProfilesFromCredentialsFile() []string {
-	var profiles []string
+func (processor AWSSharedCredentialsProcessor) getProfilesFromCredentialsFile() []AWSProfile {
+	var profiles []AWSProfile
 
 	for _, section := range processor.CredentialsFile.Sections() {
 		if !strings.EqualFold(section.Name(), "default") {
-			profiles = append(profiles, section.Name())
+			profiles = append(profiles, AWSProfile{
+				ProfileName:        section.Name(),
+				DisplayProfileName: section.Name(),
+			})
 		}
 	}
 
 	return profiles
 }
 
-func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile() []string {
-	var profiles []string
+func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile() []AWSProfile {
+	var profiles []AWSProfile
 
 	for _, section := range processor.ConfigFile.Sections() {
 		if !strings.EqualFold(section.Name(), "default") &&
 			section.HasKey("role_arn") &&
 			section.HasKey("source_profile") {
-			profiles = append(profiles, fmt.Sprintf("assume %s:%s", section.Name(), section.Name()))
+			profiles = append(profiles, AWSProfile{
+				ProfileName:        section.Name(),
+				DisplayProfileName: fmt.Sprintf("assume %s", section.Name()),
+			})
 		}
 	}
 
@@ -60,7 +66,6 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selec
 func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefault(selectedAssumedProfile string) {
 	configFile := processor.ConfigFile
 
-
 	selectedRoleArn := configFile.Section(selectedAssumedProfile).Key("role_arn").Value()
 	selectedSourceProfile := configFile.Section(selectedAssumedProfile).Key("source_profile").Value()
 
@@ -68,11 +73,3 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefaul
 	configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
 }
 
-func (processor AWSSharedCredentialsProcessor) GetProfileSectionNameFromColonDelimited(selected string) string {
-	if ! strings.Contains(selected, ":") {
-		return selected
-	}
-
-	elements := strings.Split(selected, ":")
-	return elements[1]
-}
