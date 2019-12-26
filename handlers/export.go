@@ -2,9 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hpcsc/aws-profile-utils/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -14,6 +11,7 @@ import (
 type ExportHandler struct {
 	SubCommand *kingpin.CmdClause
 	SelectProfile utils.SelectProfileFn
+	GetAWSCredentials utils.GetAWSCredentialsFn
 	Arguments  ExportCommandArguments
 }
 
@@ -23,7 +21,7 @@ type ExportCommandArguments struct {
 	Pattern *string
 }
 
-func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProfileFn) ExportHandler {
+func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
 	subCommand := app.Command("export", "print commands to set environment variables for assuming a AWS role")
 
 	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
@@ -33,6 +31,7 @@ func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProf
 	return ExportHandler {
 		SubCommand: subCommand,
 		SelectProfile: selectProfileFn,
+		GetAWSCredentials: getAWSCredentialsFn,
 		Arguments:   ExportCommandArguments{
 			CredentialsFilePath: credentialsFilePath,
 			ConfigFilePath: configFilePath,
@@ -42,9 +41,9 @@ func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProf
 }
 
 func (handler ExportHandler) Handle() (bool, string) {
-	configFile, err := utils.ReadFile(*handler.Arguments.ConfigFilePath)
-	if err != nil {
-		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
+	configFile, readConfigErr := utils.ReadFile(*handler.Arguments.ConfigFilePath)
+	if readConfigErr != nil {
+		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)
 	}
 
 	processor := utils.AWSSharedCredentialsProcessor{
@@ -54,29 +53,18 @@ func (handler ExportHandler) Handle() (bool, string) {
 
 	profiles := processor.GetProfilesFromCredentialsAndConfig()
 
-	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
-	if err != nil {
+	selectProfileResult, selectProfileErr := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
+	if selectProfileErr != nil {
+		// cancel by user
 		return true, ""
 	}
 
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 	profile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult)
 
-	session := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	credentials := stscreds.NewCredentials(session, profile.RoleArn, func(p *stscreds.AssumeRoleProvider) {
-		if profile.MFASerialNumber != "" {
-			p.SerialNumber = aws.String(profile.MFASerialNumber)
-			p.TokenProvider = stscreds.StdinTokenProvider
-		}
-		p.RoleSessionName = "aws-profile-utils-session"
-	})
-
-	credentialsValue, err := credentials.Get()
-	if err != nil {
-		return false, err.Error()
+	credentialsValue, getCredentialsErr := handler.GetAWSCredentials(profile)
+	if getCredentialsErr != nil {
+		return false, getCredentialsErr.Error()
 	}
 
 	linuxExport := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'\n",
