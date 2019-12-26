@@ -14,7 +14,7 @@ func noopWriteToFileMock(_ *ini.File, _ string) {
 	// noop
 }
 
-func setupSetHandler(credentialsName string, configName string, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
+func setupSetHandler(credentialsName string, configName string, selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
 	app := kingpin.New("some-app", "some description")
 	setHandler := NewSetHandler(app, selectProfileFn, writeToFileFn)
 

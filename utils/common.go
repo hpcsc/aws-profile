@@ -25,3 +25,6 @@ func ExpandHomeDirectory(filePath string) string {
 type Handler interface {
 	Handle() (bool, string)
 }
+
+type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
+type WriteToFileFn func(*ini.File, string)

@@ -33,10 +33,17 @@ func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile(
 		if !strings.EqualFold(section.Name(), "default") &&
 			section.HasKey("role_arn") &&
 			section.HasKey("source_profile") {
-			profiles = append(profiles, AWSProfile{
+			profile := AWSProfile{
 				ProfileName:        section.Name(),
 				DisplayProfileName: fmt.Sprintf("assume %s", section.Name()),
-			})
+				RoleArn: section.Key("role_arn").Value(),
+			}
+
+			if section.HasKey("mfa_serial") {
+				profile.MFASerialNumber = section.Key("mfa_serial").Value()
+			}
+
+			profiles = append(profiles, profile)
 		}
 	}
 

@@ -5,6 +5,8 @@ import "strings"
 type AWSProfile struct {
 	ProfileName string
 	DisplayProfileName string
+	RoleArn string
+	MFASerialNumber string
 }
 
 type AWSProfiles struct {

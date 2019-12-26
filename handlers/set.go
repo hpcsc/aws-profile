@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"github.com/hpcsc/aws-profile-utils/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"gopkg.in/ini.v1"
 	"strings"
 )
 
 type SetHandler struct {
 	SubCommand *kingpin.CmdClause
 	Arguments  SetCommandArguments
-	SelectProfile SelectProfileFn
-	WriteToFile WriteToFileFn
+	SelectProfile utils.SelectProfileFn
+	WriteToFile utils.WriteToFileFn
 }
 
 type SetCommandArguments struct {
@@ -21,10 +20,7 @@ type SetCommandArguments struct {
 	Pattern *string
 }
 
-type SelectProfileFn func(utils.AWSProfiles, string) ([]byte, error)
-type WriteToFileFn func(*ini.File, string)
-
-func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
+func NewSetHandler(app *kingpin.Application, selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
 	subCommand := app.Command("set", "set default profile with credentials of selected profile")
 
 	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
