@@ -11,7 +11,7 @@
 
 - Release build [Github Releases](https://github.com/hpcsc/aws-profile-utils/releases)
 
-After downloading binary file, rename it to `aws-profile-utils`, `chmod +x` and move the executable to `/usr/local/bin`:
+After downloading binary file, rename it to `aws-profile-utils` (or `aws-profile-utils.exe` on Windows), `chmod +x` and move the executable to a location in your `PATH` (.e.g. `/usr/local/bin` for Linux/MacOS):
 
 ```
 chmod +x aws-profile-utils && mv ./aws-profile-utils /usr/local/bin
@@ -35,7 +35,10 @@ Commands:
     get current AWS profile (that is set to default profile)
 
   set [<flags>] [<pattern>]
-    set default profile with credentials of selected profile (this command assumes fzf is already setup)
+    set default profile with credentials of selected profile
+
+  export [<flags>] [<pattern>]
+    print commands to set environment variables for assuming a AWS role
 
   version
     show aws-profile-utils version
