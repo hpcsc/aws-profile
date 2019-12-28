@@ -24,7 +24,7 @@ jobs:
 
     - name: Build
       run: |
-        go build -i -ldflags="-X github.com/hpcsc/aws-profile-utils/handlers.version=${{github.sha}}" -o bin/aws-profile-utils-${{runner.os}}-${{github.sha}} github.com/hpcsc/aws-profile-utils
+        go build -i -ldflags="-X github.com/hpcsc/aws-profile/handlers.version=${{github.sha}}" -o bin/aws-profile-${{runner.os}}-${{github.sha}} github.com/hpcsc/aws-profile
 
     - name: Test
       run: make test
@@ -33,8 +33,8 @@ jobs:
     - name: Upload binary as artifact
       uses: actions/upload-artifact@v1
       with:
-        name: aws-profile-utils-${{runner.os}}-${{github.sha}}
-        path: ./bin/aws-profile-utils-${{runner.os}}-${{github.sha}}
+        name: aws-profile-${{runner.os}}-${{github.sha}}
+        path: ./bin/aws-profile-${{runner.os}}-${{github.sha}}
 
   release:
     name: Publish
@@ -44,26 +44,26 @@ jobs:
     - name: Download Linux artifact
       uses: actions/download-artifact@v1
       with:
-        name: aws-profile-utils-Linux-${{github.sha}}
+        name: aws-profile-Linux-${{github.sha}}
         path: ./bin
     - name: Download MacOS artifact
       uses: actions/download-artifact@v1
       with:
-        name: aws-profile-utils-macOS-${{github.sha}}
+        name: aws-profile-macOS-${{github.sha}}
         path: ./bin
     - name: Download Windows artifact
       uses: actions/download-artifact@v1
       with:
-        name: aws-profile-utils-Windows-${{github.sha}}
+        name: aws-profile-Windows-${{github.sha}}
         path: ./bin
     - name: List downloaded artifacts
       run: ls -la ./bin
     - name: Upload to Bintray
       uses: hpcsc/upload-bintray-docker-action@v1
       with:
-        repository: aws-profile-utils
-        package: aws-profile-utils-master
+        repository: aws-profile
+        package: master
         version: ${{github.sha}}
-        sourcePath: ./bin/aws-profile-utils*
+        sourcePath: ./bin/aws-profile*
         username: hpcsc
         apiKey: ${{secrets.BINTRAY_API_KEY}}

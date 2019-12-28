@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/hpcsc/aws-profile-utils/utils"
+	"github.com/hpcsc/aws-profile/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"path/filepath"

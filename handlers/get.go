@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/hpcsc/aws-profile-utils/utils"
+	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"strings"
 )

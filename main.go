@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/hpcsc/aws-profile-utils/handlers"
-	"github.com/hpcsc/aws-profile-utils/utils"
+	"github.com/hpcsc/aws-profile/handlers"
+	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"strings"
@@ -24,7 +24,7 @@ func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 }
 
 func main() {
-	app := kingpin.New("aws-profile-utils", "simple tool to help switching among AWS profiles more easily")
+	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')
 	handlerMap := createHandlerMap(app)
 

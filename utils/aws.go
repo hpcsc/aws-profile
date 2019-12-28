@@ -17,7 +17,7 @@ func GetAWSCredentials(profile *AWSProfile) (credentials.Value, error) {
 			p.SerialNumber = aws.String(profile.MFASerialNumber)
 			p.TokenProvider = stscreds.StdinTokenProvider
 		}
-		p.RoleSessionName = "aws-profile-utils-session"
+		p.RoleSessionName = "aws-profile-session"
 	})
 
 	return credentials.Get()

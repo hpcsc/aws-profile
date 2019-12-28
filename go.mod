@@ -1,4 +1,4 @@
-module github.com/hpcsc/aws-profile-utils
+module github.com/hpcsc/aws-profile
 
 go 1.13
 

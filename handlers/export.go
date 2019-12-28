@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/hpcsc/aws-profile-utils/utils"
+	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"strings"
@@ -83,17 +83,17 @@ Execute the following command in your shell:
 
 %s
 
-To unset those environment variables: 
+To unset those environment variables:
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN\n
-								
+
 WINDOWS
 ================================
-Execute the following command in Powershell: 
+Execute the following command in Powershell:
 
 %s
 
-To unset those environment variables: 
+To unset those environment variables:
 
 Remove-Item Env:\AWS_ACCESS_KEY_ID; Remove-Item Env:\AWS_SECRET_ACCESS_KEY; Remove-Item Env:\AWS_SESSION_TOKEN`,
 		linuxExport,
