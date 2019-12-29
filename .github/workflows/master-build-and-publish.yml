@@ -1,5 +1,8 @@
-name: Pipeline
-on: [push]
+name: Master Build and Publish
+on:
+  push:
+    branches:
+      - master
 jobs:
 
   build:
@@ -36,8 +39,8 @@ jobs:
         name: aws-profile-${{runner.os}}-${{github.sha}}
         path: ./bin/aws-profile-${{runner.os}}-${{github.sha}}
 
-  release:
-    name: Publish
+  publish:
+    name: Publish to Bintray
     runs-on: ubuntu-18.04
     needs: build
     steps:

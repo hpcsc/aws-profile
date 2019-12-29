@@ -1,0 +1,54 @@
+name: Release
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  release:
+    name: Create Github Release
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Download binaries from Bintray
+        run: curl --remote-name-all -Lf https://dl.bintray.com/hpcsc/aws-profile/aws-profile-{Linux,Windows,macOS}-${{github.sha}}
+
+      - name: Attach Linux binary to Github release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./aws-profile-Linux-${{github.sha}}
+          asset_name: aws-profile-linux
+          asset_content_type: application/octet-stream
+
+      - name: Attach Windows binary to Github release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./aws-profile-Windows-${{github.sha}}
+          asset_name: aws-profile-windows.exe
+          asset_content_type: application/octet-stream
+
+      - name: Attach MacOS binary to Github release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./aws-profile-macOS-${{github.sha}}
+          asset_name: aws-profile-macos
+          asset_content_type: application/octet-stream
