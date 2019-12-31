@@ -23,8 +23,13 @@ func ExpandHomeDirectory(filePath string) string {
 	return filePath
 }
 
+type GlobalArguments struct {
+	CredentialsFilePath   *string
+	ConfigFilePath   *string
+}
+
 type Handler interface {
-	Handle() (bool, string)
+	Handle(globalArguments GlobalArguments) (bool, string)
 }
 
 type SelectProfileFn func(AWSProfiles, string) ([]byte, error)

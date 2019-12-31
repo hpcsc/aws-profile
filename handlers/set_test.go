@@ -14,46 +14,46 @@ func noopWriteToFileMock(_ *ini.File, _ string) {
 	// noop
 }
 
-func setupSetHandler(credentialsName string, configName string, selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
+func stubGlobalArgumentsForSet(credentialsName string, configName string) utils.GlobalArguments {
+	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
+	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
+
+	return utils.GlobalArguments{
+		CredentialsFilePath: &testCredentialsPath,
+		ConfigFilePath:      &testConfigPath,
+	}
+}
+
+func setupSetHandler(selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
 	app := kingpin.New("some-app", "some description")
 	setHandler := NewSetHandler(app, selectProfileFn, writeToFileFn)
 
-	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
-	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
-	app.Parse([]string { "set", "--credentials-path", testCredentialsPath, "--config-path", testConfigPath  })
+	app.Parse([]string { "set" })
 
 	return setHandler
 }
 
-func TestSetHandlerReturnErrorIfCredentialsFileNotFound(t *testing.T) {
-	setHandler := setupSetHandler(
-		"credentials_not_exists",
-		"get_profile_in_neither_file-config",
-		nil,
-		nil,
-		)
+func TestSetHandler_ReturnErrorIfCredentialsFileNotFound(t *testing.T) {
+	setHandler := setupSetHandler(nil, nil)
+	globalArguments := stubGlobalArgumentsForSet("credentials_not_exists", "get_profile_in_neither_file-config")
 
-	success, output := setHandler.Handle()
+	success, output := setHandler.Handle(globalArguments)
 
 	assert.False(t, success)
 	assert.Contains(t, output, "Fail to read AWS credentials file")
 }
 
-func TestSetHandlerReturnErrorIfConfigFileNotFound(t *testing.T) {
-	setHandler := setupSetHandler(
-		"get_profile_in_neither_file-credentials",
-		"config_not_exists",
-		nil,
-		nil,
-		)
+func TestSetHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
+	setHandler := setupSetHandler(nil, nil, )
+	globalArguments := stubGlobalArgumentsForSet("get_profile_in_neither_file-credentials", "config_not_exists")
 
-	success, output := setHandler.Handle()
+	success, output := setHandler.Handle(globalArguments)
 
 	assert.False(t, success)
 	assert.Contains(t, output, "Fail to read AWS config file")
 }
 
-func TestSelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
+func TestSetHandler_SelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 	called := false
 
 	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
@@ -72,14 +72,10 @@ func TestSelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 		return []byte("credentials_profile_2"), nil
 	}
 
-	setHandler := setupSetHandler(
-		"set-credentials",
-		"set-config",
-		selectProfileMock,
-		noopWriteToFileMock,
-		)
+	setHandler := setupSetHandler(selectProfileMock, noopWriteToFileMock)
+	globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
 
-	success, _ := setHandler.Handle()
+	success, _ := setHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	if !called {
@@ -87,25 +83,21 @@ func TestSelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 	}
 }
 
-func TestReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t *testing.T) {
+func TestSetHandler_ReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t *testing.T) {
 	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("a_random_profile"), nil
 	}
 
-	setHandler := setupSetHandler(
-		"set-credentials",
-		"set-config",
-		selectProfileMock,
-		noopWriteToFileMock,
-	)
+	setHandler := setupSetHandler(selectProfileMock, noopWriteToFileMock)
+	globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
 
-	success, message := setHandler.Handle()
+	success, message := setHandler.Handle(globalArguments)
 
 	assert.False(t, success)
 	assert.Contains(t, message, "not found in either credentials or config file")
 }
 
-func TestDefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected(t *testing.T) {
+func TestSetHandler_DefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected(t *testing.T) {
 	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("credentials_profile_2"), nil
 	}
@@ -123,20 +115,16 @@ func TestDefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected
 		}
 	}
 
-	setHandler := setupSetHandler(
-		"set-credentials",
-		"set-config",
-		selectProfileMock,
-		writeToFileMock,
-	)
+	setHandler := setupSetHandler(selectProfileMock, writeToFileMock)
+	globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
 
-	success, message := setHandler.Handle()
+	success, message := setHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	assert.Contains(t, message, "credentials from profile [credentials_profile_2]")
 }
 
-func TestDefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testing.T) {
+func TestSetHandler_DefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testing.T) {
 	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("profile config_profile_2"), nil
 	}
@@ -151,14 +139,10 @@ func TestDefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testin
 		}
 	}
 
-	setHandler := setupSetHandler(
-		"set-credentials",
-		"set-config",
-		selectProfileMock,
-		writeToFileMock,
-	)
+	setHandler := setupSetHandler(selectProfileMock, writeToFileMock)
+	globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
 
-	success, message := setHandler.Handle()
+	success, message := setHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	assert.Contains(t, message, "configs from assumed [profile config_profile_2]")

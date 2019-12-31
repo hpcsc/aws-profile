@@ -1,63 +1,77 @@
 package handlers
 
 import (
+	"github.com/hpcsc/aws-profile/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"path/filepath"
 	"testing"
 )
 
-func setupHandler(credentialsName string, configName string) GetHandler {
+func stubGlobalArgumentsForGet(credentialsName string, configName string) utils.GlobalArguments {
+	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
+	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
+
+	return utils.GlobalArguments{
+		CredentialsFilePath: &testCredentialsPath,
+		ConfigFilePath:      &testConfigPath,
+	}
+}
+
+func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
 	getHandler := NewGetHandler(app)
 
-	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
-	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
-	app.Parse([]string { "get", "--credentials-path", testCredentialsPath, "--config-path", testConfigPath  })
+	app.Parse([]string { "get" })
 
 	return getHandler
 }
 
-func TestReturnErrorIfCredentialsFileNotFound(t *testing.T) {
-	getHandler := setupHandler("credentials_not_exists", "get_profile_in_neither_file-config")
+func TestGetHandler_ReturnErrorIfCredentialsFileNotFound(t *testing.T) {
+	getHandler := setupHandler()
+	globalArguments := stubGlobalArgumentsForGet("credentials_not_exists", "get_profile_in_neither_file-config")
 
-	success, output := getHandler.Handle()
+	success, output := getHandler.Handle(globalArguments)
 
 	assert.False(t, success)
 	assert.Contains(t, output, "Fail to read AWS credentials file")
 }
 
-func TestReturnErrorIfConfigFileNotFound(t *testing.T) {
-	getHandler := setupHandler("get_profile_in_neither_file-credentials", "config_not_exists")
+func TestGetHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
+	getHandler := setupHandler()
+	globalArguments := stubGlobalArgumentsForGet("get_profile_in_neither_file-credentials", "config_not_exists")
 
-	success, output := getHandler.Handle()
+	success, output := getHandler.Handle(globalArguments)
 
 	assert.False(t, success)
 	assert.Contains(t, output, "Fail to read AWS config file")
 }
 
-func TestConfigProfileHasPriorityOverCredentialsProfile(t *testing.T) {
-	getHandler := setupHandler("get_config_priority_over_credentials-credentials", "get_config_priority_over_credentials-config")
+func TestGetHandler_ConfigProfileHasPriorityOverCredentialsProfile(t *testing.T) {
+	getHandler := setupHandler()
+	globalArguments := stubGlobalArgumentsForGet("get_config_priority_over_credentials-credentials", "get_config_priority_over_credentials-config")
 
-	success, output := getHandler.Handle()
+	success, output := getHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	assert.Contains(t, output, "assuming profile two")
 }
 
-func TestReturnEmptyIfProfileInNeitherConfigNorCredentials(t *testing.T) {
-	getHandler := setupHandler("get_profile_in_neither_file-credentials", "get_profile_in_neither_file-config")
+func TestGetHandler_ReturnEmptyIfProfileInNeitherConfigNorCredentials(t *testing.T) {
+	getHandler := setupHandler()
+	globalArguments := stubGlobalArgumentsForGet("get_profile_in_neither_file-credentials", "get_profile_in_neither_file-config")
 
-	success, output := getHandler.Handle()
+	success, output := getHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	assert.Equal(t, "", output)
 }
 
-func TestReturnCredentialsProfileIfNotFoundInConfig(t *testing.T) {
-	getHandler := setupHandler("get_profile_not_in_config-credentials", "get_profile_not_in_config-config")
+func TestGetHandler_ReturnCredentialsProfileIfNotFoundInConfig(t *testing.T) {
+	getHandler := setupHandler()
+	globalArguments := stubGlobalArgumentsForGet("get_profile_not_in_config-credentials", "get_profile_not_in_config-config")
 
-	success, output := getHandler.Handle()
+	success, output := getHandler.Handle(globalArguments)
 
 	assert.True(t, success)
 	assert.Contains(t, output, "two_credentials")

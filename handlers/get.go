@@ -9,31 +9,18 @@ import (
 
 type GetHandler struct {
 	SubCommand *kingpin.CmdClause
-	Arguments  GetHandlerArguments
-}
-
-type GetHandlerArguments struct {
-	CredentialsFilePath   *string
-	ConfigFilePath   *string
 }
 
 func NewGetHandler(app *kingpin.Application) GetHandler {
 	subCommand := app.Command("get", "get current AWS profile (that is set to default profile)")
 
-	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
-	configFilePath := subCommand.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
-
 	return GetHandler{
 		SubCommand: subCommand,
-		Arguments:   GetHandlerArguments{
-			CredentialsFilePath: credentialsFilePath,
-			ConfigFilePath: configFilePath,
-		},
 	}
 }
 
-func (handler GetHandler) Handle() (bool, string) {
-	configFile, err := utils.ReadFile(*handler.Arguments.ConfigFilePath)
+func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
+	configFile, err := utils.ReadFile(*globalArguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
@@ -48,7 +35,7 @@ func (handler GetHandler) Handle() (bool, string) {
 
 		for _, section := range configFile.Sections() {
 			if strings.Compare(section.Name(), "default") != 0 &&
-				section.Haskey("role_arn") &&
+				section.HasKey("role_arn") &&
 				section.HasKey("source_profile") &&
 				strings.Compare(section.Key("role_arn").Value(), defaultRoleArn) == 0 &&
 				strings.Compare(section.Key("source_profile").Value(), defaultSourceProfile) == 0 {
@@ -57,7 +44,7 @@ func (handler GetHandler) Handle() (bool, string) {
 		}
 	}
 
-	credentialsFile, err := utils.ReadFile(*handler.Arguments.CredentialsFilePath)
+	credentialsFile, err := utils.ReadFile(*globalArguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}

@@ -32,6 +32,8 @@ func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 func main() {
 	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')
+	credentialsPathFlag := app.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
+	configPathFlag := app.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 	handlerMap := createHandlerMap(app)
 
 	if len(os.Args) < 2 {
@@ -42,7 +44,12 @@ func main() {
 	parsedInput := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	if handler, ok := handlerMap[parsedInput]; ok {
-		success, message := handler.Handle()
+		globalArguments := utils.GlobalArguments{
+			CredentialsFilePath: credentialsPathFlag,
+			ConfigFilePath:      configPathFlag,
+		}
+
+		success, message := handler.Handle(globalArguments)
 		if !strings.EqualFold(message, "") {
 			fmt.Println(message)
 		}
