@@ -17,6 +17,15 @@ After downloading binary file, rename it to `aws-profile` (or `aws-profile.exe` 
 chmod +x aws-profile && mv ./aws-profile /usr/local/bin
 ```
 
+### How it works
+
+- The `get` and `set` commands work primarily on AWS `config` and `credentials` files.
+- `set` command sets `default` profile in either `config` or `credentials` file with values (e.g. `aws_access_key_id` and `aws_secret_access_key` or `role_arn` and `source_profile`) from selected profile.
+- `get` command compares values in `default` profile with other profiles and returns the matched profile
+- `export` command prints out suitable command for your OS (`export` in Linux/MacOS or `$env:VAR` setting in Windows Powershell). These printed commands can be copied and executed directly in your terminal to set suitable AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION`). The purpose of this command is to support some of the tools that don't work well with AWS `config` and `credentials` files, e.g. 
+    - Terraform aws provider with role that requires MFA [https://github.com/terraform-providers/terraform-provider-aws/issues/2420](https://github.com/terraform-providers/terraform-provider-aws/issues/2420)
+    - Or when you want to execute AWS CLI commands inside a container and it's not convenient to mount host machine `~/.aws` folder
+
 ### Usage
 
 ```
@@ -43,6 +52,10 @@ Commands:
 
   export [<pattern>]
     print commands to set environment variables for assuming a AWS role
+
+    For Linux/MacOS, execute: "eval $(aws-profile export)"
+
+    For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"
 
   version
     show aws-profile version

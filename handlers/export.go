@@ -22,7 +22,11 @@ type ExportCommandArguments struct {
 }
 
 func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
-	subCommand := app.Command("export", "print commands to set environment variables for assuming a AWS role")
+	subCommand := app.Command("export", `print commands to set environment variables for assuming a AWS role
+
+For Linux/MacOS, execute: "eval $(aws-profile export)"
+
+For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
 
