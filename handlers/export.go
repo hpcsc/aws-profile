@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -10,6 +11,7 @@ import (
 
 type ExportHandler struct {
 	SubCommand *kingpin.CmdClause
+	IsWindows bool
 	SelectProfile utils.SelectProfileFn
 	GetAWSCredentials utils.GetAWSCredentialsFn
 	Arguments  ExportCommandArguments
@@ -21,7 +23,7 @@ type ExportCommandArguments struct {
 	Pattern *string
 }
 
-func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
+func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
 	subCommand := app.Command("export", "print commands to set environment variables for assuming a AWS role")
 
 	credentialsFilePath := subCommand.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
@@ -30,6 +32,7 @@ func NewExportHandler(app *kingpin.Application, selectProfileFn utils.SelectProf
 
 	return ExportHandler {
 		SubCommand: subCommand,
+		IsWindows: isWindows,
 		SelectProfile: selectProfileFn,
 		GetAWSCredentials: getAWSCredentialsFn,
 		Arguments:   ExportCommandArguments{
@@ -67,36 +70,20 @@ func (handler ExportHandler) Handle() (bool, string) {
 		return false, getCredentialsErr.Error()
 	}
 
-	linuxExport := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'\n",
-		credentialsValue.AccessKeyID,
-		credentialsValue.SecretAccessKey,
-		credentialsValue.SessionToken)
-
-	windowsExport := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'\n",
-		credentialsValue.AccessKeyID,
-		credentialsValue.SecretAccessKey,
-		credentialsValue.SessionToken)
-
-	output := fmt.Sprintf(`LINUX or MACOS
-================================
-Execute the following command in your shell:
-
-%s
-
-To unset those environment variables:
-
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN\n
-
-WINDOWS
-================================
-Execute the following command in Powershell:
-
-%s
-
-To unset those environment variables:
-
-Remove-Item Env:\AWS_ACCESS_KEY_ID; Remove-Item Env:\AWS_SECRET_ACCESS_KEY; Remove-Item Env:\AWS_SESSION_TOKEN`,
-		linuxExport,
-		windowsExport)
+	output := formatOutputByPlatform(handler.IsWindows, credentialsValue)
 	return true, output
+}
+
+func formatOutputByPlatform(isWindows bool, credentialsValue credentials.Value) string {
+	if isWindows {
+		return fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
+			credentialsValue.AccessKeyID,
+			credentialsValue.SecretAccessKey,
+			credentialsValue.SessionToken)
+	}
+
+	return fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
+		credentialsValue.AccessKeyID,
+		credentialsValue.SecretAccessKey,
+		credentialsValue.SessionToken)
 }

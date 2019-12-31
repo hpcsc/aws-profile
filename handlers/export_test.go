@@ -20,9 +20,9 @@ func stubbedGetAWSCredentials(_ *utils.AWSProfile) (credentials.Value, error) {
 	return value, nil
 }
 
-func setupExportHandler(configName string, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
+func setupExportHandler(configName string, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
 	app := kingpin.New("some-app", "some description")
-	exportHandler := NewExportHandler(app, selectProfileFn, getAWSCredentialsFn)
+	exportHandler := NewExportHandler(app, isWindows, selectProfileFn, getAWSCredentialsFn)
 
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 	app.Parse([]string { "export", "--config-path", testConfigPath  })
@@ -33,6 +33,7 @@ func setupExportHandler(configName string, selectProfileFn utils.SelectProfileFn
 func TestExportHandlerReturnErrorIfConfigFileNotFound(t *testing.T) {
 	exportHandler := setupExportHandler(
 		"config_not_exists",
+		false,
 		nil,
 		nil,
 		)
@@ -62,6 +63,7 @@ func TestSelectProfileIsInvokedWithProfileNamesFromConfigFileOnly(t *testing.T) 
 
 	exportHandler := setupExportHandler(
 		"set-config",
+		false,
 		selectProfileMock,
 		stubbedGetAWSCredentials,
 	)
@@ -81,6 +83,7 @@ func TestOutputContainsExportInstructionForLinuxAndMacOS(t *testing.T) {
 
 	exportHandler := setupExportHandler(
 		"set-config",
+		false,
 		selectProfileMock,
 		stubbedGetAWSCredentials,
 	)
@@ -88,7 +91,7 @@ func TestOutputContainsExportInstructionForLinuxAndMacOS(t *testing.T) {
 	success, output := exportHandler.Handle()
 
 	assert.True(t, success)
-	assert.Contains(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
+	assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
 }
 
 func TestOutputContainsExportInstructionForWindows(t *testing.T) {
@@ -98,6 +101,7 @@ func TestOutputContainsExportInstructionForWindows(t *testing.T) {
 
 	exportHandler := setupExportHandler(
 		"set-config",
+		true,
 		selectProfileMock,
 		stubbedGetAWSCredentials,
 	)
@@ -105,5 +109,5 @@ func TestOutputContainsExportInstructionForWindows(t *testing.T) {
 	success, output := exportHandler.Handle()
 
 	assert.True(t, success)
-	assert.Contains(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
+	assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
 }

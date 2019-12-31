@@ -6,13 +6,19 @@ import (
 	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
+	"runtime"
 	"strings"
 )
 
 func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 	getHandler := handlers.NewGetHandler(app)
 	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
-	exportHandler := handlers.NewExportHandler(app, utils.SelectProfileFromList, utils.GetAWSCredentials)
+	exportHandler := handlers.NewExportHandler(
+		app,
+		runtime.GOOS == "windows",
+		utils.SelectProfileFromList,
+		utils.GetAWSCredentials,
+		)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]utils.Handler{
