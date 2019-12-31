@@ -7,7 +7,6 @@ import (
 	"log"
 )
 
-
 func getDisplayableLabels(profiles []AWSProfile) []string {
 	var labels []string
 

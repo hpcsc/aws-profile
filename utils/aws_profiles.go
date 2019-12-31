@@ -3,14 +3,14 @@ package utils
 import "strings"
 
 type AWSProfile struct {
-	ProfileName string
+	ProfileName        string
 	DisplayProfileName string
-	RoleArn string
-	MFASerialNumber string
+	RoleArn            string
+	MFASerialNumber    string
 }
 
 type AWSProfiles struct {
-	CredentialsProfiles []AWSProfile
+	CredentialsProfiles   []AWSProfile
 	ConfigAssumedProfiles []AWSProfile
 }
 

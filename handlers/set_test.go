@@ -28,7 +28,7 @@ func setupSetHandler(selectProfileFn utils.SelectProfileFn, writeToFileFn utils.
 	app := kingpin.New("some-app", "some description")
 	setHandler := NewSetHandler(app, selectProfileFn, writeToFileFn)
 
-	app.Parse([]string { "set" })
+	app.Parse([]string{"set"})
 
 	return setHandler
 }
@@ -44,7 +44,7 @@ func TestSetHandler_ReturnErrorIfCredentialsFileNotFound(t *testing.T) {
 }
 
 func TestSetHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
-	setHandler := setupSetHandler(nil, nil, )
+	setHandler := setupSetHandler(nil, nil)
 	globalArguments := stubGlobalArgumentsForSet("get_profile_in_neither_file-credentials", "config_not_exists")
 
 	success, output := setHandler.Handle(globalArguments)
@@ -56,17 +56,17 @@ func TestSetHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
 func TestSetHandler_SelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *testing.T) {
 	called := false
 
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		assert.ElementsMatch(
 			t,
 			profiles.GetAllDisplayProfileNames(),
-			[]string {
+			[]string{
 				"credentials_profile_1",
 				"credentials_profile_2",
 				"assume profile config_profile_1",
 				"assume profile config_profile_2",
 			},
-			)
+		)
 
 		called = true
 		return []byte("credentials_profile_2"), nil
@@ -84,7 +84,7 @@ func TestSetHandler_SelectProfileIsInvokedWithProfileNamesFromBothConfigs(t *tes
 }
 
 func TestSetHandler_ReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t *testing.T) {
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("a_random_profile"), nil
 	}
 
@@ -98,11 +98,11 @@ func TestSetHandler_ReturnErrorIfSelectedProfileNotInBothConfigAndCredentials(t 
 }
 
 func TestSetHandler_DefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProfileSelected(t *testing.T) {
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("credentials_profile_2"), nil
 	}
 
-	writeToFileMock := func (file *ini.File, unexpandedFilePath string) {
+	writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
 		// when profile is from credentials file, it should set default in credentials file and clear default in config file
 		if strings.Contains(unexpandedFilePath, "-credentials") {
 			assert.Equal(t, "4", file.Section("default").Key("aws_access_key_id").Value())
@@ -125,11 +125,11 @@ func TestSetHandler_DefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProf
 }
 
 func TestSetHandler_DefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testing.T) {
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("profile config_profile_2"), nil
 	}
 
-	writeToFileMock := func (file *ini.File, unexpandedFilePath string) {
+	writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
 		// when profile is from config file, it should set default in config file and keep default in credentials unchanged
 		if strings.Contains(unexpandedFilePath, "-config") {
 			assert.Equal(t, "2", file.Section("default").Key("role_arn").Value())

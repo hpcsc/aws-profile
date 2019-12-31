@@ -8,7 +8,7 @@ import (
 
 type AWSSharedCredentialsProcessor struct {
 	CredentialsFile *ini.File
-	ConfigFile *ini.File
+	ConfigFile      *ini.File
 }
 
 func (processor AWSSharedCredentialsProcessor) getProfilesFromCredentialsFile() []AWSProfile {
@@ -36,7 +36,7 @@ func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile(
 			profile := AWSProfile{
 				ProfileName:        section.Name(),
 				DisplayProfileName: fmt.Sprintf("assume %s", section.Name()),
-				RoleArn: section.Key("role_arn").Value(),
+				RoleArn:            section.Key("role_arn").Value(),
 			}
 
 			if section.HasKey("mfa_serial") {
@@ -79,4 +79,3 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefaul
 	configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
 	configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
 }
-

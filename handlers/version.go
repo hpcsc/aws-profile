@@ -1,7 +1,7 @@
 package handlers
 
 import (
-		"fmt"
+	"fmt"
 	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -12,12 +12,13 @@ type VersionHandler struct {
 
 func NewVersionHandler(app *kingpin.Application) VersionHandler {
 	subCommand := app.Command("version", "show aws-profile version")
-	return VersionHandler {
+	return VersionHandler{
 		SubCommand: subCommand,
 	}
 }
 
 var version = "undefined"
+
 func (handler VersionHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
 	fmt.Printf("aws-profile (%s)", version)
 	return true, ""

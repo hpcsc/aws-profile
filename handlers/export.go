@@ -10,11 +10,11 @@ import (
 )
 
 type ExportHandler struct {
-	SubCommand *kingpin.CmdClause
-	IsWindows bool
-	SelectProfile utils.SelectProfileFn
+	SubCommand        *kingpin.CmdClause
+	IsWindows         bool
+	SelectProfile     utils.SelectProfileFn
 	GetAWSCredentials utils.GetAWSCredentialsFn
-	Arguments  ExportCommandArguments
+	Arguments         ExportCommandArguments
 }
 
 type ExportCommandArguments struct {
@@ -26,12 +26,12 @@ func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn 
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
 
-	return ExportHandler {
-		SubCommand: subCommand,
-		IsWindows: isWindows,
-		SelectProfile: selectProfileFn,
+	return ExportHandler{
+		SubCommand:        subCommand,
+		IsWindows:         isWindows,
+		SelectProfile:     selectProfileFn,
 		GetAWSCredentials: getAWSCredentialsFn,
-		Arguments:   ExportCommandArguments{
+		Arguments: ExportCommandArguments{
 			Pattern: pattern,
 		},
 	}
@@ -45,7 +45,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 
 	processor := utils.AWSSharedCredentialsProcessor{
 		CredentialsFile: ini.Empty(),
-		ConfigFile: configFile,
+		ConfigFile:      configFile,
 	}
 
 	profiles := processor.GetProfilesFromCredentialsAndConfig()

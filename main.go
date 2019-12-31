@@ -18,13 +18,13 @@ func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 		runtime.GOOS == "windows",
 		utils.SelectProfileFromList,
 		utils.GetAWSCredentials,
-		)
+	)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]utils.Handler{
-		getHandler.SubCommand.FullCommand(): getHandler,
-		setHandler.SubCommand.FullCommand(): setHandler,
-		exportHandler.SubCommand.FullCommand(): exportHandler,
+		getHandler.SubCommand.FullCommand():     getHandler,
+		setHandler.SubCommand.FullCommand():     setHandler,
+		exportHandler.SubCommand.FullCommand():  exportHandler,
 		versionHandler.SubCommand.FullCommand(): versionHandler,
 	}
 }
@@ -37,7 +37,7 @@ func main() {
 	handlerMap := createHandlerMap(app)
 
 	if len(os.Args) < 2 {
-		app.Usage([]string {})
+		app.Usage([]string{})
 		os.Exit(1)
 	}
 
@@ -60,6 +60,6 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		app.Usage([]string {})
+		app.Usage([]string{})
 	}
 }

@@ -8,10 +8,10 @@ import (
 )
 
 type SetHandler struct {
-	SubCommand *kingpin.CmdClause
-	Arguments  SetCommandArguments
+	SubCommand    *kingpin.CmdClause
+	Arguments     SetCommandArguments
 	SelectProfile utils.SelectProfileFn
-	WriteToFile utils.WriteToFileFn
+	WriteToFile   utils.WriteToFileFn
 }
 
 type SetCommandArguments struct {
@@ -25,14 +25,13 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn utils.SelectProfile
 
 	return SetHandler{
 		SubCommand: subCommand,
-		Arguments:   SetCommandArguments{
+		Arguments: SetCommandArguments{
 			Pattern: pattern,
 		},
 		SelectProfile: selectProfileFn,
-		WriteToFile: writeToFileFn,
+		WriteToFile:   writeToFileFn,
 	}
 }
-
 
 func (handler SetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
 	credentialsFile, err := utils.ReadFile(*globalArguments.CredentialsFilePath)
@@ -47,7 +46,7 @@ func (handler SetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 
 	processor := utils.AWSSharedCredentialsProcessor{
 		CredentialsFile: credentialsFile,
-		ConfigFile: configFile,
+		ConfigFile:      configFile,
 	}
 
 	profiles := processor.GetProfilesFromCredentialsAndConfig()

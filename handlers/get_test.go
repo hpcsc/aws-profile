@@ -22,7 +22,7 @@ func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
 	getHandler := NewGetHandler(app)
 
-	app.Parse([]string { "get" })
+	app.Parse([]string{"get"})
 
 	return getHandler
 }

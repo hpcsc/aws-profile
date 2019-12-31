@@ -24,7 +24,7 @@ func stubGlobalArgumentsForExport(configName string) utils.GlobalArguments {
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
 	return utils.GlobalArguments{
-		ConfigFilePath:      &testConfigPath,
+		ConfigFilePath: &testConfigPath,
 	}
 }
 
@@ -32,7 +32,7 @@ func setupExportHandler(isWindows bool, selectProfileFn utils.SelectProfileFn, g
 	app := kingpin.New("some-app", "some description")
 	exportHandler := NewExportHandler(app, isWindows, selectProfileFn, getAWSCredentialsFn)
 
-	app.Parse([]string { "export"})
+	app.Parse([]string{"export"})
 
 	return exportHandler
 }
@@ -42,7 +42,7 @@ func TestExportHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
 		false,
 		nil,
 		nil,
-		)
+	)
 	globalArguments := stubGlobalArgumentsForExport("config_not_exists")
 
 	success, output := exportHandler.Handle(globalArguments)
@@ -54,15 +54,15 @@ func TestExportHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
 func TestExportHandler_SelectProfileIsInvokedWithProfileNamesFromConfigFileOnly(t *testing.T) {
 	called := false
 
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		assert.ElementsMatch(
 			t,
 			profiles.GetAllDisplayProfileNames(),
-			[]string {
+			[]string{
 				"assume profile config_profile_1",
 				"assume profile config_profile_2",
 			},
-			)
+		)
 
 		called = true
 		return []byte("profile config_profile_1"), nil
@@ -84,7 +84,7 @@ func TestExportHandler_SelectProfileIsInvokedWithProfileNamesFromConfigFileOnly(
 }
 
 func TestExportHandler_OutputContainsExportInstructionForLinuxAndMacOS(t *testing.T) {
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("profile config_profile_1"), nil
 	}
 
@@ -102,7 +102,7 @@ func TestExportHandler_OutputContainsExportInstructionForLinuxAndMacOS(t *testin
 }
 
 func TestExportHandler_OutputContainsExportInstructionForWindows(t *testing.T) {
-	selectProfileMock := func (profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
 		return []byte("profile config_profile_1"), nil
 	}
 

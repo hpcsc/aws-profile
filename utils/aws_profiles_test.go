@@ -9,7 +9,7 @@ import (
 func StubProfiles(startIndex int, endIndex int) []AWSProfile {
 	var profiles []AWSProfile
 
-	for i := startIndex; i <= endIndex; i++  {
+	for i := startIndex; i <= endIndex; i++ {
 		profiles = append(profiles, AWSProfile{
 			ProfileName:        fmt.Sprintf("profile-%d", i),
 			DisplayProfileName: fmt.Sprintf("profile-%d display name", i),
@@ -21,7 +21,7 @@ func StubProfiles(startIndex int, endIndex int) []AWSProfile {
 
 func TestFindProfileInCredentialsFile_ReturnsNilIfNoProfileWithGivenNameFound(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  StubProfiles(1, 2),
+		CredentialsProfiles:   StubProfiles(1, 2),
 		ConfigAssumedProfiles: []AWSProfile{},
 	}
 
@@ -32,7 +32,7 @@ func TestFindProfileInCredentialsFile_ReturnsNilIfNoProfileWithGivenNameFound(t 
 
 func TestFindProfileInCredentialsFile_ReturnsProfileOnceFound(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  StubProfiles(1, 2),
+		CredentialsProfiles:   StubProfiles(1, 2),
 		ConfigAssumedProfiles: []AWSProfile{},
 	}
 
@@ -44,7 +44,7 @@ func TestFindProfileInCredentialsFile_ReturnsProfileOnceFound(t *testing.T) {
 
 func TestFindProfileInConfigFile_ReturnsNilIfNoProfileWithGivenNameFound(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  []AWSProfile{},
+		CredentialsProfiles:   []AWSProfile{},
 		ConfigAssumedProfiles: StubProfiles(1, 2),
 	}
 
@@ -55,7 +55,7 @@ func TestFindProfileInConfigFile_ReturnsNilIfNoProfileWithGivenNameFound(t *test
 
 func TestFindProfileInConfigFile_ReturnsProfileOnceFound(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  []AWSProfile{},
+		CredentialsProfiles:   []AWSProfile{},
 		ConfigAssumedProfiles: StubProfiles(1, 2),
 	}
 
@@ -67,13 +67,13 @@ func TestFindProfileInConfigFile_ReturnsProfileOnceFound(t *testing.T) {
 
 func TestGetAllDisplayProfileNames_ReturnsProfileNamesFromBothCredentialsAndConfigFiles(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  StubProfiles(1, 2),
+		CredentialsProfiles:   StubProfiles(1, 2),
 		ConfigAssumedProfiles: StubProfiles(3, 3),
 	}
 
 	result := profiles.GetAllDisplayProfileNames()
 
-	expected := []string {
+	expected := []string{
 		"profile-1 display name",
 		"profile-2 display name",
 		"profile-3 display name",
@@ -83,7 +83,7 @@ func TestGetAllDisplayProfileNames_ReturnsProfileNamesFromBothCredentialsAndConf
 
 func TestFilter_ReturnsFilteredProfilesFromBothCredentialsAndConfigFiles(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  []AWSProfile {
+		CredentialsProfiles: []AWSProfile{
 			{
 				ProfileName:        "credentials profile 1",
 				DisplayProfileName: "credentials profile 1",
@@ -93,7 +93,7 @@ func TestFilter_ReturnsFilteredProfilesFromBothCredentialsAndConfigFiles(t *test
 				DisplayProfileName: "credentials profile 2",
 			},
 		},
-		ConfigAssumedProfiles:  []AWSProfile {
+		ConfigAssumedProfiles: []AWSProfile{
 			{
 				ProfileName:        "config profile 1",
 				DisplayProfileName: "config profile 1",
@@ -114,7 +114,7 @@ func TestFilter_ReturnsFilteredProfilesFromBothCredentialsAndConfigFiles(t *test
 
 func TestFilter_ReturnsEmptyIfNoneMatchesFilter(t *testing.T) {
 	profiles := AWSProfiles{
-		CredentialsProfiles:  []AWSProfile {
+		CredentialsProfiles: []AWSProfile{
 			{
 				ProfileName:        "credentials profile 1",
 				DisplayProfileName: "credentials profile 1",
@@ -124,7 +124,7 @@ func TestFilter_ReturnsEmptyIfNoneMatchesFilter(t *testing.T) {
 				DisplayProfileName: "credentials profile 2",
 			},
 		},
-		ConfigAssumedProfiles:  []AWSProfile {
+		ConfigAssumedProfiles: []AWSProfile{
 			{
 				ProfileName:        "config profile 1",
 				DisplayProfileName: "config profile 1",

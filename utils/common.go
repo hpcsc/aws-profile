@@ -24,8 +24,8 @@ func ExpandHomeDirectory(filePath string) string {
 }
 
 type GlobalArguments struct {
-	CredentialsFilePath   *string
-	ConfigFilePath   *string
+	CredentialsFilePath *string
+	ConfigFilePath      *string
 }
 
 type Handler interface {

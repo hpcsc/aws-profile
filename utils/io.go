@@ -21,4 +21,3 @@ func WriteToFile(file *ini.File, unexpandedFilePath string) {
 
 	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
-
