@@ -26,18 +26,22 @@ simple tool to help switching among AWS profiles more easily
 
 Flags:
   -h, --help  Show context-sensitive help (also try --help-long and --help-man).
+      --credentials-path="~/.aws/credentials"
+              Path to AWS Credentials file
+      --config-path="~/.aws/config"
+              Path to AWS Config file
 
 Commands:
   help [<command>...]
     Show help.
 
-  get [<flags>]
+  get
     get current AWS profile (that is set to default profile)
 
-  set [<flags>] [<pattern>]
+  set [<pattern>]
     set default profile with credentials of selected profile
 
-  export [<flags>] [<pattern>]
+  export [<pattern>]
     print commands to set environment variables for assuming a AWS role
 
   version
