@@ -15,3 +15,7 @@
 bin
 
 node_modules
+
+tmp
+
+/aws-profile
