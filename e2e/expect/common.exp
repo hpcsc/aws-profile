@@ -1,0 +1,11 @@
+set send_slow {1 .1}
+
+proc send {ignore arg} {
+	sleep .1
+	exp_send -s -- $arg
+}
+
+proc init {} {
+    set timeout -1
+    match_max 100000
+}
