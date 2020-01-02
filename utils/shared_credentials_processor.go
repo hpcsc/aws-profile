@@ -57,25 +57,54 @@ func (processor AWSSharedCredentialsProcessor) GetProfilesFromCredentialsAndConf
 	}
 }
 
-func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selectedProfile string) {
-	credentialsFile := processor.CredentialsFile
-	configFile := processor.ConfigFile
+func (processor AWSSharedCredentialsProcessor) findRegionInConfigFile(selectedProfileName string) string {
+	for _, section := range processor.ConfigFile.Sections() {
+		if strings.EqualFold(strings.TrimPrefix(section.Name(), "profile "), selectedProfileName) &&
+			section.HasKey("region") {
+			return section.Key("region").Value()
+		}
+	}
 
-	selectedKeyId := credentialsFile.Section(selectedProfile).Key("aws_access_key_id").Value()
-	selectedAccessKey := credentialsFile.Section(selectedProfile).Key("aws_secret_access_key").Value()
-
-	credentialsFile.Section("default").Key("aws_access_key_id").SetValue(selectedKeyId)
-	credentialsFile.Section("default").Key("aws_secret_access_key").SetValue(selectedAccessKey)
-	configFile.Section("default").DeleteKey("role_arn")
-	configFile.Section("default").DeleteKey("source_profile")
+	return ""
 }
 
-func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefault(selectedAssumedProfile string) {
+func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selectedProfileName string) {
+	credentialsFile := processor.CredentialsFile
+
+	selectedProfile := credentialsFile.Section(selectedProfileName)
+	selectedKeyId := selectedProfile.Key("aws_access_key_id").Value()
+	selectedAccessKey := selectedProfile.Key("aws_secret_access_key").Value()
+
+	defaultProfileInCredentials := credentialsFile.Section("default")
+	defaultProfileInCredentials.Key("aws_access_key_id").SetValue(selectedKeyId)
+	defaultProfileInCredentials.Key("aws_secret_access_key").SetValue(selectedAccessKey)
+
+	defaultProfileInConfig := processor.ConfigFile.Section("default")
+	defaultProfileInConfig.DeleteKey("role_arn")
+	defaultProfileInConfig.DeleteKey("source_profile")
+
+	selectedRegion := processor.findRegionInConfigFile(selectedProfileName)
+	if selectedRegion != "" {
+		defaultProfileInConfig.Key("region").SetValue(selectedRegion)
+	} else {
+		defaultProfileInConfig.DeleteKey("region")
+	}
+}
+
+func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefault(selectedAssumedProfileName string) {
 	configFile := processor.ConfigFile
 
-	selectedRoleArn := configFile.Section(selectedAssumedProfile).Key("role_arn").Value()
-	selectedSourceProfile := configFile.Section(selectedAssumedProfile).Key("source_profile").Value()
+	selectedProfile := configFile.Section(selectedAssumedProfileName)
+	selectedRoleArn := selectedProfile.Key("role_arn").Value()
+	selectedSourceProfile := selectedProfile.Key("source_profile").Value()
 
-	configFile.Section("default").Key("role_arn").SetValue(selectedRoleArn)
-	configFile.Section("default").Key("source_profile").SetValue(selectedSourceProfile)
+	defaultProfile := configFile.Section("default")
+	defaultProfile.Key("role_arn").SetValue(selectedRoleArn)
+	defaultProfile.Key("source_profile").SetValue(selectedSourceProfile)
+
+	if selectedProfile.HasKey("region") {
+		defaultProfile.Key("region").SetValue(selectedProfile.Key("region").Value())
+	} else {
+		defaultProfile.DeleteKey("region")
+	}
 }
