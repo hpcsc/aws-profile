@@ -34,4 +34,4 @@ type Handler interface {
 
 type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
-type GetAWSCredentialsFn func(*AWSProfile) (credentials.Value, error)
+type GetAWSCredentialsFn func(*AWSProfile, int) (credentials.Value, error)

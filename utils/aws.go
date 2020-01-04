@@ -1,13 +1,15 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"time"
 )
 
-func GetAWSCredentials(profile *AWSProfile) (credentials.Value, error) {
+func GetAWSCredentials(profile *AWSProfile, durationInMinutes int) (credentials.Value, error) {
 	session := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -17,7 +19,8 @@ func GetAWSCredentials(profile *AWSProfile) (credentials.Value, error) {
 			p.SerialNumber = aws.String(profile.MFASerialNumber)
 			p.TokenProvider = stscreds.StdinTokenProvider
 		}
-		p.RoleSessionName = "aws-profile-session"
+		p.RoleSessionName = fmt.Sprintf("aws-profile-%d", time.Now().UnixNano())
+		p.Duration = time.Duration(durationInMinutes) * time.Minute
 	})
 
 	return credentials.Get()

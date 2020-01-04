@@ -19,6 +19,7 @@ type ExportHandler struct {
 
 type ExportCommandArguments struct {
 	Pattern *string
+	DurationInMinutes *int
 }
 
 func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
@@ -29,6 +30,7 @@ For Linux/MacOS, execute: "eval $(aws-profile export)"
 For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
+	durationInMinutes := subCommand.Flag("duration-in-minutes", "AWS temporary session token duration in minutes").Short('d').Default("15").Int()
 
 	return ExportHandler{
 		SubCommand:        subCommand,
@@ -37,6 +39,7 @@ For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 		GetAWSCredentials: getAWSCredentialsFn,
 		Arguments: ExportCommandArguments{
 			Pattern: pattern,
+			DurationInMinutes: durationInMinutes,
 		},
 	}
 }
@@ -45,6 +48,10 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 	configFile, readConfigErr := utils.ReadFile(*globalArguments.ConfigFilePath)
 	if readConfigErr != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)
+	}
+
+	if *handler.Arguments.DurationInMinutes < 15 {
+		return false, "Minimum duration is 15 minutes"
 	}
 
 	processor := utils.AWSSharedCredentialsProcessor{
@@ -63,7 +70,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 	profile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult)
 
-	credentialsValue, getCredentialsErr := handler.GetAWSCredentials(profile)
+	credentialsValue, getCredentialsErr := handler.GetAWSCredentials(profile, *handler.Arguments.DurationInMinutes)
 	if getCredentialsErr != nil {
 		return false, getCredentialsErr.Error()
 	}
