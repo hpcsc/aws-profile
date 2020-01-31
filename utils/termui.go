@@ -29,7 +29,7 @@ func SelectProfileFromList(profiles AWSProfiles, pattern string) ([]byte, error)
 	list := widgets.NewList()
 	list.Title = "Select a AWS profile"
 	list.Rows = labels
-	list.TextStyle = ui.NewStyle(ui.ColorYellow)
+	list.SelectedRowStyle = ui.NewStyle(ui.ColorGreen)
 	list.WrapText = true
 
 	grid := ui.NewGrid()
