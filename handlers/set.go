@@ -66,13 +66,13 @@ func (handler SetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 		handler.WriteToFile(processor.CredentialsFile, *globalArguments.CredentialsFilePath)
 		handler.WriteToFile(processor.ConfigFile, *globalArguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== profile [default] in [%s] is set with credentials from profile [%s]", *globalArguments.CredentialsFilePath, trimmedSelectedProfileResult)
+		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, *globalArguments.CredentialsFilePath)
 	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
 		processor.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName)
 
 		handler.WriteToFile(processor.ConfigFile, *globalArguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== profile [default] config in [%s] is set with configs from assumed [%s]", *globalArguments.ConfigFilePath, assumedProfile.ProfileName)
+		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", assumedProfile.ProfileName, *globalArguments.ConfigFilePath)
 	} else {
 		return false, fmt.Sprintf("=== profile [%s] not found in either credentials or config file", trimmedSelectedProfileResult)
 	}

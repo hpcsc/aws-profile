@@ -121,7 +121,7 @@ func TestSetHandler_DefaultProfileInCredentialsIsSetCorrectlyWhenCredentialsProf
 	success, message := setHandler.Handle(globalArguments)
 
 	assert.True(t, success)
-	assert.Contains(t, message, "credentials from profile [credentials_profile_2]")
+	assert.Contains(t, message, "[credentials_profile_2] -> [default]")
 }
 
 func TestSetHandler_DefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelected(t *testing.T) {
@@ -145,5 +145,5 @@ func TestSetHandler_DefaultProfileInConfigIsSetCorrectlyWhenConfigProfileSelecte
 	success, message := setHandler.Handle(globalArguments)
 
 	assert.True(t, success)
-	assert.Contains(t, message, "configs from assumed [profile config_profile_2]")
+	assert.Contains(t, message, "[profile config_profile_2] -> [default]")
 }
