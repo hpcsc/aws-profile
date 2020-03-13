@@ -7,6 +7,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"strings"
+	"time"
 )
 
 type ExportHandler struct {
@@ -18,8 +19,8 @@ type ExportHandler struct {
 }
 
 type ExportCommandArguments struct {
-	Pattern *string
-	DurationInMinutes *int
+	Pattern  *string
+	Duration *string
 }
 
 func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
@@ -30,7 +31,7 @@ For Linux/MacOS, execute: "eval $(aws-profile export)"
 For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
-	durationInMinutes := subCommand.Flag("duration-in-minutes", "AWS temporary session token duration in minutes").Short('d').Default("15").Int()
+	duration := subCommand.Flag("duration", "AWS temporary session token duration. Example of valid duration: 5s, 15m").Short('d').Default("15m").String()
 
 	return ExportHandler{
 		SubCommand:        subCommand,
@@ -38,8 +39,8 @@ For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 		SelectProfile:     selectProfileFn,
 		GetAWSCredentials: getAWSCredentialsFn,
 		Arguments: ExportCommandArguments{
-			Pattern: pattern,
-			DurationInMinutes: durationInMinutes,
+			Pattern:  pattern,
+			Duration: duration,
 		},
 	}
 }
@@ -50,7 +51,12 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)
 	}
 
-	if *handler.Arguments.DurationInMinutes < 15 {
+	var duration, parseDurationErr = time.ParseDuration(*handler.Arguments.Duration)
+	if parseDurationErr != nil {
+		return false, parseDurationErr.Error()
+	}
+
+	if duration < time.Duration(15) * time.Minute {
 		return false, "Minimum duration is 15 minutes"
 	}
 
@@ -70,7 +76,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 	profile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult)
 
-	credentialsValue, getCredentialsErr := handler.GetAWSCredentials(profile, *handler.Arguments.DurationInMinutes)
+	credentialsValue, getCredentialsErr := handler.GetAWSCredentials(profile, duration)
 	if getCredentialsErr != nil {
 		return false, getCredentialsErr.Error()
 	}

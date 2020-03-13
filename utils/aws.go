@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func GetAWSCredentials(profile *AWSProfile, durationInMinutes int) (credentials.Value, error) {
+func GetAWSCredentials(profile *AWSProfile, duration time.Duration) (credentials.Value, error) {
 	session := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -20,7 +20,7 @@ func GetAWSCredentials(profile *AWSProfile, durationInMinutes int) (credentials.
 			p.TokenProvider = stscreds.StdinTokenProvider
 		}
 		p.RoleSessionName = fmt.Sprintf("aws-profile-%d", time.Now().UnixNano())
-		p.Duration = time.Duration(durationInMinutes) * time.Minute
+		p.Duration = duration
 	})
 
 	return credentials.Get()

@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func ReadFile(filePath string) (*ini.File, error) {
@@ -34,4 +35,4 @@ type Handler interface {
 
 type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
-type GetAWSCredentialsFn func(*AWSProfile, int) (credentials.Value, error)
+type GetAWSCredentialsFn func(*AWSProfile, time.Duration) (credentials.Value, error)

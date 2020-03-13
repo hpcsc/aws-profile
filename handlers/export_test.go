@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"path/filepath"
-	"strconv"
 	"testing"
+	"time"
 )
 
 func stubAWSCredentials() credentials.Value {
@@ -19,7 +19,7 @@ func stubAWSCredentials() credentials.Value {
 	}
 }
 
-func stubGetAWSCredentials(_ *utils.AWSProfile, _ int) (credentials.Value, error) {
+func stubGetAWSCredentials(_ *utils.AWSProfile, _ time.Duration) (credentials.Value, error) {
 	return stubAWSCredentials(), nil
 }
 
@@ -86,11 +86,24 @@ func TestExportHandler_SelectProfileIsInvokedWithProfileNamesFromConfigFileOnly(
 	}
 }
 
+func TestExportHandler_ReturnErrorIfDurationIsInvalid(t *testing.T) {
+	app := kingpin.New("some-app", "some description")
+	exportHandler := NewExportHandler(app, false, nil, nil)
+
+	app.Parse([]string{"export", "-d", "5"})
+	globalArguments := stubGlobalArgumentsForExport("set-config")
+
+	success, err := exportHandler.Handle(globalArguments)
+
+	assert.False(t, success)
+	assert.Contains(t, err, "missing unit in duration")
+}
+
 func TestExportHandler_ReturnErrorIfDurationIsLowerThanMinimumAllowed(t *testing.T) {
 	app := kingpin.New("some-app", "some description")
 	exportHandler := NewExportHandler(app, false, nil, nil)
 
-	app.Parse([]string{"export", "-d 5"})
+	app.Parse([]string{"export", "-d", "5m"})
 	globalArguments := stubGlobalArgumentsForExport("set-config")
 
 	success, err := exportHandler.Handle(globalArguments)
@@ -106,8 +119,8 @@ func TestExportHandler_CallGetAWSCredentialsWithDefaultValueWhenNoDurationGiven(
 
 	called := false
 
-	getAWSCredentialsMock := func(_ *utils.AWSProfile, durationInMinutes int) (credentials.Value, error) {
-		assert.Equal(t, 15, durationInMinutes)
+	getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
+		assert.Equal(t, float64(15), duration.Minutes())
 		called = true
 		return stubAWSCredentials(), nil
 	}
@@ -130,10 +143,10 @@ func TestExportHandler_CallGetAWSCredentialsWithValueGiven(t *testing.T) {
 	}
 
 	called := false
-	duration := 20
+	mockDurationValue := "20m"
 
-	getAWSCredentialsMock := func(_ *utils.AWSProfile, durationInMinutes int) (credentials.Value, error) {
-		assert.Equal(t, duration, durationInMinutes)
+	getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
+		assert.Equal(t, float64(20), duration.Minutes())
 		called = true
 		return stubAWSCredentials(), nil
 	}
@@ -141,7 +154,7 @@ func TestExportHandler_CallGetAWSCredentialsWithValueGiven(t *testing.T) {
 	app := kingpin.New("some-app", "some description")
 	exportHandler := NewExportHandler(app, false, selectProfileMock, getAWSCredentialsMock)
 
-	app.Parse([]string{"export", "-d", strconv.Itoa(duration)})
+	app.Parse([]string{"export", "-d", mockDurationValue})
 	globalArguments := stubGlobalArgumentsForExport("set-config")
 
 	exportHandler.Handle(globalArguments)
