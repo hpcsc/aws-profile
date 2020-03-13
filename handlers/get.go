@@ -4,22 +4,43 @@ import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
 	"strings"
 )
 
 type GetHandler struct {
 	SubCommand *kingpin.CmdClause
+	GetAWSCallerIdentityFn utils.GetAWSCallerIdentityFn
 }
 
-func NewGetHandler(app *kingpin.Application) GetHandler {
+func NewGetHandler(app *kingpin.Application, getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn) GetHandler {
 	subCommand := app.Command("get", "get current AWS profile (that is set to default profile)")
 
 	return GetHandler{
 		SubCommand: subCommand,
+		GetAWSCallerIdentityFn: getAWSCallerIdentityFn,
 	}
 }
 
+func awsCredentialsEnvironmentVariablesSet() bool {
+	var _, accessKeyIdExists = os.LookupEnv("AWS_ACCESS_KEY_ID")
+	var _, secretAccessKeyExists = os.LookupEnv("AWS_SECRET_ACCESS_KEY")
+	var _, sessionTokenExists = os.LookupEnv("AWS_SESSION_TOKEN")
+
+	return accessKeyIdExists && secretAccessKeyExists && sessionTokenExists
+}
+
 func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
+	if awsCredentialsEnvironmentVariablesSet() {
+		var callerIdentityProfile, getCallerIdentityErr = handler.GetAWSCallerIdentityFn()
+		if getCallerIdentityErr != nil {
+			// purposely ignore error from AWS STS
+			return true, "unknown"
+		}
+
+		return true, callerIdentityProfile
+	}
+
 	configFile, err := utils.ReadFile(*globalArguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)

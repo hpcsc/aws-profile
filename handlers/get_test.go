@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/hpcsc/aws-profile/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -18,9 +20,13 @@ func stubGlobalArgumentsForGet(credentialsName string, configName string) utils.
 	}
 }
 
+func stubGetAWSCallerIdentity() (string, error) {
+	return "caller-identity-profile", nil
+}
+
 func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
-	getHandler := NewGetHandler(app)
+	getHandler := NewGetHandler(app, stubGetAWSCallerIdentity)
 
 	app.Parse([]string{"get"})
 
@@ -75,4 +81,44 @@ func TestGetHandler_ReturnCredentialsProfileIfNotFoundInConfig(t *testing.T) {
 
 	assert.True(t, success)
 	assert.Contains(t, output, "two_credentials")
+}
+
+func TestGetHandler_ReturnCallerIdentityResultIfCredentialsEnvironmentVariablesAreSet(t *testing.T) {
+	getHandler := setupHandler()
+	os.Setenv("AWS_ACCESS_KEY_ID", "aws-access-key-id")
+	os.Setenv("AWS_SECRET_ACCESS_KEY", "aws-secret-access-key")
+	os.Setenv("AWS_SESSION_TOKEN", "aws-session-key")
+	globalArguments := stubGlobalArgumentsForGet("get_profile_not_in_config-credentials", "get_profile_not_in_config-config")
+
+	success, output := getHandler.Handle(globalArguments)
+
+	assert.True(t, success)
+	assert.Contains(t, output, "caller-identity-profile")
+
+	os.Unsetenv("AWS_ACCESS_KEY_ID")
+	os.Unsetenv("AWS_SECRET_ACCESS_KEY")
+	os.Unsetenv("AWS_SESSION_TOKEN")
+}
+
+func TestGetHandler_ReturnUnknownIfFailToGetCallerIdentityFromAWS(t *testing.T) {
+	app := kingpin.New("some-app", "some description")
+	getHandler := NewGetHandler(app, func() (string, error) {
+		return "", errors.New("some error from aws")
+	})
+	app.Parse([]string{"get"})
+
+
+	os.Setenv("AWS_ACCESS_KEY_ID", "aws-access-key-id")
+	os.Setenv("AWS_SECRET_ACCESS_KEY", "aws-secret-access-key")
+	os.Setenv("AWS_SESSION_TOKEN", "aws-session-key")
+	globalArguments := stubGlobalArgumentsForGet("get_profile_not_in_config-credentials", "get_profile_not_in_config-config")
+
+	success, output := getHandler.Handle(globalArguments)
+
+	assert.True(t, success)
+	assert.Contains(t, output, "unknown")
+
+	os.Unsetenv("AWS_ACCESS_KEY_ID")
+	os.Unsetenv("AWS_SECRET_ACCESS_KEY")
+	os.Unsetenv("AWS_SESSION_TOKEN")
 }

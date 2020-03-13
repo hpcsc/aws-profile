@@ -6,6 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
+	"strings"
 	"time"
 )
 
@@ -24,4 +26,24 @@ func GetAWSCredentials(profile *AWSProfile, duration time.Duration) (credentials
 	})
 
 	return credentials.Get()
+}
+
+func GetAWSCallerIdentity() (string, error) {
+	session := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	stsClient := sts.New(session)
+
+	output, error := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if error != nil {
+		return "", error
+	}
+
+	splittedArn := strings.Split(*output.Arn, "/")
+	if len(splittedArn) < 2 {
+		return *output.Arn, nil
+	}
+
+	return fmt.Sprintf("role %s (env)", splittedArn[1]), nil
 }
