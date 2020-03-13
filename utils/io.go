@@ -21,3 +21,18 @@ func WriteToFile(file *ini.File, unexpandedFilePath string) {
 
 	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
 }
+
+const cachedCallerIdentityFile = "~/.aws-profile-cached-caller-identity"
+
+func ReadCachedCallerIdentity() (string, error) {
+	callerIdentity, error := ioutil.ReadFile(ExpandHomeDirectory(cachedCallerIdentityFile))
+	if error != nil {
+		return "", error
+	}
+
+	return string(callerIdentity), nil
+}
+
+func WriteCachedCallerIdentity(callerIdentity string) error {
+	return ioutil.WriteFile(ExpandHomeDirectory(cachedCallerIdentityFile), []byte(callerIdentity), 0600)
+}

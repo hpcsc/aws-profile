@@ -24,9 +24,17 @@ func stubGetAWSCallerIdentity() (string, error) {
 	return "caller-identity-profile", nil
 }
 
+func stubReadCachedCallerIdentity() (string, error) {
+	return "", nil
+}
+
+func stubWriteCachedCallerIdentity(_ string) error {
+	return nil
+}
+
 func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
-	getHandler := NewGetHandler(app, stubGetAWSCallerIdentity)
+	getHandler := NewGetHandler(app, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 
 	app.Parse([]string{"get"})
 
@@ -104,7 +112,7 @@ func TestGetHandler_ReturnUnknownIfFailToGetCallerIdentityFromAWS(t *testing.T) 
 	app := kingpin.New("some-app", "some description")
 	getHandler := NewGetHandler(app, func() (string, error) {
 		return "", errors.New("some error from aws")
-	})
+	}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 	app.Parse([]string{"get"})
 
 

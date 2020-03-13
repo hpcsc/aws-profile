@@ -37,3 +37,5 @@ type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
 type GetAWSCredentialsFn func(*AWSProfile, time.Duration) (credentials.Value, error)
 type GetAWSCallerIdentityFn func() (string, error)
+type ReadCachedCallerIdentityFn func() (string, error)
+type WriteCachedCallerIdentityFn func(string) error

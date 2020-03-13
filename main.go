@@ -11,7 +11,12 @@ import (
 )
 
 func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
-	getHandler := handlers.NewGetHandler(app, utils.GetAWSCallerIdentity)
+	getHandler := handlers.NewGetHandler(
+		app,
+		utils.GetAWSCallerIdentity,
+		utils.ReadCachedCallerIdentity,
+		utils.WriteCachedCallerIdentity,
+		)
 	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,

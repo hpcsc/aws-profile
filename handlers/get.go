@@ -11,14 +11,21 @@ import (
 type GetHandler struct {
 	SubCommand *kingpin.CmdClause
 	GetAWSCallerIdentityFn utils.GetAWSCallerIdentityFn
+	ReadCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn
+	WriteCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn
 }
 
-func NewGetHandler(app *kingpin.Application, getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn) GetHandler {
+func NewGetHandler(app *kingpin.Application,
+				getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn,
+				readCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn,
+				writeCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn) GetHandler {
 	subCommand := app.Command("get", "get current AWS profile (that is set to default profile)")
 
 	return GetHandler{
 		SubCommand: subCommand,
 		GetAWSCallerIdentityFn: getAWSCallerIdentityFn,
+		ReadCachedCallerIdentityFn: readCachedCallerIdentityFn,
+		WriteCachedCallerIdentityFn: writeCachedCallerIdentityFn,
 	}
 }
 
@@ -32,13 +39,21 @@ func awsCredentialsEnvironmentVariablesSet() bool {
 
 func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
 	if awsCredentialsEnvironmentVariablesSet() {
+		cachedCallerIdentity, readCachedCallerIdentityErr  := handler.ReadCachedCallerIdentityFn()
+		if readCachedCallerIdentityErr == nil && cachedCallerIdentity != "" {
+			return true, cachedCallerIdentity
+		}
+
 		var callerIdentityProfile, getCallerIdentityErr = handler.GetAWSCallerIdentityFn()
 		if getCallerIdentityErr != nil {
 			// purposely ignore error from AWS STS
 			return true, "unknown"
 		}
 
+		handler.WriteCachedCallerIdentityFn(callerIdentityProfile)
 		return true, callerIdentityProfile
+	} else {
+		handler.WriteCachedCallerIdentityFn("")
 	}
 
 	configFile, err := utils.ReadFile(*globalArguments.ConfigFilePath)
