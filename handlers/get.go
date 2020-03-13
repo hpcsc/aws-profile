@@ -39,7 +39,7 @@ func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 				section.HasKey("source_profile") &&
 				strings.Compare(section.Key("role_arn").Value(), defaultRoleArn) == 0 &&
 				strings.Compare(section.Key("source_profile").Value(), defaultSourceProfile) == 0 {
-				return true, fmt.Sprintf("assuming %s\n", section.Name())
+				return true, section.Name()
 			}
 		}
 	}

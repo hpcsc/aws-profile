@@ -54,7 +54,7 @@ func TestGetHandler_ConfigProfileHasPriorityOverCredentialsProfile(t *testing.T)
 	success, output := getHandler.Handle(globalArguments)
 
 	assert.True(t, success)
-	assert.Contains(t, output, "assuming profile two")
+	assert.Contains(t, output, "profile two")
 }
 
 func TestGetHandler_ReturnEmptyIfProfileInNeitherConfigNorCredentials(t *testing.T) {
