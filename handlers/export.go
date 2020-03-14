@@ -56,7 +56,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 		return false, parseDurationErr.Error()
 	}
 
-	if duration < time.Duration(15) * time.Minute {
+	if duration < time.Duration(15)*time.Minute {
 		return false, "Minimum duration is 15 minutes"
 	}
 

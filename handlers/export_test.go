@@ -11,7 +11,7 @@ import (
 )
 
 func stubAWSCredentials() credentials.Value {
-	return credentials.Value {
+	return credentials.Value{
 		AccessKeyID:     "access-key-id",
 		SecretAccessKey: "secret-access-key",
 		SessionToken:    "session-token",
