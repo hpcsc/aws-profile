@@ -9,23 +9,28 @@ import (
 )
 
 type GetHandler struct {
-	SubCommand *kingpin.CmdClause
-	GetAWSCallerIdentityFn utils.GetAWSCallerIdentityFn
-	ReadCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn
+	SubCommand                  *kingpin.CmdClause
+	GetAWSCallerIdentityFn      utils.GetAWSCallerIdentityFn
+	ReadCachedCallerIdentityFn  utils.ReadCachedCallerIdentityFn
 	WriteCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn
+	Logger                      utils.Logger
 }
 
-func NewGetHandler(app *kingpin.Application,
-				getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn,
-				readCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn,
-				writeCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn) GetHandler {
-	subCommand := app.Command("get", "get current AWS profile (that is set to default profile)")
+func NewGetHandler(
+	app *kingpin.Application,
+	logger utils.Logger,
+	getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn,
+	readCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn,
+	writeCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn,
+) GetHandler {
+	subCommand := app.Command("get", "get current AWS profile")
 
 	return GetHandler{
-		SubCommand: subCommand,
-		GetAWSCallerIdentityFn: getAWSCallerIdentityFn,
-		ReadCachedCallerIdentityFn: readCachedCallerIdentityFn,
+		SubCommand:                  subCommand,
+		GetAWSCallerIdentityFn:      getAWSCallerIdentityFn,
+		ReadCachedCallerIdentityFn:  readCachedCallerIdentityFn,
 		WriteCachedCallerIdentityFn: writeCachedCallerIdentityFn,
+		Logger:                      logger,
 	}
 }
 
@@ -39,7 +44,7 @@ func awsCredentialsEnvironmentVariablesSet() bool {
 
 func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
 	if awsCredentialsEnvironmentVariablesSet() {
-		cachedCallerIdentity, readCachedCallerIdentityErr  := handler.ReadCachedCallerIdentityFn()
+		cachedCallerIdentity, readCachedCallerIdentityErr := handler.ReadCachedCallerIdentityFn()
 		if readCachedCallerIdentityErr == nil && cachedCallerIdentity != "" {
 			return true, cachedCallerIdentity
 		}
@@ -47,13 +52,20 @@ func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 		var callerIdentityProfile, getCallerIdentityErr = handler.GetAWSCallerIdentityFn()
 		if getCallerIdentityErr != nil {
 			// purposely ignore error from AWS STS
+			handler.Logger.Errorf("failed to get caller identity with error: %s", getCallerIdentityErr.Error())
 			return true, "unknown"
 		}
 
-		handler.WriteCachedCallerIdentityFn(callerIdentityProfile)
+		writeError := handler.WriteCachedCallerIdentityFn(callerIdentityProfile)
+		if writeError != nil {
+			handler.Logger.Errorf("failed to write caller identity [%s] to cached file", callerIdentityProfile)
+		}
 		return true, callerIdentityProfile
 	} else {
-		handler.WriteCachedCallerIdentityFn("")
+		writeError := handler.WriteCachedCallerIdentityFn("")
+		if writeError != nil {
+			handler.Logger.Errorf("failed to reset caller identity in cached file")
+		}
 	}
 
 	configFile, err := utils.ReadFile(*globalArguments.ConfigFilePath)

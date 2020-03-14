@@ -33,6 +33,14 @@ type Handler interface {
 	Handle(globalArguments GlobalArguments) (bool, string)
 }
 
+type Logger interface {
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
+	Fatalf(format string, args ...interface{})
+}
+
 type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
 type GetAWSCredentialsFn func(*AWSProfile, time.Duration) (credentials.Value, error)

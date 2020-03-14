@@ -9,6 +9,7 @@ require (
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
+	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
@@ -16,4 +17,5 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/ini.v1 v1.51.0
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

@@ -32,9 +32,27 @@ func stubWriteCachedCallerIdentity(_ string) error {
 	return nil
 }
 
+type NullLogger struct {
+}
+
+func (l *NullLogger) Debugf(format string, args ...interface{}) {
+}
+
+func (l *NullLogger) Infof(format string, args ...interface{}) {
+}
+
+func (l *NullLogger) Warnf(format string, args ...interface{}) {
+}
+
+func (l *NullLogger) Errorf(format string, args ...interface{}) {
+}
+
+func (l *NullLogger) Fatalf(format string, args ...interface{}) {
+}
+
 func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
-	getHandler := NewGetHandler(app, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
+	getHandler := NewGetHandler(app, &NullLogger{}, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 
 	app.Parse([]string{"get"})
 
@@ -110,11 +128,10 @@ func TestGetHandler_ReturnCallerIdentityResultIfCredentialsEnvironmentVariablesA
 
 func TestGetHandler_ReturnUnknownIfFailToGetCallerIdentityFromAWS(t *testing.T) {
 	app := kingpin.New("some-app", "some description")
-	getHandler := NewGetHandler(app, func() (string, error) {
+	getHandler := NewGetHandler(app, &NullLogger{}, func() (string, error) {
 		return "", errors.New("some error from aws")
 	}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 	app.Parse([]string{"get"})
-
 
 	os.Setenv("AWS_ACCESS_KEY_ID", "aws-access-key-id")
 	os.Setenv("AWS_SECRET_ACCESS_KEY", "aws-secret-access-key")

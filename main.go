@@ -10,13 +10,14 @@ import (
 	"strings"
 )
 
-func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
+func createHandlerMap(app *kingpin.Application, logger utils.Logger) map[string]utils.Handler {
 	getHandler := handlers.NewGetHandler(
 		app,
+		logger,
 		utils.GetAWSCallerIdentity,
 		utils.ReadCachedCallerIdentity,
 		utils.WriteCachedCallerIdentity,
-		)
+	)
 	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
@@ -35,11 +36,13 @@ func createHandlerMap(app *kingpin.Application) map[string]utils.Handler {
 }
 
 func main() {
+	logger := utils.NewLogrusLogger()
+
 	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')
 	credentialsPathFlag := app.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
 	configPathFlag := app.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
-	handlerMap := createHandlerMap(app)
+	handlerMap := createHandlerMap(app, logger)
 
 	if len(os.Args) < 2 {
 		app.Usage([]string{})

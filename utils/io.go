@@ -24,12 +24,12 @@ func WriteToFile(file *ini.File, unexpandedFilePath string) {
 }
 
 const awsProfileHome = "~/.aws-profile"
-const cachedCallerIdentityFileName =  "cached-caller-identity"
+const cachedCallerIdentityFileName = "cached-caller-identity"
 
-func createCachedCallerIdentityFileIfNotExists() (string, error ) {
+func createCachedCallerIdentityFileIfNotExists() (string, error) {
 	expandedHomeDir := ExpandHomeDirectory(awsProfileHome)
 
-	if _, createDirError := os.Stat(expandedHomeDir); os.IsNotExist(createDirError) {
+	if _, statError := os.Stat(expandedHomeDir); os.IsNotExist(statError) {
 		makeDirError := os.Mkdir(expandedHomeDir, os.FileMode(0755))
 		if makeDirError != nil {
 			return "", makeDirError
@@ -59,5 +59,5 @@ func WriteCachedCallerIdentity(callerIdentity string) error {
 		return createError
 	}
 
-	return ioutil.WriteFile(cachedCallerIdentityFile, []byte(callerIdentity), 0644)
+	return ioutil.WriteFile(cachedCallerIdentityFile, []byte(callerIdentity), os.FileMode(0644))
 }
