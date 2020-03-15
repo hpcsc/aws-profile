@@ -11,6 +11,8 @@ import (
 )
 
 func createHandlerMap(app *kingpin.Application, logger utils.Logger) map[string]utils.Handler {
+	isWindows := runtime.GOOS == "windows"
+
 	getHandler := handlers.NewGetHandler(
 		app,
 		logger,
@@ -21,16 +23,18 @@ func createHandlerMap(app *kingpin.Application, logger utils.Logger) map[string]
 	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
-		runtime.GOOS == "windows",
+		isWindows,
 		utils.SelectProfileFromList,
 		utils.GetAWSCredentials,
 	)
+	unsetHandler := handlers.NewUnsetHandler(app, isWindows)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]utils.Handler{
 		getHandler.SubCommand.FullCommand():     getHandler,
 		setHandler.SubCommand.FullCommand():     setHandler,
 		exportHandler.SubCommand.FullCommand():  exportHandler,
+		unsetHandler.SubCommand.FullCommand():   unsetHandler,
 		versionHandler.SubCommand.FullCommand(): versionHandler,
 	}
 }

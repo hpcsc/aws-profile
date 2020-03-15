@@ -26,9 +26,11 @@ type ExportCommandArguments struct {
 func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
 	subCommand := app.Command("export", `print commands to set environment variables for assuming a AWS role
 
-For Linux/MacOS, execute: "eval $(aws-profile export)"
+To execute the command without printing it to console:
 
-For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
+- For Linux/MacOS, execute: "eval $(aws-profile export)"
+
+- For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe export)"`)
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
 	duration := subCommand.Flag("duration", "AWS temporary session token duration. Example of valid duration: 5s, 15m").Short('d').Default("15m").String()
