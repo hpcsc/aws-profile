@@ -5,6 +5,7 @@ import (
 	"github.com/hpcsc/aws-profile/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -51,9 +52,14 @@ func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 
 		var callerIdentityProfile, getCallerIdentityErr = handler.GetAWSCallerIdentityFn()
 		if getCallerIdentityErr != nil {
-			// purposely ignore error from AWS STS
-			handler.Logger.Errorf("failed to get caller identity with error: %s", getCallerIdentityErr.Error())
-			return true, "unknown"
+			errorRegex := regexp.MustCompile(`(\(.*?\))`)
+			errorMatch := errorRegex.FindStringSubmatch(getCallerIdentityErr.Error())
+			if len(errorMatch) < 2 {
+				handler.Logger.Errorf("failed to get caller identity with error: %s", getCallerIdentityErr.Error())
+				return true, "unknown"
+			}
+
+			return true, errorMatch[1]
 		}
 
 		writeError := handler.WriteCachedCallerIdentityFn(callerIdentityProfile)
