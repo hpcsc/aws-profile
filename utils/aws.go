@@ -45,5 +45,6 @@ func GetAWSCallerIdentity() (string, error) {
 		return *output.Arn, nil
 	}
 
-	return fmt.Sprintf("role %s (env)", splittedArn[1]), nil
+	roleName := splittedArn[1]
+	return fmt.Sprintf("role %s@%s (env)", roleName, *output.Account), nil
 }
