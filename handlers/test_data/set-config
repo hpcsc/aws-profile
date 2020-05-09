@@ -9,3 +9,4 @@ source_profile = 1
 [profile config_profile_2]
 role_arn = 2
 source_profile = 2
+region = us-west-2

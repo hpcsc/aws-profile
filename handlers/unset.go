@@ -32,8 +32,8 @@ func (handler UnsetHandler) Handle(_ utils.GlobalArguments) (bool, string) {
 
 func formatUnsetCommandByPlatform(isWindows bool) string {
 	if isWindows {
-		return "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN"
+		return "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN, Env:\\AWS_REGION, Env:\\AWS_DEFAULT_REGION"
 	}
 
-	return "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN"
+	return "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION"
 }

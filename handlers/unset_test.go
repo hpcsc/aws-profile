@@ -16,26 +16,28 @@ func setupUnsetHandler(isWindows bool) UnsetHandler {
 	return unsetHandler
 }
 
-func TestUnsetHandler_OutputContainsUnsetInstructionForLinuxAndMacOS(t *testing.T) {
-	unsetHandler := setupUnsetHandler(false)
+func TestUnsetHandler(t *testing.T) {
+	t.Run("contains unset command for Linux and MacOS in output", func (t *testing.T) {
+		unsetHandler := setupUnsetHandler(false)
 
-	success, output := unsetHandler.Handle(utils.GlobalArguments{
-		CredentialsFilePath: nil,
-		ConfigFilePath:      nil,
+		success, output := unsetHandler.Handle(utils.GlobalArguments{
+			CredentialsFilePath: nil,
+			ConfigFilePath:      nil,
+		})
+
+		assert.True(t, success)
+		assert.Equal(t, output, "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION")
 	})
 
-	assert.True(t, success)
-	assert.Equal(t, output, "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN")
-}
+	t.Run("contains unset command for Windows in output", func (t *testing.T) {
+		unsetHandler := setupUnsetHandler(true)
 
-func TestUnsetHandler_OutputContainsUnsetInstructionForWindows(t *testing.T) {
-	unsetHandler := setupUnsetHandler(true)
+		success, output := unsetHandler.Handle(utils.GlobalArguments{
+			CredentialsFilePath: nil,
+			ConfigFilePath:      nil,
+		})
 
-	success, output := unsetHandler.Handle(utils.GlobalArguments{
-		CredentialsFilePath: nil,
-		ConfigFilePath:      nil,
+		assert.True(t, success)
+		assert.Equal(t, output, "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN, Env:\\AWS_REGION, Env:\\AWS_DEFAULT_REGION")
 	})
-
-	assert.True(t, success)
-	assert.Equal(t, output, "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN")
 }

@@ -7,6 +7,7 @@ type AWSProfile struct {
 	DisplayProfileName string
 	RoleArn            string
 	MFASerialNumber    string
+	Region             string
 }
 
 type AWSProfiles struct {

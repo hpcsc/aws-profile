@@ -43,6 +43,10 @@ func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile(
 				profile.MFASerialNumber = section.Key("mfa_serial").Value()
 			}
 
+			if section.HasKey("region") {
+				profile.Region = section.Key("region").Value()
+			}
+
 			profiles = append(profiles, profile)
 		}
 	}

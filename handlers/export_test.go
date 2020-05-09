@@ -40,160 +40,198 @@ func setupExportHandler(isWindows bool, selectProfileFn utils.SelectProfileFn, g
 	return exportHandler
 }
 
-func TestExportHandler_ReturnErrorIfConfigFileNotFound(t *testing.T) {
-	exportHandler := setupExportHandler(
-		false,
-		nil,
-		nil,
-	)
-	globalArguments := stubGlobalArgumentsForExport("config_not_exists")
-
-	success, output := exportHandler.Handle(globalArguments)
-
-	assert.False(t, success)
-	assert.Contains(t, output, "Fail to read AWS config file")
-}
-
-func TestExportHandler_SelectProfileIsInvokedWithProfileNamesFromConfigFileOnly(t *testing.T) {
-	called := false
-
-	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
-		assert.ElementsMatch(
-			t,
-			profiles.GetAllDisplayProfileNames(),
-			[]string{
-				"assume profile config_profile_1",
-				"assume profile config_profile_2",
-			},
+func TestExportHandler(t *testing.T) {
+	t.Run("return error if config file is not found", func(t *testing.T) {
+		exportHandler := setupExportHandler(
+			false,
+			nil,
+			nil,
 		)
+		globalArguments := stubGlobalArgumentsForExport("config_not_exists")
 
-		called = true
-		return []byte("profile config_profile_1"), nil
-	}
+		success, output := exportHandler.Handle(globalArguments)
 
-	exportHandler := setupExportHandler(
-		false,
-		selectProfileMock,
-		stubGetAWSCredentials,
-	)
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		assert.False(t, success)
+		assert.Contains(t, output, "Fail to read AWS config file")
+	})
 
-	success, _ := exportHandler.Handle(globalArguments)
+	t.Run("invoke SelectProfile with profile names from config file only", func(t *testing.T) {
+		called := false
 
-	assert.True(t, success)
-	if !called {
-		t.Errorf("selectProfileFn is not invoked")
-	}
-}
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			assert.ElementsMatch(
+				t,
+				profiles.GetAllDisplayProfileNames(),
+				[]string{
+					"assume profile config_profile_1",
+					"assume profile config_profile_2",
+				},
+			)
 
-func TestExportHandler_ReturnErrorIfDurationIsInvalid(t *testing.T) {
-	app := kingpin.New("some-app", "some description")
-	exportHandler := NewExportHandler(app, false, nil, nil)
+			called = true
+			return []byte("profile config_profile_1"), nil
+		}
 
-	app.Parse([]string{"export", "-d", "5"})
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		exportHandler := setupExportHandler(
+			false,
+			selectProfileMock,
+			stubGetAWSCredentials,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	success, err := exportHandler.Handle(globalArguments)
+		success, _ := exportHandler.Handle(globalArguments)
 
-	assert.False(t, success)
-	assert.Contains(t, err, "missing unit in duration")
-}
+		assert.True(t, success)
+		if !called {
+			t.Errorf("selectProfileFn is not invoked")
+		}
+	})
 
-func TestExportHandler_ReturnErrorIfDurationIsLowerThanMinimumAllowed(t *testing.T) {
-	app := kingpin.New("some-app", "some description")
-	exportHandler := NewExportHandler(app, false, nil, nil)
+	t.Run("return error if duration is invalid", func(t *testing.T) {
+		app := kingpin.New("some-app", "some description")
+		exportHandler := NewExportHandler(app, false, nil, nil)
 
-	app.Parse([]string{"export", "-d", "5m"})
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		app.Parse([]string{"export", "-d", "5"})
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	success, err := exportHandler.Handle(globalArguments)
+		success, err := exportHandler.Handle(globalArguments)
 
-	assert.False(t, success)
-	assert.Contains(t, err, "Minimum duration is 15 minutes")
-}
+		assert.False(t, success)
+		assert.Contains(t, err, "missing unit in duration")
+	})
 
-func TestExportHandler_CallGetAWSCredentialsWithDefaultValueWhenNoDurationGiven(t *testing.T) {
-	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
-		return []byte("profile config_profile_1"), nil
-	}
+	t.Run("return error if duration is lower than minimum duration allowed", func(t *testing.T) {
+		app := kingpin.New("some-app", "some description")
+		exportHandler := NewExportHandler(app, false, nil, nil)
 
-	called := false
+		app.Parse([]string{"export", "-d", "5m"})
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
-		assert.Equal(t, float64(15), duration.Minutes())
-		called = true
-		return stubAWSCredentials(), nil
-	}
+		success, err := exportHandler.Handle(globalArguments)
 
-	exportHandler := setupExportHandler(
-		false,
-		selectProfileMock,
-		getAWSCredentialsMock,
-	)
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		assert.False(t, success)
+		assert.Contains(t, err, "Minimum duration is 15 minutes")
+	})
 
-	exportHandler.Handle(globalArguments)
+	t.Run("call GetAWSCredentials with default value when no duration given", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_1"), nil
+		}
 
-	assert.True(t, called)
-}
+		called := false
 
-func TestExportHandler_CallGetAWSCredentialsWithValueGiven(t *testing.T) {
-	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
-		return []byte("profile config_profile_1"), nil
-	}
+		getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
+			assert.Equal(t, float64(15), duration.Minutes())
+			called = true
+			return stubAWSCredentials(), nil
+		}
 
-	called := false
-	mockDurationValue := "20m"
+		exportHandler := setupExportHandler(
+			false,
+			selectProfileMock,
+			getAWSCredentialsMock,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
-		assert.Equal(t, float64(20), duration.Minutes())
-		called = true
-		return stubAWSCredentials(), nil
-	}
+		exportHandler.Handle(globalArguments)
 
-	app := kingpin.New("some-app", "some description")
-	exportHandler := NewExportHandler(app, false, selectProfileMock, getAWSCredentialsMock)
+		assert.True(t, called)
+	})
 
-	app.Parse([]string{"export", "-d", mockDurationValue})
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+	t.Run("call GetAWSCredentials with given value", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_1"), nil
+		}
 
-	exportHandler.Handle(globalArguments)
+		called := false
+		mockDurationValue := "20m"
 
-	assert.True(t, called)
-}
+		getAWSCredentialsMock := func(_ *utils.AWSProfile, duration time.Duration) (credentials.Value, error) {
+			assert.Equal(t, float64(20), duration.Minutes())
+			called = true
+			return stubAWSCredentials(), nil
+		}
 
-func TestExportHandler_OutputContainsExportInstructionForLinuxAndMacOS(t *testing.T) {
-	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
-		return []byte("profile config_profile_1"), nil
-	}
+		app := kingpin.New("some-app", "some description")
+		exportHandler := NewExportHandler(app, false, selectProfileMock, getAWSCredentialsMock)
 
-	exportHandler := setupExportHandler(
-		false,
-		selectProfileMock,
-		stubGetAWSCredentials,
-	)
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		app.Parse([]string{"export", "-d", mockDurationValue})
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	success, output := exportHandler.Handle(globalArguments)
+		exportHandler.Handle(globalArguments)
 
-	assert.True(t, success)
-	assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
-}
+		assert.True(t, called)
+	})
 
-func TestExportHandler_OutputContainsExportInstructionForWindows(t *testing.T) {
-	selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
-		return []byte("profile config_profile_1"), nil
-	}
+	t.Run("contains export command for Linux and MacOS in output", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_1"), nil
+		}
 
-	exportHandler := setupExportHandler(
-		true,
-		selectProfileMock,
-		stubGetAWSCredentials,
-	)
-	globalArguments := stubGlobalArgumentsForExport("set-config")
+		exportHandler := setupExportHandler(
+			false,
+			selectProfileMock,
+			stubGetAWSCredentials,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
 
-	success, output := exportHandler.Handle(globalArguments)
+		success, output := exportHandler.Handle(globalArguments)
 
-	assert.True(t, success)
-	assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
+		assert.True(t, success)
+		assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
+	})
+
+	t.Run("contains export region for Linux and MacOS in output", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_2"), nil
+		}
+
+		exportHandler := setupExportHandler(
+			false,
+			selectProfileMock,
+			stubGetAWSCredentials,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
+
+		success, output := exportHandler.Handle(globalArguments)
+
+		assert.True(t, success)
+		assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token' AWS_REGION='us-west-2' AWS_DEFAULT_REGION='us-west-2'")
+	})
+
+	t.Run("contains export command for Windows in output", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_1"), nil
+		}
+
+		exportHandler := setupExportHandler(
+			true,
+			selectProfileMock,
+			stubGetAWSCredentials,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
+
+		success, output := exportHandler.Handle(globalArguments)
+
+		assert.True(t, success)
+		assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
+	})
+
+	t.Run("contains export region for Windows in output", func(t *testing.T) {
+		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_2"), nil
+		}
+
+		exportHandler := setupExportHandler(
+			true,
+			selectProfileMock,
+			stubGetAWSCredentials,
+		)
+		globalArguments := stubGlobalArgumentsForExport("set-config")
+
+		success, output := exportHandler.Handle(globalArguments)
+
+		assert.True(t, success)
+		assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'; $env:AWS_REGION = 'us-west-2'; $env:AWS_DEFAULT_REGION = 'us-west-2'")
+	})
 }

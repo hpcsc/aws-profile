@@ -83,20 +83,43 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 		return false, getCredentialsErr.Error()
 	}
 
-	output := formatOutputByPlatform(handler.IsWindows, credentialsValue)
-	return true, output
+	if handler.IsWindows {
+		return true, formatOutputForWindows(credentialsValue, profile)
+	} else {
+		return true, formatOutputForLinuxAndMacOS(credentialsValue, profile)
+	}
 }
 
-func formatOutputByPlatform(isWindows bool, credentialsValue credentials.Value) string {
-	if isWindows {
-		return fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
+func formatOutputForWindows(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
+		output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
 			credentialsValue.AccessKeyID,
 			credentialsValue.SecretAccessKey,
-			credentialsValue.SessionToken)
-	}
+			credentialsValue.SessionToken,
+		)
 
-	return fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
+		if profile.Region == "" {
+			return output
+		}
+
+		return fmt.Sprintf("%s; $env:AWS_REGION = '%s'; $env:AWS_DEFAULT_REGION = '%s'",
+			output,
+			profile.Region,
+			profile.Region)
+}
+
+func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
+	output := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,
-		credentialsValue.SessionToken)
+		credentialsValue.SessionToken,
+	)
+
+	if profile.Region == "" {
+		return output
+	}
+
+	return fmt.Sprintf("%s AWS_REGION='%s' AWS_DEFAULT_REGION='%s'",
+		output,
+		profile.Region,
+		profile.Region)
 }

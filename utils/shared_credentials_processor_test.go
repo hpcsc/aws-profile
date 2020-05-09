@@ -74,6 +74,26 @@ func TestGetAssumedProfilesFromConfigFile_ReturnRoleArnAndMFASerialWithProfilesI
 	assert.Equal(t, "12345", result[1].MFASerialNumber)
 }
 
+func TestGetAssumedProfilesFromConfigFile_ReturnRegionWithProfilesIfAvailable(t *testing.T) {
+	configFile := ini.Empty()
+	AddConfigSection(configFile, "default")
+	AddConfigSection(configFile, "profile-1")
+	profile2Section := AddConfigSection(configFile, "profile-2")
+	profile2Section.Key("region").SetValue("ap-southeast-2")
+
+	processor := AWSSharedCredentialsProcessor{
+		CredentialsFile: nil,
+		ConfigFile:      configFile,
+	}
+
+	result := processor.getAssumedProfilesFromConfigFile()
+
+	assert.Equal(t, 2, len(result))
+	assert.Equal(t, "profile-1-role-arn", result[0].RoleArn)
+	assert.Equal(t, "profile-2-role-arn", result[1].RoleArn)
+	assert.Equal(t, "ap-southeast-2", result[1].Region)
+}
+
 func TestFindRegionInConfigFile_ReturnEmptyIfNoProfileWithGivenNameFound(t *testing.T) {
 	configFile := ini.Empty()
 	AddConfigSection(configFile, "default")
