@@ -20,283 +20,308 @@ func AddConfigSection(file *ini.File, sectionName string) *ini.Section {
 	return section
 }
 
-func TestGetProfilesFromCredentialsFile_ReturnNonDefaultProfiles(t *testing.T) {
-	credentialsFile := ini.Empty()
-	AddCredentialsSection(credentialsFile, "default")
-	AddCredentialsSection(credentialsFile, "profile-1")
+func TestGetProfilesFromCredentialsFile(t *testing.T) {
+	t.Run("return non default profiles", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      nil,
-	}
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      nil,
+		}
 
-	result := processor.getProfilesFromCredentialsFile()
+		result := processor.getProfilesFromCredentialsFile()
 
-	assert.Equal(t, 1, len(result))
-	assert.Equal(t, "profile-1", result[0].ProfileName)
+		assert.Equal(t, 1, len(result))
+		assert.Equal(t, "profile-1", result[0].ProfileName)
+
+	})
 }
 
-func TestGetAssumedProfilesFromConfigFile_ReturnNonDefaultProfilesWithRoleArnAndSourceProfileAttributes(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	profile1Section, _ := configFile.NewSection("profile-1")
-	profile1Section.Key("some_attribute").SetValue("some-value")
-	AddConfigSection(configFile, "profile-2")
+func TestGetAssumedProfilesFromConfigFile(t *testing.T) {
+	t.Run("return non default profiles with role arn and source profile attributes", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		profile1Section, _ := configFile.NewSection("profile-1")
+		profile1Section.Key("some_attribute").SetValue("some-value")
+		AddConfigSection(configFile, "profile-2")
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
 
-	result := processor.getAssumedProfilesFromConfigFile()
+		result := processor.getAssumedProfilesFromConfigFile()
 
-	assert.Equal(t, 1, len(result))
-	assert.Equal(t, "profile-2", result[0].ProfileName)
+		assert.Equal(t, 1, len(result))
+		assert.Equal(t, "profile-2", result[0].ProfileName)
+
+	})
+
+	t.Run("return role arn and mfa serial with profiles if available", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("mfa_serial").SetValue("12345")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
+
+		result := processor.getAssumedProfilesFromConfigFile()
+
+		assert.Equal(t, 2, len(result))
+		assert.Equal(t, "profile-1-role-arn", result[0].RoleArn)
+		assert.Equal(t, "profile-2-role-arn", result[1].RoleArn)
+		assert.Equal(t, "12345", result[1].MFASerialNumber)
+
+	})
+
+	t.Run("return region with profiles if available", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("region").SetValue("ap-southeast-2")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
+
+		result := processor.getAssumedProfilesFromConfigFile()
+
+		assert.Equal(t, 2, len(result))
+		assert.Equal(t, "profile-1-role-arn", result[0].RoleArn)
+		assert.Equal(t, "profile-2-role-arn", result[1].RoleArn)
+		assert.Equal(t, "ap-southeast-2", result[1].Region)
+
+	})
+
 }
 
-func TestGetAssumedProfilesFromConfigFile_ReturnRoleArnAndMFASerialWithProfilesIfAvailable(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("mfa_serial").SetValue("12345")
+func TestFindRegionInConfigFile(t *testing.T) {
+	t.Run("return empty if profile not found", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("region").SetValue("ap-southeast-2")
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
 
-	result := processor.getAssumedProfilesFromConfigFile()
+		result := processor.findRegionInConfigFile("profile-3")
 
-	assert.Equal(t, 2, len(result))
-	assert.Equal(t, "profile-1-role-arn", result[0].RoleArn)
-	assert.Equal(t, "profile-2-role-arn", result[1].RoleArn)
-	assert.Equal(t, "12345", result[1].MFASerialNumber)
+		assert.Empty(t, result)
+
+	})
+
+	t.Run("return empty if selected profile has no region", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("region").SetValue("ap-southeast-2")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
+
+		result := processor.findRegionInConfigFile("profile-1")
+
+		assert.Empty(t, result)
+
+	})
+
+	t.Run("return region if selected profile has region", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("region").SetValue("ap-southeast-2")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: nil,
+			ConfigFile:      configFile,
+		}
+
+		result := processor.findRegionInConfigFile("profile-2")
+
+		assert.Equal(t, "ap-southeast-2", result)
+
+	})
+
 }
 
-func TestGetAssumedProfilesFromConfigFile_ReturnRegionWithProfilesIfAvailable(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("region").SetValue("ap-southeast-2")
+func TestSetSelectedProfileAsDefault(t *testing.T) {
+	t.Run("set default profile access key id and secret access key", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+		configFile := ini.Empty()
 
-	result := processor.getAssumedProfilesFromConfigFile()
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
 
-	assert.Equal(t, 2, len(result))
-	assert.Equal(t, "profile-1-role-arn", result[0].RoleArn)
-	assert.Equal(t, "profile-2-role-arn", result[1].RoleArn)
-	assert.Equal(t, "ap-southeast-2", result[1].Region)
+		processor.SetSelectedProfileAsDefault("profile-2")
+
+		defaultSection := processor.CredentialsFile.Section("default")
+		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+
+	})
+
+	t.Run("reset default profile in config file", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
+
+		defaultSection := processor.ConfigFile.Section("default")
+		assert.NotEmpty(t, defaultSection.Key("role_arn").Value())
+		assert.NotEmpty(t, defaultSection.Key("source_profile").Value())
+
+		processor.SetSelectedProfileAsDefault("profile-2")
+
+		defaultSection = processor.ConfigFile.Section("default")
+		assert.Empty(t, defaultSection.Key("role_arn").Value())
+		assert.Empty(t, defaultSection.Key("source_profile").Value())
+
+	})
+
+	t.Run("set default profile region in config file if available", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		profile1Section := AddConfigSection(configFile, "profile profile-1")
+		profile1Section.Key("region").SetValue("us-east-2")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
+
+		defaultSection := processor.ConfigFile.Section("default")
+		assert.Empty(t, defaultSection.Key("region").Value())
+
+		processor.SetSelectedProfileAsDefault("profile-1")
+
+		defaultSection = processor.ConfigFile.Section("default")
+		assert.Equal(t, "us-east-2", defaultSection.Key("region").Value())
+	})
+
+	t.Run("clear default region if selected profile has no region", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+		defaultSection := AddConfigSection(configFile, "default")
+		defaultSection.Key("region").SetValue("ap-southeast-2")
+		AddConfigSection(configFile, "profile-3")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
+
+		assert.Equal(t, "ap-southeast-2", processor.ConfigFile.Section("default").Key("region").Value())
+
+		processor.SetSelectedProfileAsDefault("profile-1")
+
+		assert.Empty(t, processor.ConfigFile.Section("default").Key("region").Value())
+
+	})
 }
 
-func TestFindRegionInConfigFile_ReturnEmptyIfNoProfileWithGivenNameFound(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("region").SetValue("ap-southeast-2")
+func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
+	t.Run("set role arn and source profile for default profile in config file", func(t *testing.T) {
+		credentialsFile := ini.Empty()
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		AddConfigSection(configFile, "profile-2")
 
-	result := processor.findRegionInConfigFile("profile-3")
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
 
-	assert.Empty(t, result)
-}
+		processor.SetSelectedAssumedProfileAsDefault("profile-2")
 
-func TestFindRegionInConfigFile_ReturnEmptyIfSelectedProfileHasNoRegion(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("region").SetValue("ap-southeast-2")
+		defaultSection := processor.ConfigFile.Section("default")
+		assert.Equal(t, "profile-2-role-arn", defaultSection.Key("role_arn").Value())
+		assert.Equal(t, "profile-2-source-profile", defaultSection.Key("source_profile").Value())
+		assert.Empty(t, defaultSection.Key("region").Value())
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+	})
 
-	result := processor.findRegionInConfigFile("profile-1")
+	t.Run("set region for default profile in config file", func(t *testing.T) {
+		credentialsFile := ini.Empty()
 
-	assert.Empty(t, result)
-}
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("region").SetValue("us-west-2")
 
-func TestFindRegionInConfigFile_ReturnRegionIfSelectedProfileFoundAndHasRegion(t *testing.T) {
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("region").SetValue("ap-southeast-2")
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: nil,
-		ConfigFile:      configFile,
-	}
+		processor.SetSelectedAssumedProfileAsDefault("profile-2")
 
-	result := processor.findRegionInConfigFile("profile-2")
+		defaultSection := processor.ConfigFile.Section("default")
+		assert.Equal(t, "us-west-2", defaultSection.Key("region").Value())
 
-	assert.Equal(t, "ap-southeast-2", result)
-}
+	})
 
-func TestSetSelectedProfileAsDefault_SetDefaultProfileAccessKeyIdAndSecretAccessKey(t *testing.T) {
-	credentialsFile := ini.Empty()
-	AddCredentialsSection(credentialsFile, "default")
-	AddCredentialsSection(credentialsFile, "profile-1")
-	AddCredentialsSection(credentialsFile, "profile-2")
+	t.Run("clear default region if selected assumed profile has no region", func(t *testing.T) {
+		credentialsFile := ini.Empty()
 
-	configFile := ini.Empty()
+		configFile := ini.Empty()
+		defaultSection := AddConfigSection(configFile, "default")
+		defaultSection.Key("region").SetValue("ap-southeast-2")
+		AddConfigSection(configFile, "profile-1")
+		AddConfigSection(configFile, "profile-2")
 
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
 
-	processor.SetSelectedProfileAsDefault("profile-2")
+		assert.Equal(t, "ap-southeast-2", processor.ConfigFile.Section("default").Key("region").Value())
 
-	defaultSection := processor.CredentialsFile.Section("default")
-	assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
-	assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
-}
+		processor.SetSelectedAssumedProfileAsDefault("profile-1")
 
-func TestSetSelectedProfileAsDefault_ResetConfigFileDefaultProfile(t *testing.T) {
-	credentialsFile := ini.Empty()
-	AddCredentialsSection(credentialsFile, "default")
-	AddCredentialsSection(credentialsFile, "profile-1")
-	AddCredentialsSection(credentialsFile, "profile-2")
+		assert.Empty(t, processor.ConfigFile.Section("default").Key("region").Value())
 
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	defaultSection := processor.ConfigFile.Section("default")
-	assert.NotEmpty(t, defaultSection.Key("role_arn").Value())
-	assert.NotEmpty(t, defaultSection.Key("source_profile").Value())
-
-	processor.SetSelectedProfileAsDefault("profile-2")
-
-	defaultSection = processor.ConfigFile.Section("default")
-	assert.Empty(t, defaultSection.Key("role_arn").Value())
-	assert.Empty(t, defaultSection.Key("source_profile").Value())
-}
-
-func TestSetSelectedProfileAsDefault_SetDefaultProfileRegionInConfigFileIfAvailable(t *testing.T) {
-	credentialsFile := ini.Empty()
-	AddCredentialsSection(credentialsFile, "default")
-	AddCredentialsSection(credentialsFile, "profile-1")
-	AddCredentialsSection(credentialsFile, "profile-2")
-
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	profile1Section := AddConfigSection(configFile, "profile profile-1")
-	profile1Section.Key("region").SetValue("us-east-2")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	defaultSection := processor.ConfigFile.Section("default")
-	assert.Empty(t, defaultSection.Key("region").Value())
-
-	processor.SetSelectedProfileAsDefault("profile-1")
-
-	defaultSection = processor.ConfigFile.Section("default")
-	assert.Equal(t, "us-east-2", defaultSection.Key("region").Value())
-}
-
-func TestSetSelectedProfileAsDefault_ClearDefaultRegionIfSelectedProfileHasNoRegion(t *testing.T) {
-	credentialsFile := ini.Empty()
-	AddCredentialsSection(credentialsFile, "default")
-	AddCredentialsSection(credentialsFile, "profile-1")
-	AddCredentialsSection(credentialsFile, "profile-2")
-
-	configFile := ini.Empty()
-	defaultSection := AddConfigSection(configFile, "default")
-	defaultSection.Key("region").SetValue("ap-southeast-2")
-	AddConfigSection(configFile, "profile-3")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	assert.Equal(t, "ap-southeast-2", processor.ConfigFile.Section("default").Key("region").Value())
-
-	processor.SetSelectedProfileAsDefault("profile-1")
-
-	assert.Empty(t, processor.ConfigFile.Section("default").Key("region").Value())
-}
-
-func TestSetSelectedAssumedProfileAsDefault_SetConfigFileDefaultProfileRoleArnAndSourceProfile(t *testing.T) {
-	credentialsFile := ini.Empty()
-
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	AddConfigSection(configFile, "profile-2")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	processor.SetSelectedAssumedProfileAsDefault("profile-2")
-
-	defaultSection := processor.ConfigFile.Section("default")
-	assert.Equal(t, "profile-2-role-arn", defaultSection.Key("role_arn").Value())
-	assert.Equal(t, "profile-2-source-profile", defaultSection.Key("source_profile").Value())
-	assert.Empty(t, defaultSection.Key("region").Value())
-}
-
-func TestSetSelectedAssumedProfileAsDefault_SetConfigFileDefaultProfileRegionIfOneIsAvailable(t *testing.T) {
-	credentialsFile := ini.Empty()
-
-	configFile := ini.Empty()
-	AddConfigSection(configFile, "default")
-	AddConfigSection(configFile, "profile-1")
-	profile2Section := AddConfigSection(configFile, "profile-2")
-	profile2Section.Key("region").SetValue("us-west-2")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	processor.SetSelectedAssumedProfileAsDefault("profile-2")
-
-	defaultSection := processor.ConfigFile.Section("default")
-	assert.Equal(t, "us-west-2", defaultSection.Key("region").Value())
-}
-
-func TestSetSelectedAssumedProfileAsDefault_ClearDefaultRegionIfSelectedAssumedProfileHasNoRegion(t *testing.T) {
-	credentialsFile := ini.Empty()
-
-	configFile := ini.Empty()
-	defaultSection := AddConfigSection(configFile, "default")
-	defaultSection.Key("region").SetValue("ap-southeast-2")
-	AddConfigSection(configFile, "profile-1")
-	AddConfigSection(configFile, "profile-2")
-
-	processor := AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
-	assert.Equal(t, "ap-southeast-2", processor.ConfigFile.Section("default").Key("region").Value())
-
-	processor.SetSelectedAssumedProfileAsDefault("profile-1")
-
-	assert.Empty(t, processor.ConfigFile.Section("default").Key("region").Value())
+	})
 }
