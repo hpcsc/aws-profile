@@ -91,10 +91,10 @@ aws_secret_access_key = yyy
 
 [profile role-with-mfa]
 role_arn       = arn:aws:iam::xxxxxxxxxxxx:role/role-with-mfa-enabled
-source_profile = hpcsc
+source_profile = some-profile
 mfa_serial     = arn:aws:iam::xxxxxxxxxxxx:mfa/my-mfa-device
 
 [profile role-without-mfa]
 role_arn       = arn:aws:iam::xxxxxxxxxxxx:role/role-without-mfa
-source_profile = hpcsc
+source_profile = some-profile
 ```
