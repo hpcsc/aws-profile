@@ -324,4 +324,47 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		assert.Empty(t, processor.ConfigFile.Section("default").Key("region").Value())
 
 	})
+
+	t.Run("set mfa_serial for default profile in config file", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		AddConfigSection(configFile, "profile-1")
+		profile2Section := AddConfigSection(configFile, "profile-2")
+		profile2Section.Key("mfa_serial").SetValue("profile-2-mfa-serial")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
+
+		processor.SetSelectedAssumedProfileAsDefault("profile-2")
+
+		defaultSection := processor.ConfigFile.Section("default")
+		assert.Equal(t, "profile-2-mfa-serial", defaultSection.Key("mfa_serial").Value())
+
+	})
+
+	t.Run("clear default mfa_serial if selected assumed profile has no mfa_serial", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+
+		configFile := ini.Empty()
+		defaultSection := AddConfigSection(configFile, "default")
+		defaultSection.Key("mfa_serial").SetValue("initial-mfa-serial")
+		AddConfigSection(configFile, "profile-1")
+		AddConfigSection(configFile, "profile-2")
+
+		processor := AWSSharedCredentialsProcessor{
+			CredentialsFile: credentialsFile,
+			ConfigFile:      configFile,
+		}
+
+		assert.Equal(t, "initial-mfa-serial", processor.ConfigFile.Section("default").Key("mfa_serial").Value())
+
+		processor.SetSelectedAssumedProfileAsDefault("profile-1")
+
+		assert.Empty(t, processor.ConfigFile.Section("default").Key("mfa_serial").Value())
+
+	})
 }

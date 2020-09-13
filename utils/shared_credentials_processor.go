@@ -111,4 +111,10 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefaul
 	} else {
 		defaultProfile.DeleteKey("region")
 	}
+
+	if selectedProfile.HasKey("mfa_serial") {
+		defaultProfile.Key("mfa_serial").SetValue(selectedProfile.Key("mfa_serial").Value())
+	} else {
+		defaultProfile.DeleteKey("mfa_serial")
+	}
 }
