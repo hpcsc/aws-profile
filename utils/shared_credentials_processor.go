@@ -37,6 +37,7 @@ func (processor AWSSharedCredentialsProcessor) getAssumedProfilesFromConfigFile(
 				ProfileName:        section.Name(),
 				DisplayProfileName: fmt.Sprintf("assume %s", section.Name()),
 				RoleArn:            section.Key("role_arn").Value(),
+				SourceProfile:      section.Key("source_profile").Value(),
 			}
 
 			if section.HasKey("mfa_serial") {

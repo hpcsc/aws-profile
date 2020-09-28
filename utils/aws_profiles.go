@@ -8,6 +8,7 @@ type AWSProfile struct {
 	RoleArn            string
 	MFASerialNumber    string
 	Region             string
+	SourceProfile      string
 }
 
 type AWSProfiles struct {

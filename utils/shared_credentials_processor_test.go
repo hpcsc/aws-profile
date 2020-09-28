@@ -56,7 +56,8 @@ func TestGetAssumedProfilesFromConfigFile(t *testing.T) {
 
 		assert.Equal(t, 1, len(result))
 		assert.Equal(t, "profile-2", result[0].ProfileName)
-
+		assert.Equal(t, "profile-2-role-arn", result[0].RoleArn)
+		assert.Equal(t, "profile-2-source-profile", result[0].SourceProfile)
 	})
 
 	t.Run("return role arn and mfa serial with profiles if available", func(t *testing.T) {
