@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/aws"
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"path/filepath"
@@ -32,7 +31,7 @@ func stubGlobalArgumentsForExport(configName string) GlobalArguments {
 	}
 }
 
-func setupExportHandler(isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
+func setupExportHandler(isWindows bool, selectProfileFn SelectProfileFn, getAWSCredentialsFn GetAWSCredentialsFn) ExportHandler {
 	app := kingpin.New("some-app", "some description")
 	exportHandler := NewExportHandler(app, isWindows, selectProfileFn, getAWSCredentialsFn)
 

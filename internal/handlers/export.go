@@ -11,11 +11,13 @@ import (
 	"time"
 )
 
+type GetAWSCredentialsFn func(*aws.AWSProfile, time.Duration) (credentials.Value, error)
+
 type ExportHandler struct {
 	SubCommand        *kingpin.CmdClause
 	IsWindows         bool
-	SelectProfile     utils.SelectProfileFn
-	GetAWSCredentials utils.GetAWSCredentialsFn
+	SelectProfile     SelectProfileFn
+	GetAWSCredentials GetAWSCredentialsFn
 	Arguments         ExportCommandArguments
 }
 
@@ -24,7 +26,7 @@ type ExportCommandArguments struct {
 	Duration *string
 }
 
-func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn utils.SelectProfileFn, getAWSCredentialsFn utils.GetAWSCredentialsFn) ExportHandler {
+func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn SelectProfileFn, getAWSCredentialsFn GetAWSCredentialsFn) ExportHandler {
 	subCommand := app.Command("export", `print commands to set environment variables for assuming a AWS role
 
 To execute the command without printing it to console:

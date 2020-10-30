@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/hpcsc/aws-profile/internal/aws"
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -25,7 +24,7 @@ func stubGlobalArgumentsForSet(credentialsName string, configName string) Global
 	}
 }
 
-func setupSetHandler(selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
+func setupSetHandler(selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
 	app := kingpin.New("some-app", "some description")
 	setHandler := NewSetHandler(app, selectProfileFn, writeToFileFn)
 

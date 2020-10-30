@@ -10,20 +10,24 @@ import (
 	"strings"
 )
 
+type ReadCachedCallerIdentityFn func() (string, error)
+type WriteCachedCallerIdentityFn func(string) error
+type GetAWSCallerIdentityFn func() (string, error)
+
 type GetHandler struct {
 	SubCommand                  *kingpin.CmdClause
-	GetAWSCallerIdentityFn      utils.GetAWSCallerIdentityFn
-	ReadCachedCallerIdentityFn  utils.ReadCachedCallerIdentityFn
-	WriteCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn
+	GetAWSCallerIdentityFn      GetAWSCallerIdentityFn
+	ReadCachedCallerIdentityFn  ReadCachedCallerIdentityFn
+	WriteCachedCallerIdentityFn WriteCachedCallerIdentityFn
 	Logger                      log.Logger
 }
 
 func NewGetHandler(
 	app *kingpin.Application,
 	logger log.Logger,
-	getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn,
-	readCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn,
-	writeCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn,
+	getAWSCallerIdentityFn GetAWSCallerIdentityFn,
+	readCachedCallerIdentityFn ReadCachedCallerIdentityFn,
+	writeCachedCallerIdentityFn WriteCachedCallerIdentityFn,
 ) GetHandler {
 	subCommand := app.Command("get", "get current AWS profile")
 

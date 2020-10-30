@@ -5,21 +5,24 @@ import (
 	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/ini.v1"
 	"strings"
 )
+
+type WriteToFileFn func(*ini.File, string)
 
 type SetHandler struct {
 	SubCommand    *kingpin.CmdClause
 	Arguments     SetCommandArguments
-	SelectProfile utils.SelectProfileFn
-	WriteToFile   utils.WriteToFileFn
+	SelectProfile SelectProfileFn
+	WriteToFile   WriteToFileFn
 }
 
 type SetCommandArguments struct {
 	Pattern *string
 }
 
-func NewSetHandler(app *kingpin.Application, selectProfileFn utils.SelectProfileFn, writeToFileFn utils.WriteToFileFn) SetHandler {
+func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
 	subCommand := app.Command("set", "set default profile with credentials of selected profile")
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
