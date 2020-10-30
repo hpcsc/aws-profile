@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/handlers"
 	"github.com/hpcsc/aws-profile/internal/log"
+	"github.com/hpcsc/aws-profile/internal/tui"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -21,11 +22,11 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ut
 		utils.ReadCachedCallerIdentity,
 		utils.WriteCachedCallerIdentity,
 	)
-	setHandler := handlers.NewSetHandler(app, utils.SelectProfileFromList, utils.WriteToFile)
+	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, utils.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
 		isWindows,
-		utils.SelectProfileFromList,
+		tui.SelectProfileFromList,
 		utils.GetAWSCredentials,
 	)
 	unsetHandler := handlers.NewUnsetHandler(app, isWindows)
