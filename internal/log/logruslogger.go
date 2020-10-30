@@ -1,6 +1,7 @@
-package utils
+package log
 
 import (
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -12,7 +13,7 @@ type LogrusLogger struct {
 func NewLogrusLogger() Logger {
 	lLogger := &logrus.Logger{
 		Out: &lumberjack.Logger{
-			Filename: ExpandHomeDirectory("~/.aws-profile/log"),
+			Filename: utils.ExpandHomeDirectory("~/.aws-profile/log"),
 			MaxSize:  10,
 		},
 		Formatter: &logrus.TextFormatter{

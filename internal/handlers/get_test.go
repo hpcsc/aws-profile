@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -32,27 +33,9 @@ func stubWriteCachedCallerIdentity(_ string) error {
 	return nil
 }
 
-type NullLogger struct {
-}
-
-func (l *NullLogger) Debugf(format string, args ...interface{}) {
-}
-
-func (l *NullLogger) Infof(format string, args ...interface{}) {
-}
-
-func (l *NullLogger) Warnf(format string, args ...interface{}) {
-}
-
-func (l *NullLogger) Errorf(format string, args ...interface{}) {
-}
-
-func (l *NullLogger) Fatalf(format string, args ...interface{}) {
-}
-
 func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
-	getHandler := NewGetHandler(app, &NullLogger{}, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
+	getHandler := NewGetHandler(app, &log.NullLogger{}, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 
 	app.Parse([]string{"get"})
 
@@ -151,7 +134,7 @@ func TestGetHandler(t *testing.T) {
 		for _, tt := range testInputs {
 			t.Run(tt.expectedOutput, func(t *testing.T) {
 				app := kingpin.New("some-app", "some description")
-				getHandler := NewGetHandler(app, &NullLogger{}, func() (string, error) {
+				getHandler := NewGetHandler(app, &log.NullLogger{}, func() (string, error) {
 					return "", errors.New(tt.awsError)
 				}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 				app.Parse([]string{"get"})
@@ -175,7 +158,7 @@ func TestGetHandler(t *testing.T) {
 
 	t.Run("return unknown if failing to parse error code from AWS response", func(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
-		getHandler := NewGetHandler(app, &NullLogger{}, func() (string, error) {
+		getHandler := NewGetHandler(app, &log.NullLogger{}, func() (string, error) {
 			return "", errors.New("some error from aws")
 		}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 		app.Parse([]string{"get"})

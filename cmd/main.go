@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/handlers"
+	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func createHandlerMap(app *kingpin.Application, logger utils.Logger) map[string]utils.Handler {
+func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]utils.Handler {
 	isWindows := runtime.GOOS == "windows"
 
 	getHandler := handlers.NewGetHandler(
@@ -40,7 +41,7 @@ func createHandlerMap(app *kingpin.Application, logger utils.Logger) map[string]
 }
 
 func main() {
-	logger := utils.NewLogrusLogger()
+	logger := log.NewLogrusLogger()
 
 	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')

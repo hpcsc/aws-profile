@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -14,12 +15,12 @@ type GetHandler struct {
 	GetAWSCallerIdentityFn      utils.GetAWSCallerIdentityFn
 	ReadCachedCallerIdentityFn  utils.ReadCachedCallerIdentityFn
 	WriteCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn
-	Logger                      utils.Logger
+	Logger                      log.Logger
 }
 
 func NewGetHandler(
 	app *kingpin.Application,
-	logger utils.Logger,
+	logger log.Logger,
 	getAWSCallerIdentityFn utils.GetAWSCallerIdentityFn,
 	readCachedCallerIdentityFn utils.ReadCachedCallerIdentityFn,
 	writeCachedCallerIdentityFn utils.WriteCachedCallerIdentityFn,
