@@ -27,7 +27,7 @@ jobs:
 
     - name: Build
       run: |
-        go build -i -ldflags="-X github.com/hpcsc/aws-profile/handlers.version=${{github.sha}}" -o bin/aws-profile-${{runner.os}}-${{github.sha}} github.com/hpcsc/aws-profile
+        go build -i -ldflags="-X github.com/hpcsc/aws-profile/handlers.version=${{github.sha}}" -o bin/aws-profile-${{runner.os}}-${{github.sha}} ./cmd
 
     - name: Test
       run: |
