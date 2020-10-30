@@ -62,3 +62,8 @@ func WriteCachedCallerIdentity(callerIdentity string) error {
 
 	return ioutil.WriteFile(cachedCallerIdentityFile, []byte(callerIdentity), os.FileMode(0644))
 }
+
+func ReadFile(filePath string) (*ini.File, error) {
+	path := utils.ExpandHomeDirectory(filePath)
+	return ini.Load(path)
+}

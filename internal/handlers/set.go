@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/aws"
-	"github.com/hpcsc/aws-profile/internal/utils"
+	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"strings"
@@ -38,12 +38,12 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, wr
 }
 
 func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string) {
-	credentialsFile, err := utils.ReadFile(*globalArguments.CredentialsFilePath)
+	credentialsFile, err := io.ReadFile(*globalArguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
 
-	configFile, err := utils.ReadFile(*globalArguments.ConfigFilePath)
+	configFile, err := io.ReadFile(*globalArguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}

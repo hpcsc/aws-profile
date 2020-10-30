@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/aws"
-	"github.com/hpcsc/aws-profile/internal/utils"
+	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"strings"
@@ -51,7 +51,7 @@ To execute the command without printing it to console:
 }
 
 func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, string) {
-	configFile, readConfigErr := utils.ReadFile(*globalArguments.ConfigFilePath)
+	configFile, readConfigErr := io.ReadFile(*globalArguments.ConfigFilePath)
 	if readConfigErr != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)
 	}
