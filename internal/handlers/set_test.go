@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -59,7 +60,7 @@ func TestSetHandler(t *testing.T) {
 	t.Run("invoke selectProfile with profile names from both credentials and config files", func(t *testing.T) {
 		called := false
 
-		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles aws.AWSProfiles, pattern string) ([]byte, error) {
 			assert.ElementsMatch(
 				t,
 				profiles.GetAllDisplayProfileNames(),
@@ -88,7 +89,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error if selected profile not found in both config and credentials file", func(t *testing.T) {
-		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles aws.AWSProfiles, pattern string) ([]byte, error) {
 			return []byte("a_random_profile"), nil
 		}
 
@@ -103,7 +104,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("set default profile in credentials file", func(t *testing.T) {
-		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles aws.AWSProfiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil
 		}
 
@@ -131,7 +132,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("set default profile in config file", func(t *testing.T) {
-		selectProfileMock := func(profiles utils.AWSProfiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles aws.AWSProfiles, pattern string) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
 

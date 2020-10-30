@@ -1,4 +1,4 @@
-package utils
+package aws
 
 import "strings"
 

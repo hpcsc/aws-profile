@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/handlers"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/log"
@@ -19,7 +20,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ut
 	getHandler := handlers.NewGetHandler(
 		app,
 		logger,
-		utils.GetAWSCallerIdentity,
+		aws.GetAWSCallerIdentity,
 		io.ReadCachedCallerIdentity,
 		io.WriteCachedCallerIdentity,
 	)
@@ -28,7 +29,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ut
 		app,
 		isWindows,
 		tui.SelectProfileFromList,
-		utils.GetAWSCredentials,
+		aws.GetAWSCredentials,
 	)
 	unsetHandler := handlers.NewUnsetHandler(app, isWindows)
 	versionHandler := handlers.NewVersionHandler(app)

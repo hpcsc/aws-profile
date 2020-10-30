@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"strings"
@@ -44,7 +45,7 @@ func (handler SetHandler) Handle(globalArguments utils.GlobalArguments) (bool, s
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	processor := utils.AWSSharedCredentialsProcessor{
+	processor := aws.AWSSharedCredentialsProcessor{
 		CredentialsFile: credentialsFile,
 		ConfigFile:      configFile,
 	}

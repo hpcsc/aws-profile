@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/hpcsc/aws-profile/internal/aws"
 	"gopkg.in/ini.v1"
 	"os/user"
 	"path/filepath"
@@ -33,9 +34,9 @@ type Handler interface {
 	Handle(globalArguments GlobalArguments) (bool, string)
 }
 
-type SelectProfileFn func(AWSProfiles, string) ([]byte, error)
+type SelectProfileFn func(aws.AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
-type GetAWSCredentialsFn func(*AWSProfile, time.Duration) (credentials.Value, error)
+type GetAWSCredentialsFn func(*aws.AWSProfile, time.Duration) (credentials.Value, error)
 type GetAWSCallerIdentityFn func() (string, error)
 type ReadCachedCallerIdentityFn func() (string, error)
 type WriteCachedCallerIdentityFn func(string) error

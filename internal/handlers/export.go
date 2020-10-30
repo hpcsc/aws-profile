@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -62,7 +63,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 		return false, "Minimum duration is 15 minutes"
 	}
 
-	processor := utils.AWSSharedCredentialsProcessor{
+	processor := aws.AWSSharedCredentialsProcessor{
 		CredentialsFile: ini.Empty(),
 		ConfigFile:      configFile,
 	}
@@ -90,7 +91,7 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 	}
 }
 
-func formatOutputForWindows(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
+func formatOutputForWindows(credentialsValue credentials.Value, profile *aws.AWSProfile) string {
 	output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,
@@ -107,7 +108,7 @@ func formatOutputForWindows(credentialsValue credentials.Value, profile *utils.A
 		profile.Region)
 }
 
-func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
+func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *aws.AWSProfile) string {
 	output := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,
