@@ -6,8 +6,8 @@ import (
 )
 
 type UnsetHandler struct {
-	SubCommand        *kingpin.CmdClause
-	IsWindows         bool
+	SubCommand *kingpin.CmdClause
+	IsWindows  bool
 }
 
 func NewUnsetHandler(app *kingpin.Application, isWindows bool) UnsetHandler {
@@ -20,8 +20,8 @@ To execute the command without printing it to console:
 - For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe unset)"`)
 
 	return UnsetHandler{
-		SubCommand:        subCommand,
-		IsWindows:         isWindows,
+		SubCommand: subCommand,
+		IsWindows:  isWindows,
 	}
 }
 

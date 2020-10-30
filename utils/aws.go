@@ -14,7 +14,7 @@ import (
 func GetAWSCredentials(profile *AWSProfile, duration time.Duration) (credentials.Value, error) {
 	session := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
-		Profile: profile.SourceProfile,
+		Profile:           profile.SourceProfile,
 	}))
 
 	credentials := stscreds.NewCredentials(session, profile.RoleArn, func(p *stscreds.AssumeRoleProvider) {

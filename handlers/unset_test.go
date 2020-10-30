@@ -17,7 +17,7 @@ func setupUnsetHandler(isWindows bool) UnsetHandler {
 }
 
 func TestUnsetHandler(t *testing.T) {
-	t.Run("contains unset command for Linux and MacOS in output", func (t *testing.T) {
+	t.Run("contains unset command for Linux and MacOS in output", func(t *testing.T) {
 		unsetHandler := setupUnsetHandler(false)
 
 		success, output := unsetHandler.Handle(utils.GlobalArguments{
@@ -29,7 +29,7 @@ func TestUnsetHandler(t *testing.T) {
 		assert.Equal(t, output, "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION")
 	})
 
-	t.Run("contains unset command for Windows in output", func (t *testing.T) {
+	t.Run("contains unset command for Windows in output", func(t *testing.T) {
 		unsetHandler := setupUnsetHandler(true)
 
 		success, output := unsetHandler.Handle(utils.GlobalArguments{

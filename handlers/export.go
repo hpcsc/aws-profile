@@ -91,20 +91,20 @@ func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool
 }
 
 func formatOutputForWindows(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
-		output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
-			credentialsValue.AccessKeyID,
-			credentialsValue.SecretAccessKey,
-			credentialsValue.SessionToken,
-		)
+	output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
+		credentialsValue.AccessKeyID,
+		credentialsValue.SecretAccessKey,
+		credentialsValue.SessionToken,
+	)
 
-		if profile.Region == "" {
-			return output
-		}
+	if profile.Region == "" {
+		return output
+	}
 
-		return fmt.Sprintf("%s; $env:AWS_REGION = '%s'; $env:AWS_DEFAULT_REGION = '%s'",
-			output,
-			profile.Region,
-			profile.Region)
+	return fmt.Sprintf("%s; $env:AWS_REGION = '%s'; $env:AWS_DEFAULT_REGION = '%s'",
+		output,
+		profile.Region,
+		profile.Region)
 }
 
 func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *utils.AWSProfile) string {
