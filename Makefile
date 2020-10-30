@@ -2,7 +2,7 @@ install:
 	go get -v -t -d ./...
 
 build:
-	go build -i -ldflags="-X github.com/hpcsc/aws-profile/handlers.version=$(version)" -o bin/aws-profile github.com/hpcsc/aws-profile
+	go build -i -ldflags="-X github.com/hpcsc/aws-profile/handlers.version=$(version)" -o bin/aws-profile ./cmd
 
 test:
 	go test -v ./...

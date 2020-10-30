@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/hpcsc/aws-profile/handlers"
-	"github.com/hpcsc/aws-profile/utils"
+	"github.com/hpcsc/aws-profile/internal/handlers"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"runtime"

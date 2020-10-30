@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/hpcsc/aws-profile/utils"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 

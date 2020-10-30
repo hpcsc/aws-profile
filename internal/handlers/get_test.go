@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"github.com/hpcsc/aws-profile/utils"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"

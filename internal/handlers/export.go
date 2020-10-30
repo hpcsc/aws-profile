@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/hpcsc/aws-profile/utils"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"strings"
