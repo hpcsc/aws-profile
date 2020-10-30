@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -25,7 +24,7 @@ To execute the command without printing it to console:
 	}
 }
 
-func (handler UnsetHandler) Handle(_ utils.GlobalArguments) (bool, string) {
+func (handler UnsetHandler) Handle(_ GlobalArguments) (bool, string) {
 	output := formatUnsetCommandByPlatform(handler.IsWindows)
 	return true, output
 }

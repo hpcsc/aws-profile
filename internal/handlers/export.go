@@ -48,7 +48,7 @@ To execute the command without printing it to console:
 	}
 }
 
-func (handler ExportHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
+func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, string) {
 	configFile, readConfigErr := utils.ReadFile(*globalArguments.ConfigFilePath)
 	if readConfigErr != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)

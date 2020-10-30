@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"testing"
@@ -20,7 +19,7 @@ func TestUnsetHandler(t *testing.T) {
 	t.Run("contains unset command for Linux and MacOS in output", func(t *testing.T) {
 		unsetHandler := setupUnsetHandler(false)
 
-		success, output := unsetHandler.Handle(utils.GlobalArguments{
+		success, output := unsetHandler.Handle(GlobalArguments{
 			CredentialsFilePath: nil,
 			ConfigFilePath:      nil,
 		})
@@ -32,7 +31,7 @@ func TestUnsetHandler(t *testing.T) {
 	t.Run("contains unset command for Windows in output", func(t *testing.T) {
 		unsetHandler := setupUnsetHandler(true)
 
-		success, output := unsetHandler.Handle(utils.GlobalArguments{
+		success, output := unsetHandler.Handle(GlobalArguments{
 			CredentialsFilePath: nil,
 			ConfigFilePath:      nil,
 		})

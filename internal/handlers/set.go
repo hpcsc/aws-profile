@@ -34,7 +34,7 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn utils.SelectProfile
 	}
 }
 
-func (handler SetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
+func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string) {
 	credentialsFile, err := utils.ReadFile(*globalArguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)

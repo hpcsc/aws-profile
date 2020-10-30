@@ -25,15 +25,6 @@ func ExpandHomeDirectory(filePath string) string {
 	return filePath
 }
 
-type GlobalArguments struct {
-	CredentialsFilePath *string
-	ConfigFilePath      *string
-}
-
-type Handler interface {
-	Handle(globalArguments GlobalArguments) (bool, string)
-}
-
 type SelectProfileFn func(aws.AWSProfiles, string) ([]byte, error)
 type WriteToFileFn func(*ini.File, string)
 type GetAWSCredentialsFn func(*aws.AWSProfile, time.Duration) (credentials.Value, error)

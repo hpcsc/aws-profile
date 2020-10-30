@@ -44,7 +44,7 @@ func awsCredentialsEnvironmentVariablesSet() bool {
 	return accessKeyIdExists && secretAccessKeyExists && sessionTokenExists
 }
 
-func (handler GetHandler) Handle(globalArguments utils.GlobalArguments) (bool, string) {
+func (handler GetHandler) Handle(globalArguments GlobalArguments) (bool, string) {
 	if awsCredentialsEnvironmentVariablesSet() {
 		cachedCallerIdentity, readCachedCallerIdentityErr := handler.ReadCachedCallerIdentityFn()
 		if readCachedCallerIdentityErr == nil && cachedCallerIdentity != "" {

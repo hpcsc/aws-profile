@@ -24,10 +24,10 @@ func stubGetAWSCredentials(_ *aws.AWSProfile, _ time.Duration) (credentials.Valu
 	return stubAWSCredentials(), nil
 }
 
-func stubGlobalArgumentsForExport(configName string) utils.GlobalArguments {
+func stubGlobalArgumentsForExport(configName string) GlobalArguments {
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
-	return utils.GlobalArguments{
+	return GlobalArguments{
 		ConfigFilePath: &testConfigPath,
 	}
 }

@@ -7,14 +7,13 @@ import (
 	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/tui"
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"runtime"
 	"strings"
 )
 
-func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]utils.Handler {
+func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]handlers.Handler {
 	isWindows := runtime.GOOS == "windows"
 
 	getHandler := handlers.NewGetHandler(
@@ -34,7 +33,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ut
 	unsetHandler := handlers.NewUnsetHandler(app, isWindows)
 	versionHandler := handlers.NewVersionHandler(app)
 
-	return map[string]utils.Handler{
+	return map[string]handlers.Handler{
 		getHandler.SubCommand.FullCommand():     getHandler,
 		setHandler.SubCommand.FullCommand():     setHandler,
 		exportHandler.SubCommand.FullCommand():  exportHandler,
@@ -60,7 +59,7 @@ func main() {
 	parsedInput := kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	if handler, ok := handlerMap[parsedInput]; ok {
-		globalArguments := utils.GlobalArguments{
+		globalArguments := handlers.GlobalArguments{
 			CredentialsFilePath: credentialsPathFlag,
 			ConfigFilePath:      configPathFlag,
 		}

@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"github.com/hpcsc/aws-profile/internal/log"
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -11,11 +10,11 @@ import (
 	"testing"
 )
 
-func stubGlobalArgumentsForGet(credentialsName string, configName string) utils.GlobalArguments {
+func stubGlobalArgumentsForGet(credentialsName string, configName string) GlobalArguments {
 	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
-	return utils.GlobalArguments{
+	return GlobalArguments{
 		CredentialsFilePath: &testCredentialsPath,
 		ConfigFilePath:      &testConfigPath,
 	}

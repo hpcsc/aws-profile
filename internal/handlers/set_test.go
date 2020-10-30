@@ -15,11 +15,11 @@ func noopWriteToFileMock(_ *ini.File, _ string) {
 	// noop
 }
 
-func stubGlobalArgumentsForSet(credentialsName string, configName string) utils.GlobalArguments {
+func stubGlobalArgumentsForSet(credentialsName string, configName string) GlobalArguments {
 	testCredentialsPath, _ := filepath.Abs("./test_data/" + credentialsName)
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
-	return utils.GlobalArguments{
+	return GlobalArguments{
 		CredentialsFilePath: &testCredentialsPath,
 		ConfigFilePath:      &testConfigPath,
 	}
