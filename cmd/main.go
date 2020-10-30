@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/handlers"
+	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/tui"
 	"github.com/hpcsc/aws-profile/internal/utils"
@@ -19,10 +20,10 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ut
 		app,
 		logger,
 		utils.GetAWSCallerIdentity,
-		utils.ReadCachedCallerIdentity,
-		utils.WriteCachedCallerIdentity,
+		io.ReadCachedCallerIdentity,
+		io.WriteCachedCallerIdentity,
 	)
-	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, utils.WriteToFile)
+	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, io.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
 		isWindows,

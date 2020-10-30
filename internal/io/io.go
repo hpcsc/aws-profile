@@ -1,8 +1,9 @@
-package utils
+package io
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/ini.v1"
 	"io/ioutil"
 	"os"
@@ -13,7 +14,7 @@ func WriteToFile(file *ini.File, unexpandedFilePath string) {
 	var buffer bytes.Buffer
 	_, err := file.WriteTo(&buffer)
 
-	filePath := ExpandHomeDirectory(unexpandedFilePath)
+	filePath := utils.ExpandHomeDirectory(unexpandedFilePath)
 
 	if err != nil {
 		fmt.Printf("Fail to write to file %s: %v", filePath, err)
@@ -27,7 +28,7 @@ const awsProfileHome = "~/.aws-profile"
 const cachedCallerIdentityFileName = "cached-caller-identity"
 
 func createCachedCallerIdentityFileIfNotExists() (string, error) {
-	expandedHomeDir := ExpandHomeDirectory(awsProfileHome)
+	expandedHomeDir := utils.ExpandHomeDirectory(awsProfileHome)
 
 	if _, statError := os.Stat(expandedHomeDir); os.IsNotExist(statError) {
 		makeDirError := os.Mkdir(expandedHomeDir, os.FileMode(0755))
