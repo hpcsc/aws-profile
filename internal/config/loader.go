@@ -8,12 +8,12 @@ import (
 
 func LoadProfilesFromConfigAndCredentials(credentialsFile *ini.File, configFile *ini.File) Profiles {
 	return Profiles{
-		CredentialsProfiles:   getProfilesFromCredentialsFile(credentialsFile),
-		ConfigAssumedProfiles: getAssumedProfilesFromConfigFile(configFile),
+		CredentialsProfiles:   loadFromCredentialsFile(credentialsFile),
+		ConfigAssumedProfiles: loadFromConfigFile(configFile),
 	}
 }
 
-func getProfilesFromCredentialsFile(credentialsFile *ini.File) []Profile {
+func loadFromCredentialsFile(credentialsFile *ini.File) []Profile {
 	var profiles []Profile
 
 	if credentialsFile == nil {
@@ -32,7 +32,7 @@ func getProfilesFromCredentialsFile(credentialsFile *ini.File) []Profile {
 	return profiles
 }
 
-func getAssumedProfilesFromConfigFile(configFile *ini.File) []Profile {
+func loadFromConfigFile(configFile *ini.File) []Profile {
 	var profiles []Profile
 
 	if configFile == nil {
