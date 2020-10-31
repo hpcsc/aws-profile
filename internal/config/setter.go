@@ -5,15 +5,14 @@ import (
 	"strings"
 )
 
-func findRegionInConfigFile(selectedProfileName string, configFile *ini.File) string {
+func findConfigSectionByName(name string, configFile *ini.File) *ini.Section {
 	for _, section := range configFile.Sections() {
-		if strings.EqualFold(strings.TrimPrefix(section.Name(), "profile "), selectedProfileName) &&
-			section.HasKey("region") {
-			return section.Key("region").Value()
+		if strings.EqualFold(strings.TrimPrefix(section.Name(), "profile "), name) {
+			return section
 		}
 	}
 
-	return ""
+	return nil
 }
 
 func SetSelectedProfileAsDefault(selectedProfileName string, credentialsFile *ini.File, configFile *ini.File) {
@@ -29,11 +28,20 @@ func SetSelectedProfileAsDefault(selectedProfileName string, credentialsFile *in
 	defaultProfileInConfig.DeleteKey("role_arn")
 	defaultProfileInConfig.DeleteKey("source_profile")
 
-	selectedRegion := findRegionInConfigFile(selectedProfileName, configFile)
-	if selectedRegion != "" {
-		defaultProfileInConfig.Key("region").SetValue(selectedRegion)
+	selectedProfileInConfig := findConfigSectionByName(selectedProfileName, configFile)
+
+	if selectedProfileInConfig != nil &&
+		selectedProfileInConfig.HasKey("region") {
+		defaultProfileInConfig.Key("region").SetValue(selectedProfileInConfig.Key("region").Value())
 	} else {
 		defaultProfileInConfig.DeleteKey("region")
+	}
+
+	if selectedProfileInConfig != nil &&
+		selectedProfileInConfig.HasKey("mfa_serial") {
+		defaultProfileInConfig.Key("mfa_serial").SetValue(selectedProfileInConfig.Key("mfa_serial").Value())
+	} else {
+		defaultProfileInConfig.DeleteKey("mfa_serial")
 	}
 }
 

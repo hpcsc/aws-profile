@@ -6,63 +6,6 @@ import (
 	"testing"
 )
 
-//func TestFindRegionInConfigFile(t *testing.T) {
-//	t.Run("return empty if profile not found", func(t *testing.T) {
-//		configFile := ini.Empty()
-//		AddConfigSection(configFile, "default")
-//		AddConfigSection(configFile, "profile-1")
-//		profile2Section := AddConfigSection(configFile, "profile-2")
-//		profile2Section.Key("region").SetValue("ap-southeast-2")
-//
-//		processor := AWSSharedCredentialsProcessor{
-//			CredentialsFile: nil,
-//			ConfigFile:      configFile,
-//		}
-//
-//		result := processor.findRegionInConfigFile("profile-3")
-//
-//		assert.Empty(t, result)
-//
-//	})
-//
-//	t.Run("return empty if selected profile has no region", func(t *testing.T) {
-//		configFile := ini.Empty()
-//		AddConfigSection(configFile, "default")
-//		AddConfigSection(configFile, "profile-1")
-//		profile2Section := AddConfigSection(configFile, "profile-2")
-//		profile2Section.Key("region").SetValue("ap-southeast-2")
-//
-//		processor := AWSSharedCredentialsProcessor{
-//			CredentialsFile: nil,
-//			ConfigFile:      configFile,
-//		}
-//
-//		result := processor.findRegionInConfigFile("profile-1")
-//
-//		assert.Empty(t, result)
-//
-//	})
-//
-//	t.Run("return region if selected profile has region", func(t *testing.T) {
-//		configFile := ini.Empty()
-//		AddConfigSection(configFile, "default")
-//		AddConfigSection(configFile, "profile-1")
-//		profile2Section := AddConfigSection(configFile, "profile-2")
-//		profile2Section.Key("region").SetValue("ap-southeast-2")
-//
-//		processor := AWSSharedCredentialsProcessor{
-//			CredentialsFile: nil,
-//			ConfigFile:      configFile,
-//		}
-//
-//		result := processor.findRegionInConfigFile("profile-2")
-//
-//		assert.Equal(t, "ap-southeast-2", result)
-//
-//	})
-//
-//}
-
 func TestSetSelectedProfileAsDefault(t *testing.T) {
 	t.Run("set default profile access key id and secret access key", func(t *testing.T) {
 		credentialsFile := ini.Empty()
@@ -137,6 +80,44 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
 
 		assert.Empty(t, configFile.Section("default").Key("region").Value())
+	})
+
+	t.Run("set default profile mfa serial in config file if available", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+		profile1Section := AddConfigSection(configFile, "profile profile-1")
+		profile1Section.Key("mfa_serial").SetValue("my-mfa-serial")
+
+		defaultSection := configFile.Section("default")
+		assert.Empty(t, defaultSection.Key("mfa_serial").Value())
+
+		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
+
+		defaultSection = configFile.Section("default")
+		assert.Equal(t, "my-mfa-serial", defaultSection.Key("mfa_serial").Value())
+	})
+
+	t.Run("clear default mfa serial if selected profile has no mfa serial", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+		defaultSection := AddConfigSection(configFile, "default")
+		defaultSection.Key("mfa_serial").SetValue("my-mfa-serial")
+		AddConfigSection(configFile, "profile-3")
+
+		assert.Equal(t, "my-mfa-serial", configFile.Section("default").Key("mfa_serial").Value())
+
+		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
+
+		assert.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
 	})
 }
 
