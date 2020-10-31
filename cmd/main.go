@@ -7,6 +7,7 @@ import (
 	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/tui"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"runtime"
@@ -47,8 +48,6 @@ func main() {
 
 	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')
-	credentialsPathFlag := app.Flag("credentials-path", "Path to AWS Credentials file").Default("~/.aws/credentials").String()
-	configPathFlag := app.Flag("config-path", "Path to AWS Config file").Default("~/.aws/config").String()
 	handlerMap := createHandlerMap(app, logger)
 
 	if len(os.Args) < 2 {
@@ -60,8 +59,8 @@ func main() {
 
 	if handler, ok := handlerMap[parsedInput]; ok {
 		globalArguments := handlers.GlobalArguments{
-			CredentialsFilePath: credentialsPathFlag,
-			ConfigFilePath:      configPathFlag,
+			CredentialsFilePath: utils.GetEnvVariableOrDefault("AWS_SHARED_CREDENTIALS_FILE", "~/.aws/credentials"),
+			ConfigFilePath:      utils.GetEnvVariableOrDefault("AWS_CONFIG_FILE", "~/.aws/config"),
 		}
 
 		success, message := handler.Handle(globalArguments)

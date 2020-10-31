@@ -38,12 +38,12 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, wr
 }
 
 func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string) {
-	credentialsFile, err := io.ReadFile(*globalArguments.CredentialsFilePath)
+	credentialsFile, err := io.ReadFile(globalArguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
 
-	configFile, err := io.ReadFile(*globalArguments.ConfigFilePath)
+	configFile, err := io.ReadFile(globalArguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
@@ -67,16 +67,16 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
 		processor.SetSelectedProfileAsDefault(trimmedSelectedProfileResult)
 
-		handler.WriteToFile(processor.CredentialsFile, *globalArguments.CredentialsFilePath)
-		handler.WriteToFile(processor.ConfigFile, *globalArguments.ConfigFilePath)
+		handler.WriteToFile(processor.CredentialsFile, globalArguments.CredentialsFilePath)
+		handler.WriteToFile(processor.ConfigFile, globalArguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, *globalArguments.CredentialsFilePath)
+		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, globalArguments.CredentialsFilePath)
 	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
 		processor.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName)
 
-		handler.WriteToFile(processor.ConfigFile, *globalArguments.ConfigFilePath)
+		handler.WriteToFile(processor.ConfigFile, globalArguments.ConfigFilePath)
 
-		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", assumedProfile.ProfileName, *globalArguments.ConfigFilePath)
+		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", assumedProfile.ProfileName, globalArguments.ConfigFilePath)
 	} else {
 		return false, fmt.Sprintf("=== profile [%s] not found in either credentials or config file", trimmedSelectedProfileResult)
 	}

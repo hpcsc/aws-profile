@@ -15,8 +15,8 @@ func stubGlobalArgumentsForGet(credentialsName string, configName string) Global
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
 	return GlobalArguments{
-		CredentialsFilePath: &testCredentialsPath,
-		ConfigFilePath:      &testConfigPath,
+		CredentialsFilePath: testCredentialsPath,
+		ConfigFilePath:      testConfigPath,
 	}
 }
 

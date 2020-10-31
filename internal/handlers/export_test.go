@@ -27,7 +27,7 @@ func stubGlobalArgumentsForExport(configName string) GlobalArguments {
 	testConfigPath, _ := filepath.Abs("./test_data/" + configName)
 
 	return GlobalArguments{
-		ConfigFilePath: &testConfigPath,
+		ConfigFilePath: testConfigPath,
 	}
 }
 

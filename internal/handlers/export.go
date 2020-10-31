@@ -51,7 +51,7 @@ To execute the command without printing it to console:
 }
 
 func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, string) {
-	configFile, readConfigErr := io.ReadFile(*globalArguments.ConfigFilePath)
+	configFile, readConfigErr := io.ReadFile(globalArguments.ConfigFilePath)
 	if readConfigErr != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", readConfigErr)
 	}

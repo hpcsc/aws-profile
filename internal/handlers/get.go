@@ -79,7 +79,7 @@ func (handler GetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		}
 	}
 
-	configFile, err := io.ReadFile(*globalArguments.ConfigFilePath)
+	configFile, err := io.ReadFile(globalArguments.ConfigFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
@@ -103,7 +103,7 @@ func (handler GetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		}
 	}
 
-	credentialsFile, err := io.ReadFile(*globalArguments.CredentialsFilePath)
+	credentialsFile, err := io.ReadFile(globalArguments.CredentialsFilePath)
 	if err != nil {
 		return false, fmt.Sprintf("Fail to read AWS credentials file: %v", err)
 	}
