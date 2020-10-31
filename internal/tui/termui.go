@@ -4,11 +4,11 @@ import (
 	"errors"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/hpcsc/aws-profile/internal/aws"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"log"
 )
 
-func getDisplayableLabels(profiles []aws.AWSProfile) []string {
+func getDisplayableLabels(profiles []config.AWSProfile) []string {
 	var labels []string
 
 	for _, profile := range profiles {
@@ -18,7 +18,7 @@ func getDisplayableLabels(profiles []aws.AWSProfile) []string {
 	return labels
 }
 
-func SelectProfileFromList(profiles aws.AWSProfiles, pattern string) ([]byte, error) {
+func SelectProfileFromList(profiles config.AWSProfiles, pattern string) ([]byte, error) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}

@@ -7,11 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"strings"
 	"time"
 )
 
-func GetAWSCredentials(profile *AWSProfile, duration time.Duration) (credentials.Value, error) {
+func GetAWSCredentials(profile *config.AWSProfile, duration time.Duration) (credentials.Value, error) {
 	session := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 		Profile:           profile.SourceProfile,

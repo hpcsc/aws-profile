@@ -1,5 +1,7 @@
 package handlers
 
-import "github.com/hpcsc/aws-profile/internal/aws"
+import (
+	"github.com/hpcsc/aws-profile/internal/config"
+)
 
-type SelectProfileFn func(aws.AWSProfiles, string) ([]byte, error)
+type SelectProfileFn func(config.AWSProfiles, string) ([]byte, error)

@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/aws"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -53,7 +54,7 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		ConfigFile:      configFile,
 	}
 
-	profiles := processor.GetProfilesFromCredentialsAndConfig()
+	profiles := config.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
 
 	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
 	if err != nil {
