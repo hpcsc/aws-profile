@@ -16,7 +16,7 @@ cp ./e2e/config/* ./e2e/tmp
 
 ./e2e/expect/set-from-credentials.exp ${PATH_TO_EXECUTABLE}
 
-CURRENT_PROFILE=$(${PATH_TO_EXECUTABLE} get --credentials-path ./e2e/tmp/credentials --config-path ./e2e/tmp/config)
+CURRENT_PROFILE=$(AWS_SHARED_CREDENTIALS_FILE=./e2e/tmp/credentials AWS_CONFIG_FILE=./e2e/tmp/config ${PATH_TO_EXECUTABLE} get)
 EXPECTED=credentials_profile_2
 if [ "${CURRENT_PROFILE}" != "${EXPECTED}" ]; then
     echo "FAILED [set-from-credentials] Expected [${EXPECTED}], but got [${CURRENT_PROFILE}]"
@@ -25,7 +25,7 @@ fi;
 
 ./e2e/expect/set-from-config.exp ${PATH_TO_EXECUTABLE}
 
-CURRENT_PROFILE=$(${PATH_TO_EXECUTABLE} get --credentials-path ./e2e/tmp/credentials --config-path ./e2e/tmp/config)
+CURRENT_PROFILE=$(AWS_SHARED_CREDENTIALS_FILE=./e2e/tmp/credentials AWS_CONFIG_FILE=./e2e/tmp/config ${PATH_TO_EXECUTABLE} get)
 EXPECTED='profile config_profile_1'
 if [ "${CURRENT_PROFILE}" != "${EXPECTED}" ]; then
     echo "FAILED: [set-from-config] Expected [${EXPECTED}], but got [${CURRENT_PROFILE}]"

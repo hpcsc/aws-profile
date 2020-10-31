@@ -9,7 +9,9 @@ if {[llength $argv] != 1} {
 }
 
 set pathToExecutable [lindex $argv 0]
-spawn $pathToExecutable set --credentials-path ./e2e/tmp/credentials --config-path ./e2e/tmp/config
+set env(AWS_CONFIG_FILE) ./e2e/tmp/config
+set env(AWS_SHARED_CREDENTIALS_FILE) ./e2e/tmp/credentials
+spawn $pathToExecutable set
 
 send -- "j"
 send -- "j"
