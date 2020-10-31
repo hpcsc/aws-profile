@@ -35,10 +35,6 @@ simple tool to help switching among AWS profiles more easily
 
 Flags:
   -h, --help  Show context-sensitive help (also try --help-long and --help-man).
-      --credentials-path="~/.aws/credentials"
-              Path to AWS Credentials file
-      --config-path="~/.aws/config"
-              Path to AWS Config file
 
 Commands:
   help [<command>...]
