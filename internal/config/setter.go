@@ -1,17 +1,12 @@
-package aws
+package config
 
 import (
 	"gopkg.in/ini.v1"
 	"strings"
 )
 
-type AWSSharedCredentialsProcessor struct {
-	CredentialsFile *ini.File
-	ConfigFile      *ini.File
-}
-
-func (processor AWSSharedCredentialsProcessor) findRegionInConfigFile(selectedProfileName string) string {
-	for _, section := range processor.ConfigFile.Sections() {
+func findRegionInConfigFile(selectedProfileName string, configFile *ini.File) string {
+	for _, section := range configFile.Sections() {
 		if strings.EqualFold(strings.TrimPrefix(section.Name(), "profile "), selectedProfileName) &&
 			section.HasKey("region") {
 			return section.Key("region").Value()
@@ -21,9 +16,7 @@ func (processor AWSSharedCredentialsProcessor) findRegionInConfigFile(selectedPr
 	return ""
 }
 
-func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selectedProfileName string) {
-	credentialsFile := processor.CredentialsFile
-
+func SetSelectedProfileAsDefault(selectedProfileName string, credentialsFile *ini.File, configFile *ini.File) {
 	selectedProfileInCredentials := credentialsFile.Section(selectedProfileName)
 	selectedKeyId := selectedProfileInCredentials.Key("aws_access_key_id").Value()
 	selectedAccessKey := selectedProfileInCredentials.Key("aws_secret_access_key").Value()
@@ -32,11 +25,11 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selec
 	defaultProfileInCredentials.Key("aws_access_key_id").SetValue(selectedKeyId)
 	defaultProfileInCredentials.Key("aws_secret_access_key").SetValue(selectedAccessKey)
 
-	defaultProfileInConfig := processor.ConfigFile.Section("default")
+	defaultProfileInConfig := configFile.Section("default")
 	defaultProfileInConfig.DeleteKey("role_arn")
 	defaultProfileInConfig.DeleteKey("source_profile")
 
-	selectedRegion := processor.findRegionInConfigFile(selectedProfileName)
+	selectedRegion := findRegionInConfigFile(selectedProfileName, configFile)
 	if selectedRegion != "" {
 		defaultProfileInConfig.Key("region").SetValue(selectedRegion)
 	} else {
@@ -44,9 +37,7 @@ func (processor AWSSharedCredentialsProcessor) SetSelectedProfileAsDefault(selec
 	}
 }
 
-func (processor AWSSharedCredentialsProcessor) SetSelectedAssumedProfileAsDefault(selectedAssumedProfileName string) {
-	configFile := processor.ConfigFile
-
+func SetSelectedAssumedProfileAsDefault(selectedAssumedProfileName string, configFile *ini.File) {
 	selectedProfile := configFile.Section(selectedAssumedProfileName)
 	selectedRoleArn := selectedProfile.Key("role_arn").Value()
 	selectedSourceProfile := selectedProfile.Key("source_profile").Value()

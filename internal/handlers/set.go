@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -49,11 +48,6 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	processor := aws.AWSSharedCredentialsProcessor{
-		CredentialsFile: credentialsFile,
-		ConfigFile:      configFile,
-	}
-
 	profiles := config.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
 
 	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
@@ -66,16 +60,16 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 
 	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
-		processor.SetSelectedProfileAsDefault(trimmedSelectedProfileResult)
+		config.SetSelectedProfileAsDefault(trimmedSelectedProfileResult, credentialsFile, configFile)
 
-		handler.WriteToFile(processor.CredentialsFile, globalArguments.CredentialsFilePath)
-		handler.WriteToFile(processor.ConfigFile, globalArguments.ConfigFilePath)
+		handler.WriteToFile(credentialsFile, globalArguments.CredentialsFilePath)
+		handler.WriteToFile(configFile, globalArguments.ConfigFilePath)
 
 		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, globalArguments.CredentialsFilePath)
 	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
-		processor.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName)
+		config.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName, configFile)
 
-		handler.WriteToFile(processor.ConfigFile, globalArguments.ConfigFilePath)
+		handler.WriteToFile(configFile, globalArguments.ConfigFilePath)
 
 		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", assumedProfile.ProfileName, globalArguments.ConfigFilePath)
 	} else {
