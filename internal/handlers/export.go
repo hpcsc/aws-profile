@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type GetAWSCredentialsFn func(*config.AWSProfile, time.Duration) (credentials.Value, error)
+type GetAWSCredentialsFn func(*config.Profile, time.Duration) (credentials.Value, error)
 
 type ExportHandler struct {
 	SubCommand        *kingpin.CmdClause
@@ -88,7 +88,7 @@ func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, stri
 	}
 }
 
-func formatOutputForWindows(credentialsValue credentials.Value, profile *config.AWSProfile) string {
+func formatOutputForWindows(credentialsValue credentials.Value, profile *config.Profile) string {
 	output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,
@@ -105,7 +105,7 @@ func formatOutputForWindows(credentialsValue credentials.Value, profile *config.
 		profile.Region)
 }
 
-func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *config.AWSProfile) string {
+func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *config.Profile) string {
 	output := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,

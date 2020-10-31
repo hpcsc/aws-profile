@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func GetAWSCredentials(profile *config.AWSProfile, duration time.Duration) (credentials.Value, error) {
+func GetAWSCredentials(profile *config.Profile, duration time.Duration) (credentials.Value, error) {
 	session := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 		Profile:           profile.SourceProfile,

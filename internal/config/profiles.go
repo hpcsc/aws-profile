@@ -2,21 +2,12 @@ package config
 
 import "strings"
 
-type AWSProfile struct {
-	ProfileName        string
-	DisplayProfileName string
-	RoleArn            string
-	MFASerialNumber    string
-	Region             string
-	SourceProfile      string
+type Profiles struct {
+	CredentialsProfiles   []Profile
+	ConfigAssumedProfiles []Profile
 }
 
-type AWSProfiles struct {
-	CredentialsProfiles   []AWSProfile
-	ConfigAssumedProfiles []AWSProfile
-}
-
-func (profiles AWSProfiles) FindProfileInCredentialsFile(selected string) *AWSProfile {
+func (profiles Profiles) FindProfileInCredentialsFile(selected string) *Profile {
 	for _, profile := range profiles.CredentialsProfiles {
 		if strings.EqualFold(profile.ProfileName, selected) {
 			return &profile
@@ -26,7 +17,7 @@ func (profiles AWSProfiles) FindProfileInCredentialsFile(selected string) *AWSPr
 	return nil
 }
 
-func (profiles AWSProfiles) FindProfileInConfigFile(selected string) *AWSProfile {
+func (profiles Profiles) FindProfileInConfigFile(selected string) *Profile {
 	for _, profile := range profiles.ConfigAssumedProfiles {
 		if strings.EqualFold(profile.ProfileName, selected) {
 			return &profile
@@ -35,7 +26,7 @@ func (profiles AWSProfiles) FindProfileInConfigFile(selected string) *AWSProfile
 	return nil
 }
 
-func (profiles AWSProfiles) GetAllDisplayProfileNames() []string {
+func (profiles Profiles) GetAllDisplayProfileNames() []string {
 	var displayProfileNames []string
 
 	for _, profile := range profiles.CredentialsProfiles {
@@ -49,8 +40,8 @@ func (profiles AWSProfiles) GetAllDisplayProfileNames() []string {
 	return displayProfileNames
 }
 
-func (profiles AWSProfiles) Filter(pattern string) []AWSProfile {
-	var filteredProfiles []AWSProfile
+func (profiles Profiles) Filter(pattern string) []Profile {
+	var filteredProfiles []Profile
 
 	for _, profile := range profiles.CredentialsProfiles {
 		if pattern == "" || strings.Contains(profile.ProfileName, pattern) {

@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func getDisplayableLabels(profiles []config.AWSProfile) []string {
+func getDisplayableLabels(profiles []config.Profile) []string {
 	var labels []string
 
 	for _, profile := range profiles {
@@ -18,7 +18,7 @@ func getDisplayableLabels(profiles []config.AWSProfile) []string {
 	return labels
 }
 
-func SelectProfileFromList(profiles config.AWSProfiles, pattern string) ([]byte, error) {
+func SelectProfileFromList(profiles config.Profiles, pattern string) ([]byte, error) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}

@@ -6,15 +6,15 @@ import (
 	"strings"
 )
 
-func LoadProfilesFromConfigAndCredentials(credentialsFile *ini.File, configFile *ini.File) AWSProfiles {
-	return AWSProfiles{
+func LoadProfilesFromConfigAndCredentials(credentialsFile *ini.File, configFile *ini.File) Profiles {
+	return Profiles{
 		CredentialsProfiles:   getProfilesFromCredentialsFile(credentialsFile),
 		ConfigAssumedProfiles: getAssumedProfilesFromConfigFile(configFile),
 	}
 }
 
-func getProfilesFromCredentialsFile(credentialsFile *ini.File) []AWSProfile {
-	var profiles []AWSProfile
+func getProfilesFromCredentialsFile(credentialsFile *ini.File) []Profile {
+	var profiles []Profile
 
 	if credentialsFile == nil {
 		return profiles
@@ -22,7 +22,7 @@ func getProfilesFromCredentialsFile(credentialsFile *ini.File) []AWSProfile {
 
 	for _, section := range credentialsFile.Sections() {
 		if !strings.EqualFold(section.Name(), "default") {
-			profiles = append(profiles, AWSProfile{
+			profiles = append(profiles, Profile{
 				ProfileName:        section.Name(),
 				DisplayProfileName: section.Name(),
 			})
@@ -32,8 +32,8 @@ func getProfilesFromCredentialsFile(credentialsFile *ini.File) []AWSProfile {
 	return profiles
 }
 
-func getAssumedProfilesFromConfigFile(configFile *ini.File) []AWSProfile {
-	var profiles []AWSProfile
+func getAssumedProfilesFromConfigFile(configFile *ini.File) []Profile {
+	var profiles []Profile
 
 	if configFile == nil {
 		return profiles
@@ -43,7 +43,7 @@ func getAssumedProfilesFromConfigFile(configFile *ini.File) []AWSProfile {
 		if !strings.EqualFold(section.Name(), "default") &&
 			section.HasKey("role_arn") &&
 			section.HasKey("source_profile") {
-			profile := AWSProfile{
+			profile := Profile{
 				ProfileName:        section.Name(),
 				DisplayProfileName: fmt.Sprintf("assume %s", section.Name()),
 				RoleArn:            section.Key("role_arn").Value(),
