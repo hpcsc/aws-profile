@@ -19,3 +19,5 @@ node_modules
 tmp
 
 /aws-profile
+
+coverage.txt

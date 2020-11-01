@@ -24,7 +24,11 @@ tasks:
 
   test:
     cmds:
-      - go test -v ./...
+      - go test -coverprofile=coverage.txt -v ./...
+
+  coverage-report:
+    cmds:
+      - go tool cover -html=coverage.txt
 
   e2e:
     cmds:
