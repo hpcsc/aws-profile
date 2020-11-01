@@ -1,0 +1,33 @@
+version: '2'
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  clean:
+    cmds:
+      - rm -rf ./bin
+      - rm -f ./aws-profile
+
+  install:
+    cmds:
+      - go get -v -t -d ./...
+
+  build:
+    deps: [clean]
+    cmds:
+      - go build -i -ldflags="-X github.com/hpcsc/aws-profile/internal/handlers.version=${VERSION}" -o "${OUTPUT}" ./cmd
+    env:
+      VERSION: 000
+      OUTPUT: bin/aws-profile
+
+  test:
+    cmds:
+      - go test -v ./...
+
+  e2e:
+    cmds:
+      - ./e2e/run.sh ${EXECUTABLE}
+    env:
+      EXECUTABLE: bin/aws-profile
