@@ -40,14 +40,9 @@ jobs:
       run: |
         task test
 
-    - name: Upload coverage to codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.txt
-        flags: unittests
-        name: aws-profile-coverage
-        fail_ci_if_error: true
-        verbose: true
+    - name: Generate coverage html report
+      run: |
+        task generate-coverage-report
 
     - if: matrix.os == 'macos-latest'
       name: Run E2E Test
@@ -61,6 +56,13 @@ jobs:
       with:
         name: aws-profile-${{runner.os}}-${{github.sha}}
         path: ./bin/aws-profile-${{runner.os}}-${{github.sha}}
+
+    - if: matrix.os == 'macos-latest'
+      name: Upload coverage html report as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: coverage-html-report
+        path: ./coverage.html
 
   publish:
     name: Publish to Bintray

@@ -20,4 +20,4 @@ tmp
 
 /aws-profile
 
-coverage.txt
+coverage.*
