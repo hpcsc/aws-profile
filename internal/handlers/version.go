@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -16,9 +17,7 @@ func NewVersionHandler(app *kingpin.Application) VersionHandler {
 	}
 }
 
-var version = "undefined"
-
 func (handler VersionHandler) Handle(globalArguments GlobalArguments) (bool, string) {
-	fmt.Printf("aws-profile (%s)", version)
+	fmt.Printf("aws-profile (%s)", version.Current())
 	return true, ""
 }

@@ -17,7 +17,7 @@ tasks:
   build:
     deps: [clean]
     cmds:
-      - go build -i -ldflags="-X github.com/hpcsc/aws-profile/internal/handlers.version=${VERSION}" -o "${OUTPUT}" ./cmd
+      - go build -i -ldflags="-X github.com/hpcsc/aws-profile/internal/version.version=${VERSION}" -o "${OUTPUT}" ./cmd
     env:
       VERSION: 000
       OUTPUT: bin/aws-profile
