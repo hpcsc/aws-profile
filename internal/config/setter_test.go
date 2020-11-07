@@ -41,7 +41,39 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		defaultSection = configFile.Section("default")
 		assert.Empty(t, defaultSection.Key("role_arn").Value())
 		assert.Empty(t, defaultSection.Key("source_profile").Value())
+	})
 
+	t.Run("set default profile session token if available", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		AddCredentialsSection(credentialsFile, "default")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		profile2Section := AddCredentialsSection(credentialsFile, "profile-2")
+		profile2Section.Key("aws_session_token").SetValue("profile-2-session-token")
+
+		configFile := ini.Empty()
+
+		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
+
+		defaultSection := credentialsFile.Section("default")
+		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+		assert.Equal(t, "profile-2-session-token", defaultSection.Key("aws_session_token").Value())
+	})
+
+	t.Run("clear default profile session token if session token not set", func(t *testing.T) {
+		credentialsFile := ini.Empty()
+		defaultSection := AddCredentialsSection(credentialsFile, "default")
+		defaultSection.Key("aws_session_token").SetValue("default-session-token")
+		AddCredentialsSection(credentialsFile, "profile-1")
+		AddCredentialsSection(credentialsFile, "profile-2")
+
+		configFile := ini.Empty()
+
+		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
+
+		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+		assert.False(t, defaultSection.HasKey("aws_session_token"))
 	})
 
 	t.Run("set default profile region in config file if available", func(t *testing.T) {

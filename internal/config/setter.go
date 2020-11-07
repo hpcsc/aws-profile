@@ -13,6 +13,7 @@ func SetSelectedProfileAsDefault(selectedProfileName string, credentialsFile *in
 	defaultProfileInCredentials := credentialsFile.Section("default")
 	defaultProfileInCredentials.Key("aws_access_key_id").SetValue(selectedKeyId)
 	defaultProfileInCredentials.Key("aws_secret_access_key").SetValue(selectedAccessKey)
+	copyValueToDefaultProfileIfAvailable(defaultProfileInCredentials, selectedProfileInCredentials, "aws_session_token")
 
 	defaultProfileInConfig := configFile.Section("default")
 	defaultProfileInConfig.DeleteKey("role_arn")
