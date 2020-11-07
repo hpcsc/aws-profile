@@ -1,13 +1,17 @@
 package checker
 
+import (
+	"github.com/hpcsc/aws-profile/internal/upgrade/httpclient"
+)
+
 type checker interface {
 	LatestVersionUrl() (string, error)
 }
 
 func NewChecker(os string, includePrerelease bool) checker {
 	if includePrerelease {
-		return newBintrayChecker(os, getUrl)
+		return newBintrayChecker(os, httpclient.GetUrl)
 	}
 
-	return newGithubChecker(os, getUrl)
+	return newGithubChecker(os, httpclient.GetUrl)
 }
