@@ -32,6 +32,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 		aws.GetAWSCredentials,
 	)
 	unsetHandler := handlers.NewUnsetHandler(app, isWindows)
+	upgradeHandler := handlers.NewUpgradeHandler(app, logger)
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]handlers.Handler{
@@ -39,6 +40,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 		setHandler.SubCommand.FullCommand():     setHandler,
 		exportHandler.SubCommand.FullCommand():  exportHandler,
 		unsetHandler.SubCommand.FullCommand():   unsetHandler,
+		upgradeHandler.SubCommand.FullCommand(): upgradeHandler,
 		versionHandler.SubCommand.FullCommand(): versionHandler,
 	}
 }
