@@ -8,27 +8,31 @@ import (
 	"runtime"
 )
 
-func ToLatest(binary string, includePrerelease bool) error {
+func ToLatest(binary string, includePrerelease bool, currentVersion string) (string, error) {
 	osName, err := getOSName(runtime.GOOS)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	c := checker.NewChecker(osName, includePrerelease)
-	url, err := c.LatestVersionUrl()
+	url, version, err := c.LatestVersionUrl()
 	if err != nil {
-		return err
+		return "", err
+	}
+
+	if currentVersion == version {
+		return fmt.Sprintf("aws-profile is already at latest version (%s)", version), nil
 	}
 
 	newFileName := "./aws-profile.new"
 	err = httpclient.DownloadFile(newFileName, url)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = os.Chmod(newFileName, 0755)
 	if err != nil {
-		return fmt.Errorf("failed to change downloaded file permission: %v", err)
+		return "", fmt.Errorf("failed to change downloaded file permission: %v", err)
 	}
 
 	old := binary + ".old"
@@ -36,15 +40,15 @@ func ToLatest(binary string, includePrerelease bool) error {
 
 	err = os.Rename(binary, old)
 	if err != nil {
-		return fmt.Errorf("failed to rename current executable: %v", err)
+		return "", fmt.Errorf("failed to rename current executable: %v", err)
 	}
 
 	if err := os.Rename(newFileName, binary); err != nil {
 		os.Rename(old, binary)
-		return fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, binary, err)
+		return "", fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, binary, err)
 	}
 
-	return nil
+	return fmt.Sprintf("aws-profile upgraded to latest version (%s)", version), nil
 }
 
 func getOSName(goos string) (string, error) {

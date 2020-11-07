@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/hpcsc/aws-profile/internal/upgrade"
+	"github.com/hpcsc/aws-profile/internal/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
@@ -38,10 +39,10 @@ func (handler UpgradeHandler) Handle(globalArguments GlobalArguments) (bool, str
 		return false, fmt.Sprintf("failed to get current executable path: %v", err)
 	}
 
-	err = upgrade.ToLatest(binaryPath, *handler.Arguments.IncludePrerelease)
+	message, err := upgrade.ToLatest(binaryPath, *handler.Arguments.IncludePrerelease, version.Current())
 	if err != nil {
 		return false, err.Error()
 	}
 
-	return true, "upgraded aws-profile to latest version"
+	return true, message
 }

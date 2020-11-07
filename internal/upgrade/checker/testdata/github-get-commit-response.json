@@ -1,0 +1,109 @@
+{
+  "sha": "ccc4227f44a69597aac7cd9fa516132fb37dacca",
+  "node_id": "MDY6Q29tbWl0MTQyMzg1OTczOmNjYzQyMjdmNDRhNjk1OTdhYWM3Y2Q5ZmE1MTYxMzJmYjM3ZGFjY2E=",
+  "commit": {
+    "author": {
+      "name": "David Nguyen",
+      "email": "hpcsc@users.noreply.github.com",
+      "date": "2020-03-15T04:26:42Z"
+    },
+    "committer": {
+      "name": "David Nguyen",
+      "email": "hpcsc@users.noreply.github.com",
+      "date": "2020-03-15T04:26:42Z"
+    },
+    "message": "Update gif and README",
+    "tree": {
+      "sha": "91c3a46e7e0d1404ce027523161b2d6281df6f13",
+      "url": "https://api.github.com/repos/hpcsc/aws-profile/git/trees/91c3a46e7e0d1404ce027523161b2d6281df6f13"
+    },
+    "url": "https://api.github.com/repos/hpcsc/aws-profile/git/commits/ccc4227f44a69597aac7cd9fa516132fb37dacca",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null
+    }
+  },
+  "url": "https://api.github.com/repos/hpcsc/aws-profile/commits/ccc4227f44a69597aac7cd9fa516132fb37dacca",
+  "html_url": "https://github.com/hpcsc/aws-profile/commit/ccc4227f44a69597aac7cd9fa516132fb37dacca",
+  "comments_url": "https://api.github.com/repos/hpcsc/aws-profile/commits/ccc4227f44a69597aac7cd9fa516132fb37dacca/comments",
+  "author": {
+    "login": "hpcsc",
+    "id": 5293047,
+    "node_id": "MDQ6VXNlcjUyOTMwNDc=",
+    "avatar_url": "https://avatars2.githubusercontent.com/u/5293047?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/hpcsc",
+    "html_url": "https://github.com/hpcsc",
+    "followers_url": "https://api.github.com/users/hpcsc/followers",
+    "following_url": "https://api.github.com/users/hpcsc/following{/other_user}",
+    "gists_url": "https://api.github.com/users/hpcsc/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/hpcsc/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/hpcsc/subscriptions",
+    "organizations_url": "https://api.github.com/users/hpcsc/orgs",
+    "repos_url": "https://api.github.com/users/hpcsc/repos",
+    "events_url": "https://api.github.com/users/hpcsc/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/hpcsc/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "hpcsc",
+    "id": 5293047,
+    "node_id": "MDQ6VXNlcjUyOTMwNDc=",
+    "avatar_url": "https://avatars2.githubusercontent.com/u/5293047?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/hpcsc",
+    "html_url": "https://github.com/hpcsc",
+    "followers_url": "https://api.github.com/users/hpcsc/followers",
+    "following_url": "https://api.github.com/users/hpcsc/following{/other_user}",
+    "gists_url": "https://api.github.com/users/hpcsc/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/hpcsc/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/hpcsc/subscriptions",
+    "organizations_url": "https://api.github.com/users/hpcsc/orgs",
+    "repos_url": "https://api.github.com/users/hpcsc/repos",
+    "events_url": "https://api.github.com/users/hpcsc/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/hpcsc/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "db3eccfae27b433cd7ec9680a0f2c5cb6eba23e0",
+      "url": "https://api.github.com/repos/hpcsc/aws-profile/commits/db3eccfae27b433cd7ec9680a0f2c5cb6eba23e0",
+      "html_url": "https://github.com/hpcsc/aws-profile/commit/db3eccfae27b433cd7ec9680a0f2c5cb6eba23e0"
+    }
+  ],
+  "stats": {
+    "total": 23,
+    "additions": 17,
+    "deletions": 6
+  },
+  "files": [
+    {
+      "sha": "d5661d10226b5338ea28fe6d55aebe86b118d96a",
+      "filename": "README.md",
+      "status": "modified",
+      "additions": 17,
+      "deletions": 6,
+      "changes": 23,
+      "blob_url": "https://github.com/hpcsc/aws-profile/blob/ccc4227f44a69597aac7cd9fa516132fb37dacca/README.md",
+      "raw_url": "https://github.com/hpcsc/aws-profile/raw/ccc4227f44a69597aac7cd9fa516132fb37dacca/README.md",
+      "contents_url": "https://api.github.com/repos/hpcsc/aws-profile/contents/README.md?ref=ccc4227f44a69597aac7cd9fa516132fb37dacca",
+      "patch": "@@ -21,8 +21,8 @@ chmod +x aws-profile && mv ./aws-profile /usr/local/bin\n \n - The `get` and `set` commands work primarily on AWS `config` and `credentials` files.\n - `set` command sets `default` profile in either `config` or `credentials` file with values (e.g. `aws_access_key_id` and `aws_secret_access_key` or `role_arn` and `source_profile`) from selected profile.\n-- `get` command compares values in `default` profile with other profiles and returns the matched profile\n-- `export` command prints out suitable command for your OS (`export` in Linux/MacOS or `$env:VAR` setting in Windows Powershell). These printed commands can be copied and executed directly in your terminal to set suitable AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION`). The purpose of this command is to support some of the tools that don't work well with AWS `config` and `credentials` files, e.g. \n+- `get` command first checks whether AWS credentials environment variables (e.g. `AWS_ACCESS_KEY_ID`, `AWS_SESSION_TOKEN`) are set. If yes, it will do a call to STS to get caller identity and cache the result locally. If those environment variables are not set, it compares values of `default` profile with other profiles in `config` and `credentials` files and returns the matched profile\n+- `export` command prints out suitable command for your OS (`export` in Linux/MacOS or `$env:VAR` setting in Windows Powershell). These printed commands can be copied and executed directly in your terminal to set suitable AWS environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION`). The purpose of this command is to support some of the tools that don't work well with AWS `config` and `credentials` files, e.g.\n     - Terraform aws provider with role that requires MFA [https://github.com/terraform-providers/terraform-provider-aws/issues/2420](https://github.com/terraform-providers/terraform-provider-aws/issues/2420)\n     - Or when you want to execute AWS CLI commands inside a container and it's not convenient to mount host machine `~/.aws` folder\n \n@@ -45,17 +45,28 @@ Commands:\n     Show help.\n \n   get\n-    get current AWS profile (that is set to default profile)\n+    get current AWS profile\n \n   set [<pattern>]\n     set default profile with credentials of selected profile\n \n-  export [<pattern>]\n+  export [<flags>] [<pattern>]\n     print commands to set environment variables for assuming a AWS role\n \n-    For Linux/MacOS, execute: \"eval $(aws-profile export)\"\n+    To execute the command without printing it to console:\n \n-    For Windows, execute: \"Invoke-Expression (path\\to\\aws-profile.exe export)\"\n+    - For Linux/MacOS, execute: \"eval $(aws-profile export)\"\n+\n+    - For Windows, execute: \"Invoke-Expression (path\\to\\aws-profile.exe export)\"\n+\n+  unset\n+    print commands to unset AWS credentials environment variables\n+\n+    To execute the command without printing it to console:\n+\n+    - For Linux/MacOS, execute: \"eval $(aws-profile unset)\"\n+\n+    - For Windows, execute: \"Invoke-Expression (path\\to\\aws-profile.exe unset)\"\n \n   version\n     show aws-profile version"
+    },
+    {
+      "sha": "4308a70160ce2f1495b6f32162136ca1733e157c",
+      "filename": "aws-profile.gif",
+      "status": "modified",
+      "additions": 0,
+      "deletions": 0,
+      "changes": 0,
+      "blob_url": "https://github.com/hpcsc/aws-profile/blob/ccc4227f44a69597aac7cd9fa516132fb37dacca/aws-profile.gif",
+      "raw_url": "https://github.com/hpcsc/aws-profile/raw/ccc4227f44a69597aac7cd9fa516132fb37dacca/aws-profile.gif",
+      "contents_url": "https://api.github.com/repos/hpcsc/aws-profile/contents/aws-profile.gif?ref=ccc4227f44a69597aac7cd9fa516132fb37dacca"
+    }
+  ]
+}

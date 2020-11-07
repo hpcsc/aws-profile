@@ -21,22 +21,24 @@ var stubBintrayGetUrl = func(url string) ([]byte, error) {
 
 func TestBintrayChecker_LatestVersionUrl(t *testing.T) {
 	var testCases = []struct {
-		os          string
-		expectedUrl string
+		os              string
+		expectedUrl     string
+		expectedVersion string
 	}{
-		{"windows", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Windows-ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
-		{"linux", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Linux-ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
-		{"macos", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-macOS-ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
+		{"windows", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Windows-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
+		{"linux", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Linux-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
+		{"macos", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-macOS-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
 	}
 
 	for _, tt := range testCases {
-		t.Run(fmt.Sprintf("return link to latest %s binary when os is %s", tt.os, tt.os), func(t *testing.T) {
+		t.Run(fmt.Sprintf("return version and link to latest %s binary when os is %s", tt.os, tt.os), func(t *testing.T) {
 			c := newBintrayChecker(tt.os, stubBintrayGetUrl)
 
-			url, err := c.LatestVersionUrl()
+			url, version, err := c.LatestVersionUrl()
 
 			require.NoError(t, err)
 			require.Equal(t, tt.expectedUrl, url)
+			require.Equal(t, tt.expectedVersion, version)
 		})
 	}
 
@@ -45,7 +47,7 @@ func TestBintrayChecker_LatestVersionUrl(t *testing.T) {
 			return nil, errors.New("some error")
 		})
 
-		_, err := c.LatestVersionUrl()
+		_, _, err := c.LatestVersionUrl()
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "some error")
@@ -54,7 +56,7 @@ func TestBintrayChecker_LatestVersionUrl(t *testing.T) {
 	t.Run("return error when no asset for given os found", func(t *testing.T) {
 		c := newBintrayChecker("bsd", stubBintrayGetUrl)
 
-		_, err := c.LatestVersionUrl()
+		_, _, err := c.LatestVersionUrl()
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "download url for os bsd not found")

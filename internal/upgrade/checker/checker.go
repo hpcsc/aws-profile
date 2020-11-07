@@ -5,7 +5,7 @@ import (
 )
 
 type checker interface {
-	LatestVersionUrl() (string, error)
+	LatestVersionUrl() (string, string, error)
 }
 
 func NewChecker(os string, includePrerelease bool) checker {
