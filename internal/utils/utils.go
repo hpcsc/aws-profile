@@ -1,16 +1,20 @@
 package utils
 
 import (
+	"log"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 )
 
 func ExpandHomeDirectory(filePath string) string {
-	usr, _ := user.Current()
-	homeDirectory := usr.HomeDir
 	if strings.HasPrefix(filePath, "~/") {
+		homeDirectory, err := os.UserHomeDir()
+		if err != nil {
+			// use log.Fatalf() instead of logger here because this function can be used by logger during init
+			log.Fatalf("failed to get user home directory: %v", err)
+		}
+
 		return filepath.Join(homeDirectory, filePath[2:])
 	}
 
