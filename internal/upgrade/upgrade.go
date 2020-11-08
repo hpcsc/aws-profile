@@ -5,10 +5,13 @@ import (
 	"github.com/hpcsc/aws-profile/internal/upgrade/checker"
 	"github.com/hpcsc/aws-profile/internal/upgrade/httpclient"
 	"os"
+	"path/filepath"
 	"runtime"
 )
 
-func ToLatest(binary string, includePrerelease bool, currentVersion string) (string, error) {
+func ToLatest(currentBinaryPath string, includePrerelease bool, currentVersion string) (string, error) {
+	currentBinaryName := filepath.Base(currentBinaryPath)
+
 	osName, err := getOSName(runtime.GOOS)
 	if err != nil {
 		return "", err
@@ -21,10 +24,10 @@ func ToLatest(binary string, includePrerelease bool, currentVersion string) (str
 	}
 
 	if currentVersion == version {
-		return fmt.Sprintf("aws-profile is already at latest version (%s)", version), nil
+		return fmt.Sprintf("%s is already at latest version (%s)", currentBinaryName, version), nil
 	}
 
-	newFileName := "./aws-profile.new"
+	newFileName := fmt.Sprintf("./%s.new", currentBinaryName)
 	err = httpclient.DownloadFile(newFileName, url)
 	if err != nil {
 		return "", err
@@ -35,20 +38,20 @@ func ToLatest(binary string, includePrerelease bool, currentVersion string) (str
 		return "", fmt.Errorf("failed to change downloaded file permission: %v", err)
 	}
 
-	old := binary + ".old"
+	old := currentBinaryPath+ ".old"
 	os.Remove(old)
 
-	err = os.Rename(binary, old)
+	err = os.Rename(currentBinaryPath, old)
 	if err != nil {
 		return "", fmt.Errorf("failed to rename current executable: %v", err)
 	}
 
-	if err := os.Rename(newFileName, binary); err != nil {
-		os.Rename(old, binary)
-		return "", fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, binary, err)
+	if err := os.Rename(newFileName, currentBinaryPath); err != nil {
+		os.Rename(old, currentBinaryPath)
+		return "", fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, currentBinaryPath, err)
 	}
 
-	return fmt.Sprintf("aws-profile upgraded to latest version (%s)", version), nil
+	return fmt.Sprintf("%s upgraded to latest version (%s)", currentBinaryName, version), nil
 }
 
 func getOSName(goos string) (string, error) {
