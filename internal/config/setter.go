@@ -1,8 +1,9 @@
 package config
 
 import (
-	"gopkg.in/ini.v1"
 	"strings"
+
+	"gopkg.in/ini.v1"
 )
 
 func SetSelectedProfileAsDefault(selectedProfileName string, credentialsFile *ini.File, configFile *ini.File) {
@@ -33,6 +34,11 @@ func SetSelectedAssumedProfileAsDefault(selectedAssumedProfileName string, confi
 	defaultProfile.Key("source_profile").SetValue(selectedSourceProfile)
 
 	copyValueToDefaultProfileIfAvailable(defaultProfile, selectedProfile, "region", "mfa_serial")
+}
+
+func SetSelectedRegionAsDefault(selectedRegion string, configFile *ini.File) {
+	defaultProfileInConfig := configFile.Section("default")
+	defaultProfileInConfig.Key("region").SetValue(selectedRegion)
 }
 
 func findConfigSectionByName(name string, configFile *ini.File) *ini.Section {

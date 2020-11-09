@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"runtime"
+	"strings"
+
 	"github.com/hpcsc/aws-profile/internal/aws"
 	"github.com/hpcsc/aws-profile/internal/handlers"
 	"github.com/hpcsc/aws-profile/internal/io"
@@ -9,9 +13,6 @@ import (
 	"github.com/hpcsc/aws-profile/internal/tui"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"os"
-	"runtime"
-	"strings"
 )
 
 func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]handlers.Handler {
@@ -25,6 +26,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 		io.WriteCachedCallerIdentity,
 	)
 	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, io.WriteToFile)
+	setRegionHandler := handlers.NewSetRegionHandler(app, tui.SelectValueFromList, io.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
 		isWindows,
@@ -36,12 +38,13 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 	versionHandler := handlers.NewVersionHandler(app)
 
 	return map[string]handlers.Handler{
-		getHandler.SubCommand.FullCommand():     getHandler,
-		setHandler.SubCommand.FullCommand():     setHandler,
-		exportHandler.SubCommand.FullCommand():  exportHandler,
-		unsetHandler.SubCommand.FullCommand():   unsetHandler,
-		upgradeHandler.SubCommand.FullCommand(): upgradeHandler,
-		versionHandler.SubCommand.FullCommand(): versionHandler,
+		getHandler.SubCommand.FullCommand():       getHandler,
+		setHandler.SubCommand.FullCommand():       setHandler,
+		setRegionHandler.SubCommand.FullCommand(): setRegionHandler,
+		exportHandler.SubCommand.FullCommand():    exportHandler,
+		unsetHandler.SubCommand.FullCommand():     unsetHandler,
+		upgradeHandler.SubCommand.FullCommand():   upgradeHandler,
+		versionHandler.SubCommand.FullCommand():   versionHandler,
 	}
 }
 

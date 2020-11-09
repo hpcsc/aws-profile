@@ -1,9 +1,10 @@
 package config
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/ini.v1"
-	"testing"
 )
 
 func TestSetSelectedProfileAsDefault(t *testing.T) {
@@ -220,5 +221,19 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		SetSelectedAssumedProfileAsDefault("profile-1", configFile)
 
 		assert.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
+	})
+}
+
+func TestSetSelectedRegionAsDefault(t *testing.T) {
+	t.Run("set selected region of default profile in config file", func(t *testing.T) {
+		configFile := ini.Empty()
+		AddConfigSection(configFile, "default")
+
+		SetSelectedRegionAsDefault("us-east-1", configFile)
+
+		defaultSection := configFile.Section("default")
+		assert.Equal(t, "us-east-1", defaultSection.Key("region").Value())
+		assert.Equal(t, "default-source-profile", defaultSection.Key("source_profile").Value())
+		assert.Equal(t, "default-role-arn", defaultSection.Key("role_arn").Value())
 	})
 }
