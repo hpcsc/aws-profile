@@ -38,7 +38,7 @@ func ToLatest(currentBinaryPath string, includePrerelease bool, currentVersion s
 		return "", fmt.Errorf("failed to change downloaded file permission: %v", err)
 	}
 
-	old := currentBinaryPath+ ".old"
+	old := currentBinaryPath + ".old"
 	os.Remove(old)
 
 	err = os.Rename(currentBinaryPath, old)

@@ -55,7 +55,7 @@ func TestGithubChecker_LatestVersionUrl(t *testing.T) {
 		})
 	}
 
-	t.Run("return link even if not able to get commit hash for latest version", func (t *testing.T) {
+	t.Run("return link even if not able to get commit hash for latest version", func(t *testing.T) {
 		c := newGithubChecker("linux", func(url string) ([]byte, error) {
 			if strings.Contains(url, "releases/latest") {
 				return readFile("testdata/github-latest-release-response.json")
@@ -70,7 +70,6 @@ func TestGithubChecker_LatestVersionUrl(t *testing.T) {
 		require.Equal(t, "https://github.com/hpcsc/aws-profile/releases/download/v0.4.0/aws-profile-linux", url)
 		require.Equal(t, "", version)
 	})
-
 
 	t.Run("return error when fail to get url", func(t *testing.T) {
 		c := newGithubChecker("linux", func(url string) ([]byte, error) {

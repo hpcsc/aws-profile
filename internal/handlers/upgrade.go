@@ -19,7 +19,7 @@ type UpgradeCommandArguments struct {
 	IncludePrerelease *bool
 }
 
-func NewUpgradeHandler(app *kingpin.Application, logger log.Logger, ) UpgradeHandler {
+func NewUpgradeHandler(app *kingpin.Application, logger log.Logger) UpgradeHandler {
 	subCommand := app.Command("upgrade", "upgrade to latest version")
 
 	includePrerelease := subCommand.Flag("prerelease", "Include prerelease").Default("false").Bool()
