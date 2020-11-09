@@ -12,7 +12,7 @@ import (
 var stubBintrayGetUrl = func(url string) ([]byte, error) {
 	response, err := ioutil.ReadFile("testdata/bintray-files-response.json")
 	if err != nil {
-		fmt.Errorf("failed to read response file: %v", err)
+		fmt.Printf("failed to read response file: %v", err)
 		os.Exit(1)
 	}
 

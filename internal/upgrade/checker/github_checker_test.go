@@ -21,7 +21,7 @@ func githubStubResponsePath(url string) string {
 func readFile(path string) ([]byte, error) {
 	response, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Errorf("failed to read response file: %v", err)
+		fmt.Printf("failed to read response file: %v", err)
 		os.Exit(1)
 	}
 
