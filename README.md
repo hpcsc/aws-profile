@@ -1,7 +1,7 @@
 # AWS Profile
 
 ### Build Status
-![Build Status](https://github.com/hpcsc/aws-profile/workflows/Pipeline/badge.svg)
+![Build Status](https://github.com/hpcsc/aws-profile/workflows/Pipeline/badge.svg) [![codecov](https://codecov.io/gh/hpcsc/aws-profile/branch/master/graph/badge.svg?token=76OSPJNMON)](https://codecov.io/gh/hpcsc/aws-profile)
 
 [![Demo](https://github.com/hpcsc/aws-profile/raw/master/aws-profile.gif)](https://github.com/hpcsc/aws-profile/raw/master/aws-profile.gif)
 
