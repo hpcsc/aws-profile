@@ -11,7 +11,7 @@ import (
 
 var Regions = []string{"ap-southeast-2", "us-west-1"}
 
-type SelectRegionFn func([]string) ([]byte, error)
+type SelectRegionFn func([]string, string) ([]byte, error)
 
 type SetRegionHandler struct {
 	SubCommand   *kingpin.CmdClause
@@ -39,7 +39,7 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	selectRegionResult, err := handler.SelectRegion(Regions)
+	selectRegionResult, err := handler.SelectRegion(Regions, "Select an AWS region")
 	if err != nil {
 		// should only exit with code 0 when the error is caused by Ctrl+C
 		// temporarily assume all the errors are caused by Ctrl+C for now

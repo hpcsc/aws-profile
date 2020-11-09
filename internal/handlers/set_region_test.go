@@ -41,10 +41,10 @@ func TestSetRegionHandler(t *testing.T) {
 
 	})
 
-	t.Run("invoke selectRegion with predefined regions in code", func(t *testing.T) {
+	t.Run("invoke selectRegion with predefined regions and correct title", func(t *testing.T) {
 		called := false
 
-		selectRegionMock := func(regions []string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string) ([]byte, error) {
 			assert.ElementsMatch(
 				t,
 				regions,
@@ -53,6 +53,7 @@ func TestSetRegionHandler(t *testing.T) {
 					"us-west-1",
 				},
 			)
+			assert.Equal(t, title, "Select an AWS region")
 
 			called = true
 			return []byte("us-west-1"), nil
@@ -73,7 +74,7 @@ func TestSetRegionHandler(t *testing.T) {
 	t.Run("set region of default profile in config file", func(t *testing.T) {
 		calledWriteToFile := false
 
-		selectRegionMock := func(regions []string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string) ([]byte, error) {
 			return []byte("ap-southeast-2"), nil
 		}
 
@@ -104,7 +105,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
 		calledWriteToFile := false
-		selectRegionMock := func(regions []string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string) ([]byte, error) {
 			return nil, errors.New("cancelled by user")
 		}
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
