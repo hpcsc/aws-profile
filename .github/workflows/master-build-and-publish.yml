@@ -40,6 +40,15 @@ jobs:
       run: |
         task test
 
+    - name: Upload coverage to codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.txt
+        flags: unittests
+        name: aws-profile-coverage
+        fail_ci_if_error: true
+        verbose: true
+
     - name: Generate coverage html report
       run: |
         task generate-coverage-report
