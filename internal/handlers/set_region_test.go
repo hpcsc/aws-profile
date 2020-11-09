@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -45,14 +44,7 @@ func TestSetRegionHandler(t *testing.T) {
 		called := false
 
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
-			assert.ElementsMatch(
-				t,
-				regions,
-				[]string{
-					"ap-southeast-2",
-					"us-west-1",
-				},
-			)
+			assert.Len(t, regions, 25)
 			assert.Equal(t, title, "Select an AWS region")
 
 			called = true
@@ -92,7 +84,6 @@ func TestSetRegionHandler(t *testing.T) {
 			}
 		}
 
-		fmt.Printf("hello")
 		setRegionHandler := setupSetRegionHandler(selectRegionMock, writeToFileMock)
 		globalArguments := stubGlobalArgumentsForSetRegion("set-config")
 
