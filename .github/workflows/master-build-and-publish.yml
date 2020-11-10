@@ -39,8 +39,9 @@ jobs:
         OUTPUT: bin/aws-profile-${{runner.os}}-${{github.sha}}
 
     - name: Lint
-      run: |
-        task lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.32.2
 
     - name: Test
       run: |
