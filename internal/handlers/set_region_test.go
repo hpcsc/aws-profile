@@ -115,4 +115,26 @@ func TestSetRegionHandler(t *testing.T) {
 		assert.Empty(t, message)
 		assert.False(t, calledWriteToFile)
 	})
+
+	t.Run("return error if failed to write updated config file", func(t *testing.T) {
+		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+			return []byte("ap-southeast-2"), nil
+		}
+
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
+			if strings.Contains(unexpandedFilePath, "-config") {
+				return errors.New("some error")
+			}
+
+			return nil
+		}
+
+		setRegionHandler := setupSetRegionHandler(selectRegionMock, writeToFileMock)
+		globalArguments := stubGlobalArgumentsForSetRegion("set-config")
+
+		success, message := setRegionHandler.Handle(globalArguments)
+
+		assert.False(t, success)
+		assert.Contains(t, message, "some error")
+	})
 }

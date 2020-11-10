@@ -42,7 +42,9 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 	trimmedSelectedRegionResult := strings.TrimSuffix(string(selectRegionResult), "\n")
 
 	config.SetSelectedRegionAsDefault(trimmedSelectedRegionResult, configFile)
-	handler.WriteToFile(configFile, globalArguments.ConfigFilePath)
+	if err := handler.WriteToFile(configFile, globalArguments.ConfigFilePath); err != nil {
+		return false, err.Error()
+	}
 
 	return true, fmt.Sprintf("=== [region %s] -> [default.region] (%s)", trimmedSelectedRegionResult, globalArguments.CredentialsFilePath)
 }
