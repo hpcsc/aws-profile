@@ -47,8 +47,13 @@ func ToLatest(currentBinaryPath string, includePrerelease bool, currentVersion s
 	}
 
 	if err := os.Rename(newFileName, currentBinaryPath); err != nil {
-		os.Rename(old, currentBinaryPath)
-		return "", fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, currentBinaryPath, err)
+		renameErr := fmt.Errorf("failed to rename downloaded binary %s to %s: %v", newFileName, currentBinaryPath, err)
+
+		if err := os.Rename(old, currentBinaryPath); err != nil {
+			renameErr = fmt.Errorf("failed to recover original binary: %v, original error: %v", err, renameErr)
+		}
+
+		return "", renameErr
 	}
 
 	return fmt.Sprintf("%s upgraded to latest version (%s)", currentBinaryName, version), nil

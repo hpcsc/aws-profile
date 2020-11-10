@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/hpcsc/aws-profile/internal/log"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -36,7 +37,10 @@ func setupHandler() GetHandler {
 	app := kingpin.New("some-app", "some description")
 	getHandler := NewGetHandler(app, &log.NullLogger{}, stubGetAWSCallerIdentity, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
 
-	app.Parse([]string{"get"})
+	if _, err := app.Parse([]string{"get"}); err != nil {
+		fmt.Printf("failed to setup test get handler: %v\n", err)
+		os.Exit(1)
+	}
 
 	return getHandler
 }
@@ -136,7 +140,9 @@ func TestGetHandler(t *testing.T) {
 				getHandler := NewGetHandler(app, &log.NullLogger{}, func() (string, error) {
 					return "", errors.New(tt.awsError)
 				}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
-				app.Parse([]string{"get"})
+				if _, err := app.Parse([]string{"get"}); err != nil {
+					t.Fatalf("failed to setup test export handler: %v\n", err)
+				}
 
 				os.Setenv("AWS_ACCESS_KEY_ID", "aws-access-key-id")
 				os.Setenv("AWS_SECRET_ACCESS_KEY", "aws-secret-access-key")
@@ -160,7 +166,9 @@ func TestGetHandler(t *testing.T) {
 		getHandler := NewGetHandler(app, &log.NullLogger{}, func() (string, error) {
 			return "", errors.New("some error from aws")
 		}, stubReadCachedCallerIdentity, stubWriteCachedCallerIdentity)
-		app.Parse([]string{"get"})
+		if _, err := app.Parse([]string{"get"}); err != nil {
+			t.Fatalf("failed to setup test export handler: %v\n", err)
+		}
 
 		os.Setenv("AWS_ACCESS_KEY_ID", "aws-access-key-id")
 		os.Setenv("AWS_SECRET_ACCESS_KEY", "aws-secret-access-key")

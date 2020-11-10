@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -35,7 +37,10 @@ func setupExportHandler(isWindows bool, selectProfileFn SelectProfileFn, getAWSC
 	app := kingpin.New("some-app", "some description")
 	exportHandler := NewExportHandler(app, isWindows, selectProfileFn, getAWSCredentialsFn)
 
-	app.Parse([]string{"export"})
+	if _, err := app.Parse([]string{"export"}); err != nil {
+		fmt.Printf("failed to setup test export handler: %v\n", err)
+		os.Exit(1)
+	}
 
 	return exportHandler
 }
@@ -91,7 +96,10 @@ func TestExportHandler(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
 		exportHandler := NewExportHandler(app, false, nil, nil)
 
-		app.Parse([]string{"export", "-d", "5"})
+		if _, err := app.Parse([]string{"export", "-d", "5"}); err != nil {
+			t.Fatalf("failed to setup test export handler: %v\n", err)
+		}
+
 		globalArguments := stubGlobalArgumentsForExport("set-config")
 
 		success, err := exportHandler.Handle(globalArguments)
@@ -104,7 +112,10 @@ func TestExportHandler(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
 		exportHandler := NewExportHandler(app, false, nil, nil)
 
-		app.Parse([]string{"export", "-d", "5m"})
+		if _, err := app.Parse([]string{"export", "-d", "5m"}); err != nil {
+			t.Fatalf("failed to setup test export handler: %v\n", err)
+		}
+
 		globalArguments := stubGlobalArgumentsForExport("set-config")
 
 		success, err := exportHandler.Handle(globalArguments)
@@ -155,7 +166,10 @@ func TestExportHandler(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
 		exportHandler := NewExportHandler(app, false, selectProfileMock, getAWSCredentialsMock)
 
-		app.Parse([]string{"export", "-d", mockDurationValue})
+		if _, err := app.Parse([]string{"export", "-d", mockDurationValue}); err != nil {
+			t.Fatalf("failed to setup test export handler: %v\n", err)
+		}
+
 		globalArguments := stubGlobalArgumentsForExport("set-config")
 
 		exportHandler.Handle(globalArguments)

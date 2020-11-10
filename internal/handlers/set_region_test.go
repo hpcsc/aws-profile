@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/hpcsc/aws-profile/internal/utils"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -25,7 +27,10 @@ func setupSetRegionHandler(selectRegionFn SelectRegionFn, writeToFileFn WriteToF
 	app := kingpin.New("some-app", "some description")
 	setRegionHandler := NewSetRegionHandler(app, selectRegionFn, writeToFileFn)
 
-	app.Parse([]string{"set-region"})
+	if _, err := app.Parse([]string{"set-region"}); err != nil {
+		fmt.Printf("failed to setup test set region handler: %v\n", err)
+		os.Exit(1)
+	}
 
 	return setRegionHandler
 }

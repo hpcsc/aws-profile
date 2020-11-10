@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -31,7 +33,10 @@ func setupSetHandler(selectProfileFn SelectProfileFn, writeToFileFn WriteToFileF
 	app := kingpin.New("some-app", "some description")
 	setHandler := NewSetHandler(app, selectProfileFn, writeToFileFn)
 
-	app.Parse([]string{"set"})
+	if _, err := app.Parse([]string{"set"}); err != nil {
+		fmt.Printf("failed to setup test set handler: %v\n", err)
+		os.Exit(1)
+	}
 
 	return setHandler
 }

@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
 	"testing"
 )
 
@@ -10,7 +12,10 @@ func setupUnsetHandler(isWindows bool) UnsetHandler {
 	app := kingpin.New("some-app", "some description")
 	unsetHandler := NewUnsetHandler(app, isWindows)
 
-	app.Parse([]string{"unset"})
+	if _, err := app.Parse([]string{"unset"}); err != nil {
+		fmt.Printf("failed to setup test set handler: %v\n", err)
+		os.Exit(1)
+	}
 
 	return unsetHandler
 }
