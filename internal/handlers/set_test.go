@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"github.com/hpcsc/aws-profile/internal/config"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -101,7 +102,20 @@ func TestSetHandler(t *testing.T) {
 
 		require.False(t, success)
 		require.Contains(t, message, "not found in either credentials or config file")
+	})
 
+	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
+		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+			return nil, utils.NewCancelledError()
+		}
+
+		setHandler := setupSetHandler(selectProfileMock, noopWriteToFileMock)
+		globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
+
+		success, message := setHandler.Handle(globalArguments)
+
+		require.True(t, success)
+		require.Empty(t, message)
 	})
 
 	t.Run("set default profile in credentials file when profile is in credentials file", func(t *testing.T) {

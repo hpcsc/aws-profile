@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"errors"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"log"
 
 	ui "github.com/gizak/termui/v3"
@@ -72,7 +72,7 @@ func renderListSelection(labels []string, title string) (int, error) {
 		e := <-uiEvents
 		switch e.ID {
 		case "q", "<C-c>":
-			return -1, errors.New("cancelled by user")
+			return -1, utils.NewCancelledError()
 		case "j", "<Down>":
 			list.ScrollDown()
 		case "k", "<Up>":

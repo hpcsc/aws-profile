@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"strings"
 )
@@ -48,9 +50,8 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 	profiles := config.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
 
 	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
-	if err != nil {
-		// should only exit with code 0 when the error is caused by Ctrl+C
-		// temporarily assume all the errors are caused by Ctrl+C for now
+	var cancelled *utils.CancelledError
+	if errors.As(err, &cancelled) {
 		return true, ""
 	}
 

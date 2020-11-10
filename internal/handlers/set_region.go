@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"strings"
 
 	"github.com/hpcsc/aws-profile/internal/config"
@@ -34,11 +36,11 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 	}
 
 	selectRegionResult, err := handler.SelectRegion(getAllRegions(), "Select an AWS region")
-	if err != nil {
-		// should only exit with code 0 when the error is caused by Ctrl+C
-		// temporarily assume all the errors are caused by Ctrl+C for now
+	var cancelled *utils.CancelledError
+	if errors.As(err, &cancelled) {
 		return true, ""
 	}
+
 	trimmedSelectedRegionResult := strings.TrimSuffix(string(selectRegionResult), "\n")
 
 	config.SetSelectedRegionAsDefault(trimmedSelectedRegionResult, configFile)

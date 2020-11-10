@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -99,7 +100,7 @@ func TestSetRegionHandler(t *testing.T) {
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
 		calledWriteToFile := false
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
-			return nil, errors.New("cancelled by user")
+			return nil, utils.NewCancelledError()
 		}
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			calledWriteToFile = true
