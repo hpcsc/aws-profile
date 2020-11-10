@@ -59,14 +59,21 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
 		config.SetSelectedProfileAsDefault(trimmedSelectedProfileResult, credentialsFile, configFile)
 
-		handler.WriteToFile(credentialsFile, globalArguments.CredentialsFilePath)
-		handler.WriteToFile(configFile, globalArguments.ConfigFilePath)
+		if err := handler.WriteToFile(credentialsFile, globalArguments.CredentialsFilePath); err != nil {
+			return false, err.Error()
+		}
+
+		if err := handler.WriteToFile(configFile, globalArguments.ConfigFilePath); err != nil {
+			return false, err.Error()
+		}
 
 		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, globalArguments.CredentialsFilePath)
 	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
 		config.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName, configFile)
 
-		handler.WriteToFile(configFile, globalArguments.ConfigFilePath)
+		if err := handler.WriteToFile(configFile, globalArguments.ConfigFilePath); err != nil {
+			return false, err.Error()
+		}
 
 		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", assumedProfile.ProfileName, globalArguments.ConfigFilePath)
 	} else {

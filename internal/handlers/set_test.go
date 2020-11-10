@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -103,7 +104,7 @@ func TestSetHandler(t *testing.T) {
 
 	})
 
-	t.Run("set default profile in credentials file", func(t *testing.T) {
+	t.Run("set default profile in credentials file when profile is in credentials file", func(t *testing.T) {
 		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil
 		}
@@ -130,10 +131,55 @@ func TestSetHandler(t *testing.T) {
 
 		assert.True(t, success)
 		assert.Contains(t, message, "[credentials_profile_2] -> [default]")
-
 	})
 
-	t.Run("set default profile in config file", func(t *testing.T) {
+	t.Run("return error when profile is in credentials file and failed to write updated credentials file", func(t *testing.T) {
+		selectProfileStub := func(profiles config.Profiles, pattern string) ([]byte, error) {
+			return []byte("credentials_profile_2"), nil
+		}
+
+		writeToFileStub := func(file *ini.File, unexpandedFilePath string) error {
+			// when profile is from credentials file, it should set default in credentials file and clear default in config file
+			if strings.Contains(unexpandedFilePath, "-credentials") {
+				return errors.New("some error")
+			}
+
+			return nil
+		}
+
+		setHandler := setupSetHandler(selectProfileStub, writeToFileStub)
+		globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
+
+		success, message := setHandler.Handle(globalArguments)
+
+		assert.False(t, success)
+		assert.Contains(t, message, "some error")
+	})
+
+	t.Run("return error when profile is in credentials file and failed to write updated config file", func(t *testing.T) {
+		selectProfileStub := func(profiles config.Profiles, pattern string) ([]byte, error) {
+			return []byte("credentials_profile_2"), nil
+		}
+
+		writeToFileStub := func(file *ini.File, unexpandedFilePath string) error {
+			// when profile is from credentials file, it should set default in credentials file and clear default in config file
+			if strings.Contains(unexpandedFilePath, "-config") {
+				return errors.New("some error")
+			}
+
+			return nil
+		}
+
+		setHandler := setupSetHandler(selectProfileStub, writeToFileStub)
+		globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
+
+		success, message := setHandler.Handle(globalArguments)
+
+		assert.False(t, success)
+		assert.Contains(t, message, "some error")
+	})
+
+	t.Run("set default profile in config file when profile is in config file", func(t *testing.T) {
 		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
@@ -157,6 +203,27 @@ func TestSetHandler(t *testing.T) {
 
 		assert.True(t, success)
 		assert.Contains(t, message, "[profile config_profile_2] -> [default]")
+	})
 
+	t.Run("return error when profile is in config file and failed to write updated config file", func(t *testing.T) {
+		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+			return []byte("profile config_profile_2"), nil
+		}
+
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
+			if strings.Contains(unexpandedFilePath, "-config") {
+				return errors.New("some error")
+			}
+
+			return nil
+		}
+
+		setHandler := setupSetHandler(selectProfileMock, writeToFileMock)
+		globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
+
+		success, message := setHandler.Handle(globalArguments)
+
+		assert.False(t, success)
+		assert.Contains(t, message, "some error")
 	})
 }
