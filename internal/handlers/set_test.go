@@ -123,6 +123,20 @@ func TestSetHandler(t *testing.T) {
 		require.Empty(t, message)
 	})
 
+	t.Run("return error when failed to do selection", func(t *testing.T) {
+		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+			return nil, errors.New("some error")
+		}
+
+		setHandler := setupSetHandler(selectProfileMock, noopWriteToFileMock)
+		globalArguments := stubGlobalArgumentsForSet("set-credentials", "set-config")
+
+		success, message := setHandler.Handle(globalArguments)
+
+		require.False(t, success)
+		require.Contains(t, message, "some error")
+	})
+
 	t.Run("set default profile in credentials file when profile is in credentials file", func(t *testing.T) {
 		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil

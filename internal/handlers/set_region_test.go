@@ -125,6 +125,26 @@ func TestSetRegionHandler(t *testing.T) {
 		require.False(t, calledWriteToFile)
 	})
 
+	t.Run("return error when failed to do selection", func(t *testing.T) {
+		calledWriteToFile := false
+		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+			return nil, errors.New("some error")
+		}
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
+			calledWriteToFile = true
+			return nil
+		}
+
+		setRegionHandler := setupSetRegionHandler(selectRegionMock, writeToFileMock)
+		globalArguments := stubGlobalArgumentsForSetRegion("set-config")
+
+		success, message := setRegionHandler.Handle(globalArguments)
+
+		require.False(t, success)
+		require.Contains(t, message, "some error")
+		require.False(t, calledWriteToFile)
+	})
+
 	t.Run("return error if failed to write updated config file", func(t *testing.T) {
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
 			return []byte("ap-southeast-2"), nil

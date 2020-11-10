@@ -41,6 +41,10 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 		return true, ""
 	}
 
+	if err != nil {
+		return false, fmt.Sprintf("Failed to select region: %v", err)
+	}
+
 	trimmedSelectedRegionResult := strings.TrimSuffix(string(selectRegionResult), "\n")
 
 	config.SetSelectedRegionAsDefault(trimmedSelectedRegionResult, configFile)

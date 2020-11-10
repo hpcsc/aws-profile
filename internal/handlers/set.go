@@ -55,6 +55,10 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		return true, ""
 	}
 
+	if err != nil {
+		return false, fmt.Sprintf("Failed to select profile: %v", err)
+	}
+
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 
 	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
