@@ -3,11 +3,12 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/hpcsc/aws-profile/internal/utils"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/hpcsc/aws-profile/internal/utils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -100,7 +101,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 		assert.True(t, success)
 		assert.Contains(t, message, "[region ap-southeast-2] -> [default.region]")
-		assert.Contains(t, message, "/set-config")
+		assert.Contains(t, message, globalArguments.ConfigFilePath)
 		assert.True(t, calledWriteToFile)
 	})
 
