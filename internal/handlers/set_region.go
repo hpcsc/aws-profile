@@ -48,7 +48,7 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 		return false, err.Error()
 	}
 
-	return true, fmt.Sprintf("=== [region %s] -> [default.region] (%s)", trimmedSelectedRegionResult, globalArguments.CredentialsFilePath)
+	return true, fmt.Sprintf("=== [region %s] -> [default.region] (%s)", trimmedSelectedRegionResult, globalArguments.ConfigFilePath)
 }
 
 func getAllRegions() []string {

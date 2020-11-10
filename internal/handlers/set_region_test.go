@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -92,9 +93,10 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, message := setRegionHandler.Handle(globalArguments)
 
-		require.True(t, success)
-		require.Contains(t, message, "[region ap-southeast-2] -> [default.region]")
-		require.True(t, calledWriteToFile)
+		assert.True(t, success)
+		assert.Contains(t, message, "[region ap-southeast-2] -> [default.region]")
+		assert.Contains(t, message, "/set-config")
+		assert.True(t, calledWriteToFile)
 	})
 
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
