@@ -21,6 +21,8 @@ jobs:
 
     - name: Install Task
       uses: Arduino/actions/setup-taskfile@master
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
