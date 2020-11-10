@@ -22,6 +22,11 @@ tasks:
       VERSION: 000
       OUTPUT: bin/aws-profile
 
+  lint:
+    cmds:
+      - go vet ./...
+      - golangci-lint run # to run this, install golangci-lint from: https://golangci-lint.run/usage/install/#local-installation
+
   test:
     cmds:
       - go test -coverprofile=coverage.txt -v ./...
