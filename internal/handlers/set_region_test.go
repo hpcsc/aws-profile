@@ -70,7 +70,7 @@ func TestSetRegionHandler(t *testing.T) {
 			return []byte("ap-southeast-2"), nil
 		}
 
-		writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			calledWriteToFile = true
 
 			// only the config file should be modified and non-region keys
@@ -82,6 +82,8 @@ func TestSetRegionHandler(t *testing.T) {
 			} else {
 				assert.Fail(t, "unexpected call to writeToFile")
 			}
+
+			return nil
 		}
 
 		setRegionHandler := setupSetRegionHandler(selectRegionMock, writeToFileMock)
@@ -99,8 +101,9 @@ func TestSetRegionHandler(t *testing.T) {
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
 			return nil, errors.New("cancelled by user")
 		}
-		writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			calledWriteToFile = true
+			return nil
 		}
 
 		setRegionHandler := setupSetRegionHandler(selectRegionMock, writeToFileMock)

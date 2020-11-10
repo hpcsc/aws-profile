@@ -5,11 +5,8 @@ import (
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"gopkg.in/ini.v1"
 	"strings"
 )
-
-type WriteToFileFn func(*ini.File, string)
 
 type SetHandler struct {
 	SubCommand    *kingpin.CmdClause

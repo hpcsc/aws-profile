@@ -10,8 +10,9 @@ import (
 	"testing"
 )
 
-func noopWriteToFileMock(_ *ini.File, _ string) {
+func noopWriteToFileMock(_ *ini.File, _ string) error {
 	// noop
+	return nil
 }
 
 func stubGlobalArgumentsForSet(credentialsName string, configName string) GlobalArguments {
@@ -107,7 +108,7 @@ func TestSetHandler(t *testing.T) {
 			return []byte("credentials_profile_2"), nil
 		}
 
-		writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			// when profile is from credentials file, it should set default in credentials file and clear default in config file
 			if strings.Contains(unexpandedFilePath, "-credentials") {
 				assert.Equal(t, "4", file.Section("default").Key("aws_access_key_id").Value())
@@ -118,6 +119,8 @@ func TestSetHandler(t *testing.T) {
 			} else {
 				assert.Fail(t, "unexpected call to writeToFile")
 			}
+
+			return nil
 		}
 
 		setHandler := setupSetHandler(selectProfileMock, writeToFileMock)
@@ -135,7 +138,7 @@ func TestSetHandler(t *testing.T) {
 			return []byte("profile config_profile_2"), nil
 		}
 
-		writeToFileMock := func(file *ini.File, unexpandedFilePath string) {
+		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			// when profile is from config file, it should set default in config file and keep default in credentials unchanged
 			if strings.Contains(unexpandedFilePath, "-config") {
 				assert.Equal(t, "2", file.Section("default").Key("role_arn").Value())
@@ -143,6 +146,8 @@ func TestSetHandler(t *testing.T) {
 			} else {
 				assert.Fail(t, "unexpected call to writeToFile")
 			}
+
+			return nil
 		}
 
 		setHandler := setupSetHandler(selectProfileMock, writeToFileMock)

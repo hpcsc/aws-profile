@@ -10,18 +10,20 @@ import (
 	"path"
 )
 
-func WriteToFile(file *ini.File, unexpandedFilePath string) {
+func WriteToFile(file *ini.File, unexpandedFilePath string) error {
 	var buffer bytes.Buffer
 	_, err := file.WriteTo(&buffer)
 
-	filePath := utils.ExpandHomeDirectory(unexpandedFilePath)
-
 	if err != nil {
-		fmt.Printf("Fail to write to file %s: %v", filePath, err)
-		os.Exit(1)
+		return fmt.Errorf("fail to write to buffer: %v", err)
 	}
 
-	ioutil.WriteFile(filePath, buffer.Bytes(), 0600)
+	filePath := utils.ExpandHomeDirectory(unexpandedFilePath)
+	if err = ioutil.WriteFile(filePath, buffer.Bytes(), 0600); err != nil {
+		return fmt.Errorf("fail to write to file %s: %v", filePath, err)
+	}
+
+	return nil
 }
 
 const awsProfileHome = "~/.aws-profile"
