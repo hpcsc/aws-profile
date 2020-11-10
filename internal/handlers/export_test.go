@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/config"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"path/filepath"
 	"testing"
@@ -51,15 +51,15 @@ func TestExportHandler(t *testing.T) {
 
 		success, output := exportHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS config file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS config file")
 	})
 
 	t.Run("invoke SelectProfile with profile names from config file only", func(t *testing.T) {
 		called := false
 
 		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
-			assert.ElementsMatch(
+			require.ElementsMatch(
 				t,
 				profiles.GetAllDisplayProfileNames(),
 				[]string{
@@ -81,7 +81,7 @@ func TestExportHandler(t *testing.T) {
 
 		success, _ := exportHandler.Handle(globalArguments)
 
-		assert.True(t, success)
+		require.True(t, success)
 		if !called {
 			t.Errorf("selectProfileFn is not invoked")
 		}
@@ -96,8 +96,8 @@ func TestExportHandler(t *testing.T) {
 
 		success, err := exportHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, err, "missing unit in duration")
+		require.False(t, success)
+		require.Contains(t, err, "missing unit in duration")
 	})
 
 	t.Run("return error if duration is lower than minimum duration allowed", func(t *testing.T) {
@@ -109,8 +109,8 @@ func TestExportHandler(t *testing.T) {
 
 		success, err := exportHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, err, "Minimum duration is 15 minutes")
+		require.False(t, success)
+		require.Contains(t, err, "Minimum duration is 15 minutes")
 	})
 
 	t.Run("call GetAWSCredentials with default value when no duration given", func(t *testing.T) {
@@ -121,7 +121,7 @@ func TestExportHandler(t *testing.T) {
 		called := false
 
 		getAWSCredentialsMock := func(_ *config.Profile, duration time.Duration) (credentials.Value, error) {
-			assert.Equal(t, float64(15), duration.Minutes())
+			require.Equal(t, float64(15), duration.Minutes())
 			called = true
 			return stubAWSCredentials(), nil
 		}
@@ -135,7 +135,7 @@ func TestExportHandler(t *testing.T) {
 
 		exportHandler.Handle(globalArguments)
 
-		assert.True(t, called)
+		require.True(t, called)
 	})
 
 	t.Run("call GetAWSCredentials with given value", func(t *testing.T) {
@@ -147,7 +147,7 @@ func TestExportHandler(t *testing.T) {
 		mockDurationValue := "20m"
 
 		getAWSCredentialsMock := func(_ *config.Profile, duration time.Duration) (credentials.Value, error) {
-			assert.Equal(t, float64(20), duration.Minutes())
+			require.Equal(t, float64(20), duration.Minutes())
 			called = true
 			return stubAWSCredentials(), nil
 		}
@@ -160,7 +160,7 @@ func TestExportHandler(t *testing.T) {
 
 		exportHandler.Handle(globalArguments)
 
-		assert.True(t, called)
+		require.True(t, called)
 	})
 
 	t.Run("contains export command for Linux and MacOS in output", func(t *testing.T) {
@@ -177,8 +177,8 @@ func TestExportHandler(t *testing.T) {
 
 		success, output := exportHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
+		require.True(t, success)
+		require.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token'")
 	})
 
 	t.Run("contains export region for Linux and MacOS in output", func(t *testing.T) {
@@ -195,8 +195,8 @@ func TestExportHandler(t *testing.T) {
 
 		success, output := exportHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token' AWS_REGION='us-west-2' AWS_DEFAULT_REGION='us-west-2'")
+		require.True(t, success)
+		require.Equal(t, output, "export AWS_ACCESS_KEY_ID='access-key-id' AWS_SECRET_ACCESS_KEY='secret-access-key' AWS_SESSION_TOKEN='session-token' AWS_REGION='us-west-2' AWS_DEFAULT_REGION='us-west-2'")
 	})
 
 	t.Run("contains export command for Windows in output", func(t *testing.T) {
@@ -213,8 +213,8 @@ func TestExportHandler(t *testing.T) {
 
 		success, output := exportHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
+		require.True(t, success)
+		require.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'")
 	})
 
 	t.Run("contains export region for Windows in output", func(t *testing.T) {
@@ -231,7 +231,7 @@ func TestExportHandler(t *testing.T) {
 
 		success, output := exportHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'; $env:AWS_REGION = 'us-west-2'; $env:AWS_DEFAULT_REGION = 'us-west-2'")
+		require.True(t, success)
+		require.Equal(t, output, "$env:AWS_ACCESS_KEY_ID = 'access-key-id'; $env:AWS_SECRET_ACCESS_KEY = 'secret-access-key'; $env:AWS_SESSION_TOKEN = 'session-token'; $env:AWS_REGION = 'us-west-2'; $env:AWS_DEFAULT_REGION = 'us-west-2'")
 	})
 }

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/ini.v1"
 	"testing"
 )
@@ -28,11 +28,11 @@ func TestLoadProfilesFromConfigAndCredentials(t *testing.T) {
 
 		result := LoadProfilesFromConfigAndCredentials(credentialsFile, nil)
 
-		assert.Equal(t, 0, len(result.ConfigAssumedProfiles))
+		require.Equal(t, 0, len(result.ConfigAssumedProfiles))
 
 		credentialsProfiles := result.CredentialsProfiles
-		assert.Equal(t, 1, len(credentialsProfiles))
-		assert.Equal(t, "profile-1", credentialsProfiles[0].ProfileName)
+		require.Equal(t, 1, len(credentialsProfiles))
+		require.Equal(t, "profile-1", credentialsProfiles[0].ProfileName)
 	})
 
 	t.Run("return non default profiles from config file with role arn and source profile attributes", func(t *testing.T) {
@@ -44,13 +44,13 @@ func TestLoadProfilesFromConfigAndCredentials(t *testing.T) {
 
 		result := LoadProfilesFromConfigAndCredentials(nil, configFile)
 
-		assert.Equal(t, 0, len(result.CredentialsProfiles))
+		require.Equal(t, 0, len(result.CredentialsProfiles))
 
 		configProfiles := result.ConfigAssumedProfiles
-		assert.Equal(t, 1, len(configProfiles))
-		assert.Equal(t, "profile-2", configProfiles[0].ProfileName)
-		assert.Equal(t, "profile-2-role-arn", configProfiles[0].RoleArn)
-		assert.Equal(t, "profile-2-source-profile", configProfiles[0].SourceProfile)
+		require.Equal(t, 1, len(configProfiles))
+		require.Equal(t, "profile-2", configProfiles[0].ProfileName)
+		require.Equal(t, "profile-2-role-arn", configProfiles[0].RoleArn)
+		require.Equal(t, "profile-2-source-profile", configProfiles[0].SourceProfile)
 	})
 
 	t.Run("return role arn and mfa serial with config profiles if available", func(t *testing.T) {
@@ -63,10 +63,10 @@ func TestLoadProfilesFromConfigAndCredentials(t *testing.T) {
 		result := LoadProfilesFromConfigAndCredentials(nil, configFile)
 		configProfiles := result.ConfigAssumedProfiles
 
-		assert.Equal(t, 2, len(configProfiles))
-		assert.Equal(t, "profile-1-role-arn", configProfiles[0].RoleArn)
-		assert.Equal(t, "profile-2-role-arn", configProfiles[1].RoleArn)
-		assert.Equal(t, "12345", configProfiles[1].MFASerialNumber)
+		require.Equal(t, 2, len(configProfiles))
+		require.Equal(t, "profile-1-role-arn", configProfiles[0].RoleArn)
+		require.Equal(t, "profile-2-role-arn", configProfiles[1].RoleArn)
+		require.Equal(t, "12345", configProfiles[1].MFASerialNumber)
 	})
 
 	t.Run("return region with config profiles if available", func(t *testing.T) {
@@ -79,9 +79,9 @@ func TestLoadProfilesFromConfigAndCredentials(t *testing.T) {
 		result := LoadProfilesFromConfigAndCredentials(nil, configFile)
 		configProfiles := result.ConfigAssumedProfiles
 
-		assert.Equal(t, 2, len(configProfiles))
-		assert.Equal(t, "profile-1-role-arn", configProfiles[0].RoleArn)
-		assert.Equal(t, "profile-2-role-arn", configProfiles[1].RoleArn)
-		assert.Equal(t, "ap-southeast-2", configProfiles[1].Region)
+		require.Equal(t, 2, len(configProfiles))
+		require.Equal(t, "profile-1-role-arn", configProfiles[0].RoleArn)
+		require.Equal(t, "profile-2-role-arn", configProfiles[1].RoleArn)
+		require.Equal(t, "ap-southeast-2", configProfiles[1].Region)
 	})
 }

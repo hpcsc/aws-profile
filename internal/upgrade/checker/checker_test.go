@@ -1,7 +1,7 @@
 package checker
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -11,7 +11,7 @@ func TestNewChecker(t *testing.T) {
 
 		_, ok := c.(bintrayChecker)
 
-		assert.True(t, ok)
+		require.True(t, ok)
 	})
 
 	t.Run("should return github checker if include prerelease is false", func(t *testing.T) {
@@ -19,6 +19,6 @@ func TestNewChecker(t *testing.T) {
 
 		_, ok := c.(githubChecker)
 
-		assert.True(t, ok)
+		require.True(t, ok)
 	})
 }

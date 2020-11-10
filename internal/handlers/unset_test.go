@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"testing"
 )
@@ -21,8 +21,8 @@ func TestUnsetHandler(t *testing.T) {
 
 		success, output := unsetHandler.Handle(GlobalArguments{})
 
-		assert.True(t, success)
-		assert.Equal(t, output, "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION")
+		require.True(t, success)
+		require.Equal(t, output, "unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION")
 	})
 
 	t.Run("contains unset command for Windows in output", func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestUnsetHandler(t *testing.T) {
 
 		success, output := unsetHandler.Handle(GlobalArguments{})
 
-		assert.True(t, success)
-		assert.Equal(t, output, "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN, Env:\\AWS_REGION, Env:\\AWS_DEFAULT_REGION")
+		require.True(t, success)
+		require.Equal(t, output, "Remove-Item Env:\\AWS_ACCESS_KEY_ID, Env:\\AWS_SECRET_ACCESS_KEY, Env:\\AWS_SESSION_TOKEN, Env:\\AWS_REGION, Env:\\AWS_DEFAULT_REGION")
 	})
 }

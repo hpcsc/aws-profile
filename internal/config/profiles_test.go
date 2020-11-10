@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -28,7 +28,7 @@ func TestFindProfileInCredentialsFile(t *testing.T) {
 
 		result := profiles.FindProfileInCredentialsFile("profile-3")
 
-		assert.Nil(t, result)
+		require.Nil(t, result)
 
 	})
 
@@ -40,8 +40,8 @@ func TestFindProfileInCredentialsFile(t *testing.T) {
 
 		result := profiles.FindProfileInCredentialsFile("profile-2")
 
-		assert.NotNil(t, result)
-		assert.Equal(t, result.ProfileName, "profile-2")
+		require.NotNil(t, result)
+		require.Equal(t, result.ProfileName, "profile-2")
 
 	})
 }
@@ -55,7 +55,7 @@ func TestFindProfileInConfigFile(t *testing.T) {
 
 		result := profiles.FindProfileInConfigFile("profile-3")
 
-		assert.Nil(t, result)
+		require.Nil(t, result)
 
 	})
 
@@ -67,8 +67,8 @@ func TestFindProfileInConfigFile(t *testing.T) {
 
 		result := profiles.FindProfileInConfigFile("profile-2")
 
-		assert.NotNil(t, result)
-		assert.Equal(t, result.ProfileName, "profile-2")
+		require.NotNil(t, result)
+		require.Equal(t, result.ProfileName, "profile-2")
 
 	})
 }
@@ -87,7 +87,7 @@ func TestGetAllDisplayProfileNames(t *testing.T) {
 			"profile-2 display name",
 			"profile-3 display name",
 		}
-		assert.ElementsMatch(t, expected, result)
+		require.ElementsMatch(t, expected, result)
 
 	})
 }
@@ -119,9 +119,9 @@ func TestFilter(t *testing.T) {
 
 		result := profiles.Filter("match")
 
-		assert.Equal(t, 2, len(result))
-		assert.Equal(t, "credentials profile 2 - match", result[0].ProfileName)
-		assert.Equal(t, "config profile 2 - match", result[1].ProfileName)
+		require.Equal(t, 2, len(result))
+		require.Equal(t, "credentials profile 2 - match", result[0].ProfileName)
+		require.Equal(t, "config profile 2 - match", result[1].ProfileName)
 
 	})
 
@@ -151,7 +151,7 @@ func TestFilter(t *testing.T) {
 
 		result := profiles.Filter("match")
 
-		assert.Equal(t, 0, len(result))
+		require.Equal(t, 0, len(result))
 
 	})
 }

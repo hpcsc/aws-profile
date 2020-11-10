@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 )
@@ -35,8 +35,8 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, output := setRegionHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS config file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS config file")
 
 	})
 
@@ -44,8 +44,8 @@ func TestSetRegionHandler(t *testing.T) {
 		called := false
 
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
-			assert.Len(t, regions, 25)
-			assert.Equal(t, title, "Select an AWS region")
+			require.Len(t, regions, 25)
+			require.Equal(t, title, "Select an AWS region")
 
 			called = true
 			return []byte("us-west-1"), nil
@@ -56,7 +56,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, _ := setRegionHandler.Handle(globalArguments)
 
-		assert.True(t, success)
+		require.True(t, success)
 		if !called {
 			t.Errorf("selectRegionFn is not invoked")
 		}
@@ -76,11 +76,11 @@ func TestSetRegionHandler(t *testing.T) {
 			// only the config file should be modified and non-region keys
 			// in the default profile should not be modified
 			if strings.Contains(unexpandedFilePath, "-config") {
-				assert.Equal(t, "1", file.Section("default").Key("role_arn").Value())
-				assert.Equal(t, "1", file.Section("default").Key("source_profile").Value())
-				assert.Equal(t, "ap-southeast-2", file.Section("default").Key("region").Value())
+				require.Equal(t, "1", file.Section("default").Key("role_arn").Value())
+				require.Equal(t, "1", file.Section("default").Key("source_profile").Value())
+				require.Equal(t, "ap-southeast-2", file.Section("default").Key("region").Value())
 			} else {
-				assert.Fail(t, "unexpected call to writeToFile")
+				require.Fail(t, "unexpected call to writeToFile")
 			}
 
 			return nil
@@ -91,9 +91,9 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, message := setRegionHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, message, "[region ap-southeast-2] -> [default.region]")
-		assert.True(t, calledWriteToFile)
+		require.True(t, success)
+		require.Contains(t, message, "[region ap-southeast-2] -> [default.region]")
+		require.True(t, calledWriteToFile)
 	})
 
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
@@ -111,9 +111,9 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, message := setRegionHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Empty(t, message)
-		assert.False(t, calledWriteToFile)
+		require.True(t, success)
+		require.Empty(t, message)
+		require.False(t, calledWriteToFile)
 	})
 
 	t.Run("return error if failed to write updated config file", func(t *testing.T) {
@@ -134,7 +134,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 		success, message := setRegionHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, message, "some error")
+		require.False(t, success)
+		require.Contains(t, message, "some error")
 	})
 }

@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/ini.v1"
 )
 
@@ -19,8 +19,8 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
 
 		defaultSection := credentialsFile.Section("default")
-		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
-		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+		require.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		require.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
 	})
 
 	t.Run("reset default profile in config file", func(t *testing.T) {
@@ -34,14 +34,14 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		AddConfigSection(configFile, "profile-1")
 
 		defaultSection := configFile.Section("default")
-		assert.NotEmpty(t, defaultSection.Key("role_arn").Value())
-		assert.NotEmpty(t, defaultSection.Key("source_profile").Value())
+		require.NotEmpty(t, defaultSection.Key("role_arn").Value())
+		require.NotEmpty(t, defaultSection.Key("source_profile").Value())
 
 		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
 
 		defaultSection = configFile.Section("default")
-		assert.Empty(t, defaultSection.Key("role_arn").Value())
-		assert.Empty(t, defaultSection.Key("source_profile").Value())
+		require.Empty(t, defaultSection.Key("role_arn").Value())
+		require.Empty(t, defaultSection.Key("source_profile").Value())
 	})
 
 	t.Run("set default profile session token if available", func(t *testing.T) {
@@ -56,9 +56,9 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
 
 		defaultSection := credentialsFile.Section("default")
-		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
-		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
-		assert.Equal(t, "profile-2-session-token", defaultSection.Key("aws_session_token").Value())
+		require.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		require.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+		require.Equal(t, "profile-2-session-token", defaultSection.Key("aws_session_token").Value())
 	})
 
 	t.Run("clear default profile session token if session token not set", func(t *testing.T) {
@@ -72,9 +72,9 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 
 		SetSelectedProfileAsDefault("profile-2", credentialsFile, configFile)
 
-		assert.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
-		assert.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
-		assert.False(t, defaultSection.HasKey("aws_session_token"))
+		require.Equal(t, "profile-2-id", defaultSection.Key("aws_access_key_id").Value())
+		require.Equal(t, "profile-2-secret", defaultSection.Key("aws_secret_access_key").Value())
+		require.False(t, defaultSection.HasKey("aws_session_token"))
 	})
 
 	t.Run("set default profile region in config file if available", func(t *testing.T) {
@@ -89,12 +89,12 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		profile1Section.Key("region").SetValue("us-east-2")
 
 		defaultSection := configFile.Section("default")
-		assert.Empty(t, defaultSection.Key("region").Value())
+		require.Empty(t, defaultSection.Key("region").Value())
 
 		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
 
 		defaultSection = configFile.Section("default")
-		assert.Equal(t, "us-east-2", defaultSection.Key("region").Value())
+		require.Equal(t, "us-east-2", defaultSection.Key("region").Value())
 	})
 
 	t.Run("clear default region if selected profile has no region", func(t *testing.T) {
@@ -108,11 +108,11 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		defaultSection.Key("region").SetValue("ap-southeast-2")
 		AddConfigSection(configFile, "profile-3")
 
-		assert.Equal(t, "ap-southeast-2", configFile.Section("default").Key("region").Value())
+		require.Equal(t, "ap-southeast-2", configFile.Section("default").Key("region").Value())
 
 		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
 
-		assert.Empty(t, configFile.Section("default").Key("region").Value())
+		require.Empty(t, configFile.Section("default").Key("region").Value())
 	})
 
 	t.Run("set default profile mfa serial in config file if available", func(t *testing.T) {
@@ -127,12 +127,12 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		profile1Section.Key("mfa_serial").SetValue("my-mfa-serial")
 
 		defaultSection := configFile.Section("default")
-		assert.Empty(t, defaultSection.Key("mfa_serial").Value())
+		require.Empty(t, defaultSection.Key("mfa_serial").Value())
 
 		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
 
 		defaultSection = configFile.Section("default")
-		assert.Equal(t, "my-mfa-serial", defaultSection.Key("mfa_serial").Value())
+		require.Equal(t, "my-mfa-serial", defaultSection.Key("mfa_serial").Value())
 	})
 
 	t.Run("clear default mfa serial if selected profile has no mfa serial", func(t *testing.T) {
@@ -146,11 +146,11 @@ func TestSetSelectedProfileAsDefault(t *testing.T) {
 		defaultSection.Key("mfa_serial").SetValue("my-mfa-serial")
 		AddConfigSection(configFile, "profile-3")
 
-		assert.Equal(t, "my-mfa-serial", configFile.Section("default").Key("mfa_serial").Value())
+		require.Equal(t, "my-mfa-serial", configFile.Section("default").Key("mfa_serial").Value())
 
 		SetSelectedProfileAsDefault("profile-1", credentialsFile, configFile)
 
-		assert.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
+		require.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
 	})
 }
 
@@ -164,9 +164,9 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		SetSelectedAssumedProfileAsDefault("profile-2", configFile)
 
 		defaultSection := configFile.Section("default")
-		assert.Equal(t, "profile-2-role-arn", defaultSection.Key("role_arn").Value())
-		assert.Equal(t, "profile-2-source-profile", defaultSection.Key("source_profile").Value())
-		assert.Empty(t, defaultSection.Key("region").Value())
+		require.Equal(t, "profile-2-role-arn", defaultSection.Key("role_arn").Value())
+		require.Equal(t, "profile-2-source-profile", defaultSection.Key("source_profile").Value())
+		require.Empty(t, defaultSection.Key("region").Value())
 	})
 
 	t.Run("set region for default profile in config file", func(t *testing.T) {
@@ -179,7 +179,7 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		SetSelectedAssumedProfileAsDefault("profile-2", configFile)
 
 		defaultSection := configFile.Section("default")
-		assert.Equal(t, "us-west-2", defaultSection.Key("region").Value())
+		require.Equal(t, "us-west-2", defaultSection.Key("region").Value())
 	})
 
 	t.Run("clear default region if selected assumed profile has no region", func(t *testing.T) {
@@ -189,11 +189,11 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		AddConfigSection(configFile, "profile-1")
 		AddConfigSection(configFile, "profile-2")
 
-		assert.Equal(t, "ap-southeast-2", configFile.Section("default").Key("region").Value())
+		require.Equal(t, "ap-southeast-2", configFile.Section("default").Key("region").Value())
 
 		SetSelectedAssumedProfileAsDefault("profile-1", configFile)
 
-		assert.Empty(t, configFile.Section("default").Key("region").Value())
+		require.Empty(t, configFile.Section("default").Key("region").Value())
 	})
 
 	t.Run("set mfa_serial for default profile in config file", func(t *testing.T) {
@@ -206,7 +206,7 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		SetSelectedAssumedProfileAsDefault("profile-2", configFile)
 
 		defaultSection := configFile.Section("default")
-		assert.Equal(t, "profile-2-mfa-serial", defaultSection.Key("mfa_serial").Value())
+		require.Equal(t, "profile-2-mfa-serial", defaultSection.Key("mfa_serial").Value())
 	})
 
 	t.Run("clear default mfa_serial if selected assumed profile has no mfa_serial", func(t *testing.T) {
@@ -216,11 +216,11 @@ func TestSetSelectedAssumedProfileAsDefault(t *testing.T) {
 		AddConfigSection(configFile, "profile-1")
 		AddConfigSection(configFile, "profile-2")
 
-		assert.Equal(t, "initial-mfa-serial", configFile.Section("default").Key("mfa_serial").Value())
+		require.Equal(t, "initial-mfa-serial", configFile.Section("default").Key("mfa_serial").Value())
 
 		SetSelectedAssumedProfileAsDefault("profile-1", configFile)
 
-		assert.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
+		require.Empty(t, configFile.Section("default").Key("mfa_serial").Value())
 	})
 }
 
@@ -232,8 +232,8 @@ func TestSetSelectedRegionAsDefault(t *testing.T) {
 		SetSelectedRegionAsDefault("us-east-1", configFile)
 
 		defaultSection := configFile.Section("default")
-		assert.Equal(t, "us-east-1", defaultSection.Key("region").Value())
-		assert.Equal(t, "default-source-profile", defaultSection.Key("source_profile").Value())
-		assert.Equal(t, "default-role-arn", defaultSection.Key("role_arn").Value())
+		require.Equal(t, "us-east-1", defaultSection.Key("region").Value())
+		require.Equal(t, "default-source-profile", defaultSection.Key("source_profile").Value())
+		require.Equal(t, "default-role-arn", defaultSection.Key("role_arn").Value())
 	})
 }

@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"github.com/hpcsc/aws-profile/internal/config"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
 	"path/filepath"
@@ -42,8 +42,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, output := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS credentials file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS credentials file")
 
 	})
 
@@ -53,8 +53,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, output := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS config file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS config file")
 
 	})
 
@@ -62,7 +62,7 @@ func TestSetHandler(t *testing.T) {
 		called := false
 
 		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
-			assert.ElementsMatch(
+			require.ElementsMatch(
 				t,
 				profiles.GetAllDisplayProfileNames(),
 				[]string{
@@ -82,7 +82,7 @@ func TestSetHandler(t *testing.T) {
 
 		success, _ := setHandler.Handle(globalArguments)
 
-		assert.True(t, success)
+		require.True(t, success)
 		if !called {
 			t.Errorf("selectProfileFn is not invoked")
 		}
@@ -99,8 +99,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, message, "not found in either credentials or config file")
+		require.False(t, success)
+		require.Contains(t, message, "not found in either credentials or config file")
 
 	})
 
@@ -112,13 +112,13 @@ func TestSetHandler(t *testing.T) {
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			// when profile is from credentials file, it should set default in credentials file and clear default in config file
 			if strings.Contains(unexpandedFilePath, "-credentials") {
-				assert.Equal(t, "4", file.Section("default").Key("aws_access_key_id").Value())
-				assert.Equal(t, "4", file.Section("default").Key("aws_secret_access_key").Value())
+				require.Equal(t, "4", file.Section("default").Key("aws_access_key_id").Value())
+				require.Equal(t, "4", file.Section("default").Key("aws_secret_access_key").Value())
 			} else if strings.Contains(unexpandedFilePath, "-config") {
-				assert.Equal(t, "", file.Section("default").Key("role_arn").Value())
-				assert.Equal(t, "", file.Section("default").Key("source_profile").Value())
+				require.Equal(t, "", file.Section("default").Key("role_arn").Value())
+				require.Equal(t, "", file.Section("default").Key("source_profile").Value())
 			} else {
-				assert.Fail(t, "unexpected call to writeToFile")
+				require.Fail(t, "unexpected call to writeToFile")
 			}
 
 			return nil
@@ -129,8 +129,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, message, "[credentials_profile_2] -> [default]")
+		require.True(t, success)
+		require.Contains(t, message, "[credentials_profile_2] -> [default]")
 	})
 
 	t.Run("return error when profile is in credentials file and failed to write updated credentials file", func(t *testing.T) {
@@ -152,8 +152,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, message, "some error")
+		require.False(t, success)
+		require.Contains(t, message, "some error")
 	})
 
 	t.Run("return error when profile is in credentials file and failed to write updated config file", func(t *testing.T) {
@@ -175,8 +175,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, message, "some error")
+		require.False(t, success)
+		require.Contains(t, message, "some error")
 	})
 
 	t.Run("set default profile in config file when profile is in config file", func(t *testing.T) {
@@ -187,10 +187,10 @@ func TestSetHandler(t *testing.T) {
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
 			// when profile is from config file, it should set default in config file and keep default in credentials unchanged
 			if strings.Contains(unexpandedFilePath, "-config") {
-				assert.Equal(t, "2", file.Section("default").Key("role_arn").Value())
-				assert.Equal(t, "2", file.Section("default").Key("source_profile").Value())
+				require.Equal(t, "2", file.Section("default").Key("role_arn").Value())
+				require.Equal(t, "2", file.Section("default").Key("source_profile").Value())
 			} else {
-				assert.Fail(t, "unexpected call to writeToFile")
+				require.Fail(t, "unexpected call to writeToFile")
 			}
 
 			return nil
@@ -201,8 +201,8 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, message, "[profile config_profile_2] -> [default]")
+		require.True(t, success)
+		require.Contains(t, message, "[profile config_profile_2] -> [default]")
 	})
 
 	t.Run("return error when profile is in config file and failed to write updated config file", func(t *testing.T) {
@@ -223,7 +223,7 @@ func TestSetHandler(t *testing.T) {
 
 		success, message := setHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, message, "some error")
+		require.False(t, success)
+		require.Contains(t, message, "some error")
 	})
 }

@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"github.com/hpcsc/aws-profile/internal/log"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"path/filepath"
@@ -48,8 +48,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS credentials file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS credentials file")
 
 	})
 
@@ -59,8 +59,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.False(t, success)
-		assert.Contains(t, output, "Fail to read AWS config file")
+		require.False(t, success)
+		require.Contains(t, output, "Fail to read AWS config file")
 
 	})
 
@@ -70,8 +70,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, output, "profile two")
+		require.True(t, success)
+		require.Contains(t, output, "profile two")
 
 	})
 
@@ -81,8 +81,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Equal(t, "", output)
+		require.True(t, success)
+		require.Equal(t, "", output)
 
 	})
 
@@ -92,8 +92,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, output, "two_credentials")
+		require.True(t, success)
+		require.Contains(t, output, "two_credentials")
 
 	})
 
@@ -106,8 +106,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, output, "caller-identity-profile")
+		require.True(t, success)
+		require.Contains(t, output, "caller-identity-profile")
 
 		os.Unsetenv("AWS_ACCESS_KEY_ID")
 		os.Unsetenv("AWS_SECRET_ACCESS_KEY")
@@ -145,8 +145,8 @@ func TestGetHandler(t *testing.T) {
 
 				success, output := getHandler.Handle(globalArguments)
 
-				assert.True(t, success)
-				assert.Contains(t, output, tt.expectedOutput)
+				require.True(t, success)
+				require.Contains(t, output, tt.expectedOutput)
 
 				os.Unsetenv("AWS_ACCESS_KEY_ID")
 				os.Unsetenv("AWS_SECRET_ACCESS_KEY")
@@ -169,8 +169,8 @@ func TestGetHandler(t *testing.T) {
 
 		success, output := getHandler.Handle(globalArguments)
 
-		assert.True(t, success)
-		assert.Contains(t, output, "unknown")
+		require.True(t, success)
+		require.Contains(t, output, "unknown")
 
 		os.Unsetenv("AWS_ACCESS_KEY_ID")
 		os.Unsetenv("AWS_SECRET_ACCESS_KEY")
