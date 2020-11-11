@@ -3,6 +3,7 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -27,15 +28,15 @@ type githubLatestReleaseResponseAsset struct {
 
 type githubChecker struct {
 	os     string
-	getUrl func(string) ([]byte, error)
+	getUrl func(string, string) ([]byte, error)
 }
 
-func newGithubChecker(os string, getUrl func(string) ([]byte, error)) checker {
+func newGithubChecker(os string, getUrl func(string, string) ([]byte, error)) checker {
 	return githubChecker{os: os, getUrl: getUrl}
 }
 
 func (c githubChecker) LatestVersionUrl() (string, string, error) {
-	bodyContent, err := c.getUrl(latestReleaseUrl)
+	bodyContent, err := c.getUrl(latestReleaseUrl, githubTokenFromEnvVariable())
 	if err != nil {
 		return "", "", err
 	}
@@ -60,7 +61,7 @@ func (c githubChecker) commitHashForTag(tag string) string {
 	// Commit hash is only used to check whether users has latest version in their machines.
 	// Any error here, just upgrade no matter what
 
-	bodyContent, err := c.getUrl(getCommitByTagUrl + tag)
+	bodyContent, err := c.getUrl(getCommitByTagUrl+tag, githubTokenFromEnvVariable())
 	if err != nil {
 		return ""
 	}
@@ -72,4 +73,12 @@ func (c githubChecker) commitHashForTag(tag string) string {
 	}
 
 	return unmarshalledResponse.Sha
+}
+
+func githubTokenFromEnvVariable() string {
+	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
+		return token
+	}
+
+	return ""
 }

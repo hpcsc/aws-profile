@@ -8,12 +8,36 @@ import (
 	"os"
 )
 
+func GetUrlWithAuthorization(url string, authorization string) ([]byte, error) {
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request for url %s: %v", url, err)
+	}
+
+	if authorization != "" {
+		request.Header.Set("Authorization", authorization)
+	}
+
+	c := http.Client{}
+	response, err := c.Do(request)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get url %s: %v", url, err)
+	}
+
+	return readBodyContent(url, response)
+}
+
 func GetUrl(url string) ([]byte, error) {
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get url %s: %v", url, err)
 	}
 
+	return readBodyContent(url, response)
+}
+
+func readBodyContent(url string, response *http.Response) ([]byte, error) {
 	defer response.Body.Close()
 
 	bodyContent, err := ioutil.ReadAll(response.Body)

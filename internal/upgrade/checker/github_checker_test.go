@@ -28,7 +28,7 @@ func readFile(path string) ([]byte, error) {
 	return response, nil
 }
 
-var stubGithubGetUrl = func(url string) ([]byte, error) {
+var stubGithubGetUrl = func(url string, authorization string) ([]byte, error) {
 	return readFile(githubStubResponsePath(url))
 }
 
@@ -55,8 +55,38 @@ func TestGithubChecker_LatestVersionUrl(t *testing.T) {
 		})
 	}
 
+	t.Run("access github with authorization token if available in environment variable", func(t *testing.T) {
+		os.Setenv("GITHUB_TOKEN", "some-token")
+
+		var calledAuthorization string
+		c := newGithubChecker("linux", func(url string, authorization string) ([]byte, error) {
+			calledAuthorization = authorization
+			return readFile(githubStubResponsePath(url))
+		})
+
+		_, _, err := c.LatestVersionUrl()
+
+		require.NoError(t, err)
+		require.Equal(t, "some-token", calledAuthorization)
+
+		os.Unsetenv("GITHUB_TOKEN")
+	})
+
+	t.Run("access github with no authorization token if environment variable is not set", func(t *testing.T) {
+		var calledAuthorization string
+		c := newGithubChecker("linux", func(url string, authorization string) ([]byte, error) {
+			calledAuthorization = authorization
+			return readFile(githubStubResponsePath(url))
+		})
+
+		_, _, err := c.LatestVersionUrl()
+
+		require.NoError(t, err)
+		require.Empty(t, calledAuthorization)
+	})
+
 	t.Run("return link even if not able to get commit hash for latest version", func(t *testing.T) {
-		c := newGithubChecker("linux", func(url string) ([]byte, error) {
+		c := newGithubChecker("linux", func(url string, authorization string) ([]byte, error) {
 			if strings.Contains(url, "releases/latest") {
 				return readFile("testdata/github-latest-release-response.json")
 			}
@@ -72,7 +102,7 @@ func TestGithubChecker_LatestVersionUrl(t *testing.T) {
 	})
 
 	t.Run("return error when fail to get url", func(t *testing.T) {
-		c := newGithubChecker("linux", func(url string) ([]byte, error) {
+		c := newGithubChecker("linux", func(url string, authorization string) ([]byte, error) {
 			return nil, errors.New("some error")
 		})
 

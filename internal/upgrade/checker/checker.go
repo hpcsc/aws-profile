@@ -13,5 +13,5 @@ func NewChecker(os string, includePrerelease bool) checker {
 		return newBintrayChecker(os, httpclient.GetUrl)
 	}
 
-	return newGithubChecker(os, httpclient.GetUrl)
+	return newGithubChecker(os, httpclient.GetUrlWithAuthorization)
 }
