@@ -67,6 +67,7 @@ jobs:
         task e2e
       env:
         EXECUTABLE: bin/aws-profile-${{runner.os}}-${{github.sha}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload binary as artifact
       uses: actions/upload-artifact@v1
