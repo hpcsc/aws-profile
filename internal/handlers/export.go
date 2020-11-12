@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/hpcsc/aws-profile/internal/config"
+	"github.com/hpcsc/aws-profile/internal/awsconfig"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type GetAWSCredentialsFn func(*config.Profile, time.Duration) (credentials.Value, error)
+type GetAWSCredentialsFn func(*awsconfig.Profile, time.Duration) (credentials.Value, error)
 
 type ExportHandler struct {
 	SubCommand        *kingpin.CmdClause
@@ -65,7 +65,7 @@ func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, stri
 		return false, "Minimum duration is 15 minutes"
 	}
 
-	profiles := config.LoadProfilesFromConfigAndCredentials(ini.Empty(), configFile)
+	profiles := awsconfig.LoadProfilesFromConfigAndCredentials(ini.Empty(), configFile)
 
 	selectProfileResult, selectProfileErr := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
 	if selectProfileErr != nil {
@@ -88,7 +88,7 @@ func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, stri
 	}
 }
 
-func formatOutputForWindows(credentialsValue credentials.Value, profile *config.Profile) string {
+func formatOutputForWindows(credentialsValue credentials.Value, profile *awsconfig.Profile) string {
 	output := fmt.Sprintf("$env:AWS_ACCESS_KEY_ID = '%s'; $env:AWS_SECRET_ACCESS_KEY = '%s'; $env:AWS_SESSION_TOKEN = '%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,
@@ -105,7 +105,7 @@ func formatOutputForWindows(credentialsValue credentials.Value, profile *config.
 		profile.Region)
 }
 
-func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *config.Profile) string {
+func formatOutputForLinuxAndMacOS(credentialsValue credentials.Value, profile *awsconfig.Profile) string {
 	output := fmt.Sprintf("export AWS_ACCESS_KEY_ID='%s' AWS_SECRET_ACCESS_KEY='%s' AWS_SESSION_TOKEN='%s'",
 		credentialsValue.AccessKeyID,
 		credentialsValue.SecretAccessKey,

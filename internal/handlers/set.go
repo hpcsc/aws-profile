@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/hpcsc/aws-profile/internal/config"
+	"github.com/hpcsc/aws-profile/internal/awsconfig"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -47,7 +47,7 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	profiles := config.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
+	profiles := awsconfig.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
 
 	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
 	var cancelled *utils.CancelledError
@@ -62,7 +62,7 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 	trimmedSelectedProfileResult := strings.TrimSuffix(string(selectProfileResult), "\n")
 
 	if profiles.FindProfileInCredentialsFile(trimmedSelectedProfileResult) != nil {
-		config.SetSelectedProfileAsDefault(trimmedSelectedProfileResult, credentialsFile, configFile)
+		awsconfig.SetSelectedProfileAsDefault(trimmedSelectedProfileResult, credentialsFile, configFile)
 
 		if err := handler.WriteToFile(credentialsFile, globalArguments.CredentialsFilePath); err != nil {
 			return false, err.Error()
@@ -74,7 +74,7 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 
 		return true, fmt.Sprintf("=== [%s] -> [default] (%s)", trimmedSelectedProfileResult, globalArguments.CredentialsFilePath)
 	} else if assumedProfile := profiles.FindProfileInConfigFile(trimmedSelectedProfileResult); assumedProfile != nil {
-		config.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName, configFile)
+		awsconfig.SetSelectedAssumedProfileAsDefault(assumedProfile.ProfileName, configFile)
 
 		if err := handler.WriteToFile(configFile, globalArguments.ConfigFilePath); err != nil {
 			return false, err.Error()

@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/hpcsc/aws-profile/internal/config"
+	"github.com/hpcsc/aws-profile/internal/awsconfig"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -67,7 +67,7 @@ func TestSetHandler(t *testing.T) {
 	t.Run("invoke selectProfile with profile names from both credentials and config files", func(t *testing.T) {
 		called := false
 
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			require.ElementsMatch(
 				t,
 				profiles.GetAllDisplayProfileNames(),
@@ -96,7 +96,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error if selected profile not found in both config and credentials file", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("a_random_profile"), nil
 		}
 
@@ -110,7 +110,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return nil, utils.NewCancelledError()
 		}
 
@@ -124,7 +124,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error when failed to do selection", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return nil, errors.New("some error")
 		}
 
@@ -138,7 +138,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("set default profile in credentials file when profile is in credentials file", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil
 		}
 
@@ -167,7 +167,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error when profile is in credentials file and failed to write updated credentials file", func(t *testing.T) {
-		selectProfileStub := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileStub := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil
 		}
 
@@ -190,7 +190,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error when profile is in credentials file and failed to write updated config file", func(t *testing.T) {
-		selectProfileStub := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileStub := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("credentials_profile_2"), nil
 		}
 
@@ -213,7 +213,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("set default profile in config file when profile is in config file", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
 
@@ -239,7 +239,7 @@ func TestSetHandler(t *testing.T) {
 	})
 
 	t.Run("return error when profile is in config file and failed to write updated config file", func(t *testing.T) {
-		selectProfileMock := func(profiles config.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
 

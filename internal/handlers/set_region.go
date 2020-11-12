@@ -6,7 +6,7 @@ import (
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"strings"
 
-	"github.com/hpcsc/aws-profile/internal/config"
+	"github.com/hpcsc/aws-profile/internal/awsconfig"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -47,7 +47,7 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 
 	trimmedSelectedRegionResult := strings.TrimSuffix(string(selectRegionResult), "\n")
 
-	config.SetSelectedRegionAsDefault(trimmedSelectedRegionResult, configFile)
+	awsconfig.SetSelectedRegionAsDefault(trimmedSelectedRegionResult, configFile)
 	if err := handler.WriteToFile(configFile, globalArguments.ConfigFilePath); err != nil {
 		return false, err.Error()
 	}
