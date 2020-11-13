@@ -1,0 +1,59 @@
+project_name: aws-profile
+
+containers:
+  buildenv:
+    build_directory: .batect/buildenv
+    volumes:
+      - local: .
+        container: /app
+        options: cached
+      - type: cache
+        name: go-cache
+        container: /go
+      - type: cache
+        name: golangci-cache
+        container: /root/.cache/golangci-lint/
+    working_directory: /app
+    environment:
+      GOCACHE: /go/cache
+
+tasks:
+  clean:
+    run:
+      container: buildenv
+      command: rm -rf /app/bin && rm -f /app/aws-profile
+
+  build:
+    run:
+      container: buildenv
+      command: /app/scripts/build.sh
+      environment:
+        VERSION: ${VERSION:-"000"}
+        OUTPUT: ${OUTPUT:-bin/aws-profile}
+        GOOS: ${GOOS:-linux}
+        GOARCH: ${GOARCH:-amd64}
+    prerequisites:
+      - clean
+
+  lint:
+    run:
+      container: buildenv
+      command: /app/scripts/lint.sh
+
+  test:
+    run:
+      container: buildenv
+      command: /app/scripts/test.sh
+
+  generate-coverage-report:
+    run:
+      container: buildenv
+      command: /app/scripts/generate-coverage-report.sh
+
+  e2e:
+    run:
+      container: buildenv
+      entrypoint: /app/e2e/run.sh
+      command: /app/bin/aws-profile
+      environment:
+        GITHUB_TOKEN: ${GITHUB_TOKEN:-}

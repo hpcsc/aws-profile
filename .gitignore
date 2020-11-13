@@ -21,3 +21,5 @@ tmp
 /aws-profile
 
 coverage.*
+
+.batect/caches
