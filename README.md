@@ -7,6 +7,15 @@
 
 ### Installation
 
+#### MacOS/Linux users
+
+```
+curl -sL https://raw.githubusercontent.com/hpcsc/aws-profile/master/install | sh
+```
+
+This will download latest release from Github to `/usr/local/bin/aws-profile`
+
+#### Manual Installation
 - Latest build from master branch: [Bintray](https://dl.bintray.com/hpcsc/aws-profile)
 
 - Release build [Github Releases](https://github.com/hpcsc/aws-profile/releases)
