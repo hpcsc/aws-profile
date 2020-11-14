@@ -24,6 +24,10 @@ jobs:
       run: |
         ./batect test
 
+    - name: Scan security
+      run: |
+        ./batect scan-security
+
     - name: Upload coverage to codecov
       uses: codecov/codecov-action@v1
       with:

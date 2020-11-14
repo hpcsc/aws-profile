@@ -81,3 +81,8 @@ tasks:
       command: /app/bin/aws-profile
       environment:
         GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
+  scan-security:
+    run:
+      container: buildenv
+      command: /app/scripts/scan-security.sh
