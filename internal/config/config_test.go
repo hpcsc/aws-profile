@@ -69,6 +69,14 @@ func TestFromFile(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, "valid values for highlight color are: black, red, green, yellow, blue, magenta, cyan, white", err.Error())
 	})
+
+	t.Run("return error if failed to unmarshal config file", func (t *testing.T) {
+		_, err := FromFile("testdata/invalid-config.yaml")
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed to unmarshal config file")
+	})
+
 }
 
 func sampleConfigPath(t *testing.T) string {
