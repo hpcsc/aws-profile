@@ -1,8 +1,10 @@
 package tui
 
 import (
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"log"
+	"strings"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -48,11 +50,37 @@ func SelectValueFromList(values []string, title string) ([]byte, error) {
 	return []byte(values[selectedIndex]), nil
 }
 
+func toTermUIColor(color string) ui.Color {
+	switch strings.ToLower(color) {
+	case "black":
+		return ui.ColorBlack
+	case "red":
+		return ui.ColorRed
+	case "yellow":
+		return ui.ColorYellow
+	case "blue":
+		return ui.ColorBlue
+	case "magenta":
+		return ui.ColorMagenta
+	case "cyan":
+		return ui.ColorCyan
+	case "white":
+		return ui.ColorWhite
+	}
+
+	return ui.ColorGreen
+}
+
 func renderListSelection(labels []string, title string) (int, error) {
+	c, err := config.FromFile(utils.ExpandHomeDirectory("~/.aws-profile/config.yaml"))
+	if err != nil {
+		return -1, err
+	}
+
 	list := widgets.NewList()
 	list.Title = title
 	list.Rows = labels
-	list.SelectedRowStyle = ui.NewStyle(ui.ColorGreen)
+	list.SelectedRowStyle = ui.NewStyle(toTermUIColor(c.HighlightColor))
 	list.WrapText = true
 
 	grid := ui.NewGrid()
