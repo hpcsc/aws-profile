@@ -16,7 +16,7 @@
 
 - Latest build from master branch
   ```
-  PRERELEASE=true curl -sL https://raw.githubusercontent.com/hpcsc/aws-profile/master/install | sh
+  curl -sL https://raw.githubusercontent.com/hpcsc/aws-profile/master/install | PRERELEASE=true sh
   ```
 
 This will download latest release from Github to `/usr/local/bin/aws-profile`
