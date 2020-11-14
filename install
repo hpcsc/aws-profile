@@ -1,6 +1,8 @@
 #!/bin/sh
 
-set -eu
+set -euo pipefail
+
+PRERELEASE=${PRERELEASE:-}
 
 get_download_file_name() {
   os=$1
@@ -9,6 +11,20 @@ get_download_file_name() {
     file_name=aws-profile-linux
   fi
   echo ${file_name}
+}
+
+get_download_url() {
+  file_name=$1
+  if [ -z "${PRERELEASE}" ]; then
+    curl -s https://api.github.com/repos/hpcsc/aws-profile/releases/latest | \
+          grep browser_download_url | \
+          grep ${file_name} | \
+          cut -d '"' -f 4
+  else
+    bintray_latest_version=$(curl -s https://api.bintray.com/packages/hpcsc/aws-profile/master | \
+                              sed 's/.*latest_version":"\([[:alnum:]]*\)".*/\1/g')
+    echo "https://dl.bintray.com/hpcsc/aws-profile/${file_name}-${bintray_latest_version}"
+  fi
 }
 
 OS=$(uname -s)
@@ -20,10 +36,7 @@ fi
 TMP_DIR=$(mktemp -d /tmp/aws-profile.XXXXXX)
 TARGET_FILE="/usr/local/bin/aws-profile"
 DOWNLOAD_FILE_NAME=$(get_download_file_name ${OS})
-URL="$(curl -s https://api.github.com/repos/hpcsc/aws-profile/releases/latest | \
-        grep browser_download_url | \
-        grep ${DOWNLOAD_FILE_NAME} | \
-        cut -d '"' -f 4)"
+URL="$(get_download_url ${DOWNLOAD_FILE_NAME})"
 
 if [ -e "${TARGET_FILE}" ]; then
   echo "aws-profile exists at ${TARGET_FILE}, install anyway? (N/y)"
@@ -38,7 +51,7 @@ fi
   cd "$TMP_DIR"
 
   echo "Downloading from ${URL}..."
-  curl -fLO "${URL}"
+  curl -fL "${URL}" -o ${DOWNLOAD_FILE_NAME}
   echo "Download complete!"
 )
 
