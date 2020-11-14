@@ -26,10 +26,10 @@ URL="$(curl -s https://api.github.com/repos/hpcsc/aws-profile/releases/latest | 
         cut -d '"' -f 4)"
 
 if [ -e "${TARGET_FILE}" ]; then
-  echo "aws-profile exists at ${TARGET_FILE}, cancel? (Y/n)"
-  read confirm_cancel
-  confirm_cancel=${confirm_cancel:-y}
-  if [ "${confirm_cancel}" = "y" ] || [ "${confirm_cancel}" = "Y" ]; then
+  echo "aws-profile exists at ${TARGET_FILE}, install anyway? (N/y)"
+  read confirm_install
+  confirm_install=${confirm_install:-n}
+  if [ "${confirm_install}" = "n" ] || [ "${confirm_install}" = "N" ]; then
     exit 0
   fi;
 fi
