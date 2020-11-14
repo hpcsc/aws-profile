@@ -28,6 +28,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger, config *confi
 	)
 	setHandler := handlers.NewSetHandler(app, config, tui.SelectProfileFromList, io.WriteToFile)
 	setRegionHandler := handlers.NewSetRegionHandler(app, config, tui.SelectValueFromList, io.WriteToFile)
+	getRegionHandler := handlers.NewGetRegionHandler(app)
 	exportHandler := handlers.NewExportHandler(
 		app,
 		config,
@@ -42,9 +43,10 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger, config *confi
 	return map[string]handlers.Handler{
 		getHandler.SubCommand.FullCommand():       getHandler,
 		setHandler.SubCommand.FullCommand():       setHandler,
-		setRegionHandler.SubCommand.FullCommand(): setRegionHandler,
-		exportHandler.SubCommand.FullCommand():    exportHandler,
 		unsetHandler.SubCommand.FullCommand():     unsetHandler,
+		exportHandler.SubCommand.FullCommand():    exportHandler,
+		setRegionHandler.SubCommand.FullCommand(): setRegionHandler,
+		getRegionHandler.SubCommand.FullCommand(): getRegionHandler,
 		upgradeHandler.SubCommand.FullCommand():   upgradeHandler,
 		versionHandler.SubCommand.FullCommand():   versionHandler,
 	}
