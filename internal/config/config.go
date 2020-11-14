@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -52,6 +53,11 @@ var allowedColors = []string{
 	"magenta",
 	"cyan",
 	"white",
+}
+
+func Load() (*Config, error) {
+	configPath := utils.GetEnvVariableOrDefault("AWS_PROFILE_CONFIG", "~/.aws-profile/config.yaml")
+	return FromFile(utils.ExpandHomeDirectory(configPath))
 }
 
 func FromFile(path string) (*Config, error) {

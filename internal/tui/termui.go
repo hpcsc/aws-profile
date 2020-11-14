@@ -72,7 +72,7 @@ func toTermUIColor(color string) ui.Color {
 }
 
 func renderListSelection(labels []string, title string) (int, error) {
-	c, err := config.FromFile(utils.ExpandHomeDirectory("~/.aws-profile/config.yaml"))
+	c, err := config.Load()
 	if err != nil {
 		return -1, err
 	}

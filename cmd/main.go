@@ -52,8 +52,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger, config *confi
 func main() {
 	logger := log.NewLogrusLogger()
 
-	configPath := utils.GetEnvVariableOrDefault("AWS_PROFILE_CONFIG", "~/.aws-profile/config.yaml")
-	config, err := config.FromFile(utils.ExpandHomeDirectory(configPath))
+	config, err := config.Load()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
