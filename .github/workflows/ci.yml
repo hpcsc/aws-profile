@@ -71,7 +71,7 @@ jobs:
         path: ./bin/aws-profile-linux-${{github.sha}}
 
     - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1
+      uses: hpcsc/upload-bintray-docker-action@v1.1
       with:
         repository: aws-profile
         package: master
@@ -102,7 +102,7 @@ jobs:
         path: ./bin/aws-profile-macos-${{github.sha}}
 
     - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1
+      uses: hpcsc/upload-bintray-docker-action@v1.1
       with:
         repository: aws-profile
         package: master
@@ -133,7 +133,7 @@ jobs:
         path: ./bin/aws-profile-windows-${{github.sha}}
 
     - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1
+      uses: hpcsc/upload-bintray-docker-action@v1.1
       with:
         repository: aws-profile
         package: master
