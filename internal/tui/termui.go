@@ -1,9 +1,9 @@
 package tui
 
 import (
+	"fmt"
 	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/utils"
-	"log"
 	"strings"
 
 	ui "github.com/gizak/termui/v3"
@@ -23,7 +23,7 @@ func getDisplayableLabels(profiles []awsconfig.Profile) []string {
 
 func SelectProfileFromList(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
 	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to initialize termui: %v", err)
+		return nil, fmt.Errorf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
@@ -39,7 +39,7 @@ func SelectProfileFromList(profiles awsconfig.Profiles, pattern string) ([]byte,
 
 func SelectValueFromList(values []string, title string) ([]byte, error) {
 	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to initialize termui: %v", err)
+		return nil, fmt.Errorf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
