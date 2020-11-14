@@ -47,6 +47,22 @@ func TestFromFile(t *testing.T) {
 		require.Equal(t, expectedConfig, c)
 	})
 
+	t.Run("return unmarshalled config for sample config file", func(t *testing.T) {
+		// this test makes sure sample config file is always in sync with code changes
+		c, err := FromFile(sampleConfigPath(t))
+
+		require.NoError(t, err)
+		expectedConfig := &config{
+			HighlightColor: "red",
+			Regions: []string{
+				"ap-southeast-2",
+				"us-west-2",
+				"us-east-1",
+			},
+		}
+		require.Equal(t, expectedConfig, c)
+	})
+
 	t.Run("return error if highlight color is not in the predefined list", func(t *testing.T) {
 		_, err := FromFile("testdata/invalid-highlight-color.yaml")
 
