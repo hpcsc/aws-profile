@@ -33,13 +33,13 @@ func ToLatest(currentBinaryPath string, includePrerelease bool, currentVersion s
 		return "", err
 	}
 
-	err = os.Chmod(newFileName, 0755)
+	err = os.Chmod(newFileName, 0755) // #nosec
 	if err != nil {
 		return "", fmt.Errorf("failed to change downloaded file permission: %v", err)
 	}
 
 	old := currentBinaryPath + ".old"
-	os.Remove(old)
+	_ = os.Remove(old)
 
 	err = os.Rename(currentBinaryPath, old)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 func WriteToFile(file *ini.File, unexpandedFilePath string) error {
@@ -48,7 +49,7 @@ func ReadCachedCallerIdentity() (string, error) {
 		return "", createError
 	}
 
-	callerIdentity, readError := ioutil.ReadFile(cachedCallerIdentityFile)
+	callerIdentity, readError := ioutil.ReadFile(filepath.Clean(cachedCallerIdentityFile))
 	if readError != nil {
 		return "", readError
 	}

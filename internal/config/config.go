@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -61,11 +62,12 @@ func Load() (*Config, error) {
 }
 
 func FromFile(path string) (*Config, error) {
-	if !fileExists(path) {
+	cleanedPath := filepath.Clean(path)
+	if !fileExists(cleanedPath) {
 		return defaultConfig(), nil
 	}
 
-	fileContent, err := ioutil.ReadFile(path)
+	fileContent, err := ioutil.ReadFile(cleanedPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file at %s: %v", path, err)
 	}

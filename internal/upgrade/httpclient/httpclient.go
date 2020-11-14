@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
@@ -58,7 +59,11 @@ func DownloadFile(filepath string, url string) error {
 		return fmt.Errorf("failed to create file at %s: %v", filepath, err)
 	}
 
-	defer out.Close()
+	defer func() {
+		if err := out.Close(); err != nil {
+			 log.Printf("failed to close file %s: %v", filepath, err)
+		}
+	}()
 
 	response, err := http.Get(url)
 	if err != nil {
