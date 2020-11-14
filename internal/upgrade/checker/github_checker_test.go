@@ -112,6 +112,17 @@ func TestGithubChecker_LatestVersionUrl(t *testing.T) {
 		require.Contains(t, err.Error(), "some error")
 	})
 
+	t.Run("return error when fail to unmarshal get latest response", func(t *testing.T) {
+		c := newGithubChecker("linux", func(url string, authorization string) ([]byte, error) {
+			return []byte("{ \"Assets\": \"some-assets\"}"), nil
+		})
+
+		_, _, err := c.LatestVersionUrl()
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "failed to unmarshal get latest release response body")
+	})
+
 	t.Run("return error when no asset for given os found", func(t *testing.T) {
 		c := newGithubChecker("bsd", stubGithubGetUrl)
 

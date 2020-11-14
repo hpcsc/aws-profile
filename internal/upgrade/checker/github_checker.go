@@ -44,7 +44,7 @@ func (c githubChecker) LatestVersionUrl() (string, string, error) {
 	unmarshalledResponse := githubLatestReleaseResponse{}
 	err = json.Unmarshal(bodyContent, &unmarshalledResponse)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to unmarshal response body: %s", bodyContent)
+		return "", "", fmt.Errorf("failed to unmarshal get latest release response body: %s, err: %v", bodyContent, err)
 	}
 
 	for _, asset := range unmarshalledResponse.Assets {

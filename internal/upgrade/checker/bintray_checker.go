@@ -32,7 +32,7 @@ func (c bintrayChecker) LatestVersionUrl() (string, string, error) {
 	var unmarshalledResponse bintrayMasterPackageResponse
 	err = json.Unmarshal(bodyContent, &unmarshalledResponse)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to unmarshal response body: %s", bodyContent)
+		return "", "", fmt.Errorf("failed to unmarshal response body: %s, err: %v", bodyContent, err)
 	}
 
 	latestVersion := unmarshalledResponse.LatestVersion
