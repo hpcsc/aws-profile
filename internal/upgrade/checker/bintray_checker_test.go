@@ -10,7 +10,7 @@ import (
 )
 
 var stubBintrayGetUrl = func(url string) ([]byte, error) {
-	response, err := ioutil.ReadFile("testdata/bintray-files-response.json")
+	response, err := ioutil.ReadFile("testdata/bintray-get-package-response.json")
 	if err != nil {
 		fmt.Printf("failed to read response file: %v", err)
 		os.Exit(1)
@@ -25,9 +25,9 @@ func TestBintrayChecker_LatestVersionUrl(t *testing.T) {
 		expectedUrl     string
 		expectedVersion string
 	}{
-		{"windows", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Windows-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
-		{"linux", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-Linux-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
-		{"macos", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-macOS-ebcda1baa76b902ecc035b5e5a232a488aa66cb0", "ebcda1baa76b902ecc035b5e5a232a488aa66cb0"},
+		{"windows", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-windows-9c1ab3ae40ff6697a567c272a47337b1044506e3", "9c1ab3ae40ff6697a567c272a47337b1044506e3"},
+		{"linux", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-linux-9c1ab3ae40ff6697a567c272a47337b1044506e3", "9c1ab3ae40ff6697a567c272a47337b1044506e3"},
+		{"macos", "https://dl.bintray.com/hpcsc/aws-profile/aws-profile-macos-9c1ab3ae40ff6697a567c272a47337b1044506e3", "9c1ab3ae40ff6697a567c272a47337b1044506e3"},
 	}
 
 	for _, tt := range testCases {
@@ -51,14 +51,5 @@ func TestBintrayChecker_LatestVersionUrl(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "some error")
-	})
-
-	t.Run("return error when no asset for given os found", func(t *testing.T) {
-		c := newBintrayChecker("bsd", stubBintrayGetUrl)
-
-		_, _, err := c.LatestVersionUrl()
-
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "download url for os bsd not found")
 	})
 }

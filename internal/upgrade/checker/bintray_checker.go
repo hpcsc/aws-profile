@@ -4,18 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 )
 
 const (
-	bintrayFilesUrl = "https://api.bintray.com/packages/hpcsc/aws-profile/master/files"
+	bintrayMasterPackageUrl = "https://api.bintray.com/packages/hpcsc/aws-profile/master"
 )
 
-type bintrayFilesResponsestruct struct {
-	Name    string `json:"name"`
-	Path    string `json:"path"`
-	Version string `json:"version"`
-	Created string `json:"created"`
+type bintrayMasterPackageResponse struct {
+	LatestVersion string `json:"latest_version"`
 }
 
 type bintrayChecker struct {
@@ -28,33 +24,17 @@ func newBintrayChecker(os string, getUrl func(string) ([]byte, error)) checker {
 }
 
 func (c bintrayChecker) LatestVersionUrl() (string, string, error) {
-	bodyContent, err := c.getUrl(bintrayFilesUrl)
+	bodyContent, err := c.getUrl(bintrayMasterPackageUrl)
 	if err != nil {
 		return "", "", err
 	}
 
-	var unmarshalledResponse []bintrayFilesResponsestruct
+	var unmarshalledResponse bintrayMasterPackageResponse
 	err = json.Unmarshal(bodyContent, &unmarshalledResponse)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to unmarshal response body: %s", bodyContent)
 	}
 
-	latestPath := ""
-	latestVersion := ""
-	latestCreated := time.Time{}
-	for _, file := range unmarshalledResponse {
-		created, _ := time.Parse(time.RFC3339, file.Created)
-		if strings.Contains(strings.ToLower(file.Name), c.os) &&
-			created.After(latestCreated) {
-			latestPath = file.Path
-			latestVersion = file.Version
-			latestCreated = created
-		}
-	}
-
-	if latestPath != "" {
-		return fmt.Sprintf("https://dl.bintray.com/hpcsc/aws-profile/%s", latestPath), latestVersion, nil
-	}
-
-	return "", "", fmt.Errorf("download url for os %s not found", c.os)
+	latestVersion := unmarshalledResponse.LatestVersion
+	return fmt.Sprintf("https://dl.bintray.com/hpcsc/aws-profile/aws-profile-%s-%s", strings.ToLower(c.os), latestVersion), latestVersion, nil
 }
