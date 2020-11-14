@@ -1,0 +1,146 @@
+name: Master Build and Publish
+on:
+  push:
+    branches:
+      - master
+jobs:
+
+  commit:
+    name: Commit
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Check out
+      uses: actions/checkout@v1
+
+    - name: Build
+      run: |
+        ./batect build
+
+    - name: Lint
+      run: |
+        ./batect lint
+
+    - name: Test
+      run: |
+        ./batect test
+
+    - name: Upload coverage to codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.txt
+        flags: unittests
+        name: aws-profile-coverage
+        fail_ci_if_error: true
+        verbose: true
+
+    - name: Generate coverage html report
+      run: |
+        ./batect generate-coverage-report
+
+    - name: Run E2E Test
+      run: |
+        ./batect e2e -- bin/aws-profile-${{runner.os}}-${{github.sha}}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload coverage html report as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: coverage-html-report
+        path: ./coverage.html
+
+  publishLinux:
+    name: Publish Linux
+    runs-on: ubuntu-18.04
+    needs: commit
+    steps:
+    - name: Check out
+      uses: actions/checkout@v1
+
+    - name: Build for Linux
+      run: |
+        ./batect build
+      env:
+        GOOS: linux
+        VERSION: ${{github.sha}}
+        OUTPUT: bin/aws-profile-linux-${{github.sha}}
+
+    - name: Upload Linux binary as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: aws-profile-linux-${{github.sha}}
+        path: ./bin/aws-profile-linux-${{github.sha}}
+
+    - name: Upload to Bintray
+      uses: hpcsc/upload-bintray-docker-action@v1
+      with:
+        repository: aws-profile
+        package: master
+        version: ${{github.sha}}
+        sourcePath: ./bin/aws-profile*
+        username: hpcsc
+        apiKey: ${{secrets.BINTRAY_API_KEY}}
+
+  publishMacOS:
+    name: Publish MacOS
+    runs-on: ubuntu-18.04
+    needs: commit
+    steps:
+    - name: Check out
+      uses: actions/checkout@v1
+
+    - name: Build for MacOS
+      run: |
+        ./batect build
+      env:
+        GOOS: darwin
+        VERSION: ${{github.sha}}
+        OUTPUT: bin/aws-profile-macos-${{github.sha}}
+
+    - name: Upload MacOS binary as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: aws-profile-macos-${{github.sha}}
+        path: ./bin/aws-profile-macos-${{github.sha}}
+
+    - name: Upload to Bintray
+      uses: hpcsc/upload-bintray-docker-action@v1
+      with:
+        repository: aws-profile
+        package: master
+        version: ${{github.sha}}
+        sourcePath: ./bin/aws-profile*
+        username: hpcsc
+        apiKey: ${{secrets.BINTRAY_API_KEY}}
+
+  publishWindows:
+    name: Publish Windows
+    runs-on: ubuntu-18.04
+    needs: commit
+    steps:
+    - name: Check out
+      uses: actions/checkout@v1
+
+    - name: Build for Windows
+      run: |
+        ./batect build
+      env:
+        GOOS: windows
+        VERSION: ${{github.sha}}
+        OUTPUT: bin/aws-profile-windows-${{github.sha}}
+
+    - name: Upload Windows binary as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: aws-profile-windows-${{github.sha}}
+        path: ./bin/aws-profile-windows-${{github.sha}}
+
+    - name: Upload to Bintray
+      uses: hpcsc/upload-bintray-docker-action@v1
+      with:
+        repository: aws-profile
+        package: master
+        version: ${{github.sha}}
+        sourcePath: ./bin/aws-profile*
+        username: hpcsc
+        apiKey: ${{secrets.BINTRAY_API_KEY}}
