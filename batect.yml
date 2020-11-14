@@ -1,8 +1,8 @@
 project_name: aws-profile
 
 containers:
-  buildenv:
-    build_directory: .batect/buildenv
+  build-env:
+    build_directory: .batect/build-env
     volumes:
       - local: .
         container: /app
@@ -20,12 +20,12 @@ containers:
 tasks:
   clean:
     run:
-      container: buildenv
+      container: build-env
       command: rm -rf /app/bin && rm -f /app/aws-profile
 
   build-linux:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/build.sh
       environment:
         VERSION_NUMBER: ${VERSION_NUMBER:-000}
@@ -37,7 +37,7 @@ tasks:
 
   build-macos:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/build.sh
       environment:
         VERSION_NUMBER: ${VERSION_NUMBER:-000}
@@ -49,7 +49,7 @@ tasks:
 
   build-windows:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/build.sh
       environment:
         VERSION_NUMBER: ${VERSION_NUMBER:-000}
@@ -61,22 +61,22 @@ tasks:
 
   lint:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/lint.sh
 
   test:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/test.sh
 
   generate-coverage-report:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/generate-coverage-report.sh
 
   e2e:
     run:
-      container: buildenv
+      container: build-env
       entrypoint: /app/e2e/run.sh
       command: /app/bin/aws-profile
       environment:
@@ -84,5 +84,5 @@ tasks:
 
   scan-security:
     run:
-      container: buildenv
+      container: build-env
       command: /app/scripts/scan-security.sh
