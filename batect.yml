@@ -23,14 +23,38 @@ tasks:
       container: buildenv
       command: rm -rf /app/bin && rm -f /app/aws-profile
 
-  build:
+  build-linux:
     run:
       container: buildenv
       command: /app/scripts/build.sh
       environment:
-        VERSION: ${VERSION:-"000"}
+        VERSION_NUMBER: ${VERSION_NUMBER:-000}
         OUTPUT: ${OUTPUT:-bin/aws-profile}
         GOOS: ${GOOS:-linux}
+        GOARCH: ${GOARCH:-amd64}
+    prerequisites:
+      - clean
+
+  build-macos:
+    run:
+      container: buildenv
+      command: /app/scripts/build.sh
+      environment:
+        VERSION_NUMBER: ${VERSION_NUMBER:-000}
+        OUTPUT: ${OUTPUT:-bin/aws-profile}
+        GOOS: ${GOOS:-darwin}
+        GOARCH: ${GOARCH:-amd64}
+    prerequisites:
+      - clean
+
+  build-windows:
+    run:
+      container: buildenv
+      command: /app/scripts/build.sh
+      environment:
+        VERSION_NUMBER: ${VERSION_NUMBER:-000}
+        OUTPUT: ${OUTPUT:-bin/aws-profile}
+        GOOS: ${GOOS:-windows}
         GOARCH: ${GOARCH:-amd64}
     prerequisites:
       - clean

@@ -14,7 +14,7 @@ jobs:
 
     - name: Build
       run: |
-        ./batect build
+        ./batect build-linux
 
     - name: Lint
       run: |
@@ -59,10 +59,9 @@ jobs:
 
     - name: Build for Linux
       run: |
-        ./batect build
+        ./batect build-linux
       env:
-        GOOS: linux
-        VERSION: ${{github.sha}}
+        VERSION_NUMBER: ${{github.sha}}
         OUTPUT: bin/aws-profile-linux-${{github.sha}}
 
     - name: Upload Linux binary as artifact
@@ -91,10 +90,9 @@ jobs:
 
     - name: Build for MacOS
       run: |
-        ./batect build
+        ./batect build-macos
       env:
-        GOOS: darwin
-        VERSION: ${{github.sha}}
+        VERSION_NUMBER: ${{github.sha}}
         OUTPUT: bin/aws-profile-macos-${{github.sha}}
 
     - name: Upload MacOS binary as artifact
@@ -123,10 +121,9 @@ jobs:
 
     - name: Build for Windows
       run: |
-        ./batect build
+        ./batect build-windows
       env:
-        GOOS: windows
-        VERSION: ${{github.sha}}
+        VERSION_NUMBER: ${{github.sha}}
         OUTPUT: bin/aws-profile-windows-${{github.sha}}
 
     - name: Upload Windows binary as artifact
