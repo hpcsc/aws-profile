@@ -21,7 +21,7 @@ func getDisplayableLabels(profiles []awsconfig.Profile) []string {
 	return labels
 }
 
-func SelectProfileFromList(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+func SelectProfileFromList(profiles awsconfig.Profiles, pattern string, config *config.Config) ([]byte, error) {
 	if err := ui.Init(); err != nil {
 		return nil, fmt.Errorf("failed to initialize termui: %v", err)
 	}
@@ -30,20 +30,20 @@ func SelectProfileFromList(profiles awsconfig.Profiles, pattern string) ([]byte,
 	filteredProfiles := profiles.Filter(pattern)
 	labels := getDisplayableLabels(filteredProfiles)
 
-	selectedIndex, err := renderListSelection(labels, "Select an AWS profile")
+	selectedIndex, err := renderListSelection(labels, "Select an AWS profile", config)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(filteredProfiles[selectedIndex].ProfileName), nil
 }
 
-func SelectValueFromList(values []string, title string) ([]byte, error) {
+func SelectValueFromList(values []string, title string, config *config.Config) ([]byte, error) {
 	if err := ui.Init(); err != nil {
 		return nil, fmt.Errorf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
-	selectedIndex, err := renderListSelection(values, title)
+	selectedIndex, err := renderListSelection(values, title, config)
 	if err != nil {
 		return nil, err
 	}
@@ -71,16 +71,11 @@ func toTermUIColor(color string) ui.Color {
 	return ui.ColorGreen
 }
 
-func renderListSelection(labels []string, title string) (int, error) {
-	c, err := config.Load()
-	if err != nil {
-		return -1, err
-	}
-
+func renderListSelection(labels []string, title string, config *config.Config) (int, error) {
 	list := widgets.NewList()
 	list.Title = title
 	list.Rows = labels
-	list.SelectedRowStyle = ui.NewStyle(toTermUIColor(c.HighlightColor))
+	list.SelectedRowStyle = ui.NewStyle(toTermUIColor(config.HighlightColor))
 	list.WrapText = true
 
 	grid := ui.NewGrid()

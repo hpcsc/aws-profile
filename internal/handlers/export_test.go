@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/awsconfig"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
@@ -33,9 +34,16 @@ func stubGlobalArgumentsForExport(configName string) GlobalArguments {
 	}
 }
 
+func stubConfig() *config.Config {
+	return &config.Config{
+		HighlightColor: config.DefaultHighlightColor(),
+		Regions:        config.DefaultRegions(),
+	}
+}
+
 func setupExportHandler(isWindows bool, selectProfileFn SelectProfileFn, getAWSCredentialsFn GetAWSCredentialsFn) ExportHandler {
 	app := kingpin.New("some-app", "some description")
-	exportHandler := NewExportHandler(app, isWindows, selectProfileFn, getAWSCredentialsFn)
+	exportHandler := NewExportHandler(app, stubConfig(), isWindows, selectProfileFn, getAWSCredentialsFn)
 
 	if _, err := app.Parse([]string{"export"}); err != nil {
 		fmt.Printf("failed to setup test export handler: %v\n", err)
@@ -63,7 +71,7 @@ func TestExportHandler(t *testing.T) {
 	t.Run("invoke SelectProfile with profile names from config file only", func(t *testing.T) {
 		called := false
 
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			require.ElementsMatch(
 				t,
 				profiles.GetAllDisplayProfileNames(),
@@ -94,7 +102,7 @@ func TestExportHandler(t *testing.T) {
 
 	t.Run("return error if duration is invalid", func(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
-		exportHandler := NewExportHandler(app, false, nil, nil)
+		exportHandler := NewExportHandler(app, stubConfig(), false, nil, nil)
 
 		if _, err := app.Parse([]string{"export", "-d", "5"}); err != nil {
 			t.Fatalf("failed to setup test export handler: %v\n", err)
@@ -110,7 +118,7 @@ func TestExportHandler(t *testing.T) {
 
 	t.Run("return error if duration is lower than minimum duration allowed", func(t *testing.T) {
 		app := kingpin.New("some-app", "some description")
-		exportHandler := NewExportHandler(app, false, nil, nil)
+		exportHandler := NewExportHandler(app, stubConfig(), false, nil, nil)
 
 		if _, err := app.Parse([]string{"export", "-d", "5m"}); err != nil {
 			t.Fatalf("failed to setup test export handler: %v\n", err)
@@ -125,7 +133,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("call GetAWSCredentials with default value when no duration given", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_1"), nil
 		}
 
@@ -150,7 +158,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("call GetAWSCredentials with given value", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_1"), nil
 		}
 
@@ -164,7 +172,7 @@ func TestExportHandler(t *testing.T) {
 		}
 
 		app := kingpin.New("some-app", "some description")
-		exportHandler := NewExportHandler(app, false, selectProfileMock, getAWSCredentialsMock)
+		exportHandler := NewExportHandler(app, stubConfig(), false, selectProfileMock, getAWSCredentialsMock)
 
 		if _, err := app.Parse([]string{"export", "-d", mockDurationValue}); err != nil {
 			t.Fatalf("failed to setup test export handler: %v\n", err)
@@ -178,7 +186,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("contains export command for Linux and MacOS in output", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_1"), nil
 		}
 
@@ -196,7 +204,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("contains export region for Linux and MacOS in output", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
 
@@ -214,7 +222,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("contains export command for Windows in output", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_1"), nil
 		}
 
@@ -232,7 +240,7 @@ func TestExportHandler(t *testing.T) {
 	})
 
 	t.Run("contains export region for Windows in output", func(t *testing.T) {
-		selectProfileMock := func(profiles awsconfig.Profiles, pattern string) ([]byte, error) {
+		selectProfileMock := func(profiles awsconfig.Profiles, pattern string, c *config.Config) ([]byte, error) {
 			return []byte("profile config_profile_2"), nil
 		}
 

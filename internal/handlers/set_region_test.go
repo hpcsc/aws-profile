@@ -56,7 +56,7 @@ func TestSetRegionHandler(t *testing.T) {
 	t.Run("invoke selectRegion with predefined regions and correct title", func(t *testing.T) {
 		called := false
 
-		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string, c *config.Config) ([]byte, error) {
 			require.Equal(t, regions, config.DefaultRegions())
 			require.Equal(t, title, "Select an AWS region")
 
@@ -79,7 +79,7 @@ func TestSetRegionHandler(t *testing.T) {
 	t.Run("set region of default profile in config file", func(t *testing.T) {
 		calledWriteToFile := false
 
-		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string, c *config.Config) ([]byte, error) {
 			return []byte("ap-southeast-2"), nil
 		}
 
@@ -112,7 +112,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 	t.Run("return success when user cancels in the middle of selection", func(t *testing.T) {
 		calledWriteToFile := false
-		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string, c *config.Config) ([]byte, error) {
 			return nil, utils.NewCancelledError()
 		}
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
@@ -132,7 +132,7 @@ func TestSetRegionHandler(t *testing.T) {
 
 	t.Run("return error when failed to do selection", func(t *testing.T) {
 		calledWriteToFile := false
-		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string, c *config.Config) ([]byte, error) {
 			return nil, errors.New("some error")
 		}
 		writeToFileMock := func(file *ini.File, unexpandedFilePath string) error {
@@ -151,7 +151,7 @@ func TestSetRegionHandler(t *testing.T) {
 	})
 
 	t.Run("return error if failed to write updated config file", func(t *testing.T) {
-		selectRegionMock := func(regions []string, title string) ([]byte, error) {
+		selectRegionMock := func(regions []string, title string, c *config.Config) ([]byte, error) {
 			return []byte("ap-southeast-2"), nil
 		}
 

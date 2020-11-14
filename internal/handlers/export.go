@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hpcsc/aws-profile/internal/awsconfig"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/ini.v1"
@@ -19,6 +20,7 @@ type ExportHandler struct {
 	SelectProfile     SelectProfileFn
 	GetAWSCredentials GetAWSCredentialsFn
 	Arguments         ExportCommandArguments
+	Config            *config.Config
 }
 
 type ExportCommandArguments struct {
@@ -26,7 +28,7 @@ type ExportCommandArguments struct {
 	Duration *string
 }
 
-func NewExportHandler(app *kingpin.Application, isWindows bool, selectProfileFn SelectProfileFn, getAWSCredentialsFn GetAWSCredentialsFn) ExportHandler {
+func NewExportHandler(app *kingpin.Application, config *config.Config, isWindows bool, selectProfileFn SelectProfileFn, getAWSCredentialsFn GetAWSCredentialsFn) ExportHandler {
 	subCommand := app.Command("export", `print commands to set environment variables for assuming a AWS role
 
 To execute the command without printing it to console:
@@ -47,6 +49,7 @@ To execute the command without printing it to console:
 			Pattern:  pattern,
 			Duration: duration,
 		},
+		Config: config,
 	}
 }
 
@@ -67,7 +70,7 @@ func (handler ExportHandler) Handle(globalArguments GlobalArguments) (bool, stri
 
 	profiles := awsconfig.LoadProfilesFromConfigAndCredentials(ini.Empty(), configFile)
 
-	selectProfileResult, selectProfileErr := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
+	selectProfileResult, selectProfileErr := handler.SelectProfile(profiles, *handler.Arguments.Pattern, handler.Config)
 	if selectProfileErr != nil {
 		// cancel by user
 		return true, ""

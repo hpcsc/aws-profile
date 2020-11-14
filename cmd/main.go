@@ -26,10 +26,11 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger, config *confi
 		io.ReadCachedCallerIdentity,
 		io.WriteCachedCallerIdentity,
 	)
-	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, io.WriteToFile)
+	setHandler := handlers.NewSetHandler(app, config, tui.SelectProfileFromList, io.WriteToFile)
 	setRegionHandler := handlers.NewSetRegionHandler(app, config, tui.SelectValueFromList, io.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
+		config,
 		isWindows,
 		tui.SelectProfileFromList,
 		aws.GetAWSCredentials,

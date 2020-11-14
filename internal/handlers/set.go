@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hpcsc/aws-profile/internal/awsconfig"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/io"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -15,13 +16,14 @@ type SetHandler struct {
 	Arguments     SetCommandArguments
 	SelectProfile SelectProfileFn
 	WriteToFile   WriteToFileFn
+	Config        *config.Config
 }
 
 type SetCommandArguments struct {
 	Pattern *string
 }
 
-func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
+func NewSetHandler(app *kingpin.Application, config *config.Config, selectProfileFn SelectProfileFn, writeToFileFn WriteToFileFn) SetHandler {
 	subCommand := app.Command("set", "set default profile with credentials of selected profile")
 
 	pattern := subCommand.Arg("pattern", "Filter profiles by given pattern").String()
@@ -33,6 +35,7 @@ func NewSetHandler(app *kingpin.Application, selectProfileFn SelectProfileFn, wr
 		},
 		SelectProfile: selectProfileFn,
 		WriteToFile:   writeToFileFn,
+		Config:        config,
 	}
 }
 
@@ -49,7 +52,7 @@ func (handler SetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 
 	profiles := awsconfig.LoadProfilesFromConfigAndCredentials(credentialsFile, configFile)
 
-	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern)
+	selectProfileResult, err := handler.SelectProfile(profiles, *handler.Arguments.Pattern, handler.Config)
 	var cancelled *utils.CancelledError
 	if errors.As(err, &cancelled) {
 		return true, ""

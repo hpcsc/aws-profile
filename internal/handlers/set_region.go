@@ -12,7 +12,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-type SelectRegionFn func([]string, string) ([]byte, error)
+type SelectRegionFn func([]string, string, *config.Config) ([]byte, error)
 
 type SetRegionHandler struct {
 	SubCommand   *kingpin.CmdClause
@@ -38,7 +38,7 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	selectRegionResult, err := handler.SelectRegion(handler.Config.Regions, "Select an AWS region")
+	selectRegionResult, err := handler.SelectRegion(handler.Config.Regions, "Select an AWS region", handler.Config)
 	var cancelled *utils.CancelledError
 	if errors.As(err, &cancelled) {
 		return true, ""
