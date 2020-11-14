@@ -14,7 +14,7 @@ func TestFromFile(t *testing.T) {
 		c, err := FromFile("not-exist-config.yaml")
 
 		require.NoError(t, err)
-		expectedConfig := &config{
+		expectedConfig := &Config{
 			HighlightColor: DefaultHighlightColor(),
 			Regions:        DefaultRegions(),
 		}
@@ -25,7 +25,7 @@ func TestFromFile(t *testing.T) {
 		c, err := FromFile("testdata/missing-highlight-color.yaml")
 
 		require.NoError(t, err)
-		expectedConfig := &config{
+		expectedConfig := &Config{
 			HighlightColor: DefaultHighlightColor(),
 			Regions: []string{
 				"ap-southeast-2",
@@ -40,7 +40,7 @@ func TestFromFile(t *testing.T) {
 		c, err := FromFile("testdata/missing-regions.yaml")
 
 		require.NoError(t, err)
-		expectedConfig := &config{
+		expectedConfig := &Config{
 			HighlightColor: "yellow",
 			Regions:        DefaultRegions(),
 		}
@@ -52,7 +52,7 @@ func TestFromFile(t *testing.T) {
 		c, err := FromFile(sampleConfigPath(t))
 
 		require.NoError(t, err)
-		expectedConfig := &config{
+		expectedConfig := &Config{
 			HighlightColor: "red",
 			Regions: []string{
 				"ap-southeast-2",
@@ -70,7 +70,7 @@ func TestFromFile(t *testing.T) {
 		require.Equal(t, "valid values for highlight color are: black, red, green, yellow, blue, magenta, cyan, white", err.Error())
 	})
 
-	t.Run("return error if failed to unmarshal config file", func (t *testing.T) {
+	t.Run("return error if failed to unmarshal config file", func(t *testing.T) {
 		_, err := FromFile("testdata/invalid-config.yaml")
 
 		require.Error(t, err)

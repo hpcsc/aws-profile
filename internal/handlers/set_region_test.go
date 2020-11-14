@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,11 @@ func stubGlobalArgumentsForSetRegion(configName string) GlobalArguments {
 
 func setupSetRegionHandler(selectRegionFn SelectRegionFn, writeToFileFn WriteToFileFn) SetRegionHandler {
 	app := kingpin.New("some-app", "some description")
-	setRegionHandler := NewSetRegionHandler(app, selectRegionFn, writeToFileFn)
+	config := &config.Config{
+		HighlightColor: config.DefaultHighlightColor(),
+		Regions:        config.DefaultRegions(),
+	}
+	setRegionHandler := NewSetRegionHandler(app, config, selectRegionFn, writeToFileFn)
 
 	if _, err := app.Parse([]string{"set-region"}); err != nil {
 		fmt.Printf("failed to setup test set region handler: %v\n", err)
@@ -52,7 +57,7 @@ func TestSetRegionHandler(t *testing.T) {
 		called := false
 
 		selectRegionMock := func(regions []string, title string) ([]byte, error) {
-			require.Len(t, regions, 25)
+			require.Equal(t, regions, config.DefaultRegions())
 			require.Equal(t, title, "Select an AWS region")
 
 			called = true

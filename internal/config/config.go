@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type config struct {
+type Config struct {
 	HighlightColor string   `yaml:"highlightColor"`
 	Regions        []string `yaml:"regions"`
 }
@@ -54,7 +54,7 @@ var allowedColors = []string{
 	"white",
 }
 
-func FromFile(path string) (*config, error) {
+func FromFile(path string) (*Config, error) {
 	if !fileExists(path) {
 		return defaultConfig(), nil
 	}
@@ -64,7 +64,7 @@ func FromFile(path string) (*config, error) {
 		return nil, fmt.Errorf("failed to read config file at %s: %v", path, err)
 	}
 
-	c := &config{}
+	c := &Config{}
 	if err = yaml.Unmarshal(fileContent, c); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config file %s: %v", path, err)
 	}
@@ -111,8 +111,8 @@ func fileExists(path string) bool {
 	return !info.IsDir()
 }
 
-func defaultConfig() *config {
-	return &config{
+func defaultConfig() *Config {
+	return &Config{
 		HighlightColor: defaultHighlightColor,
 		Regions:        defaultRegions,
 	}

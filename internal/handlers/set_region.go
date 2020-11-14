@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"github.com/hpcsc/aws-profile/internal/utils"
 	"strings"
 
@@ -17,15 +18,17 @@ type SetRegionHandler struct {
 	SubCommand   *kingpin.CmdClause
 	SelectRegion SelectRegionFn
 	WriteToFile  WriteToFileFn
+	Config       *config.Config
 }
 
-func NewSetRegionHandler(app *kingpin.Application, selectRegionFn SelectRegionFn, writeToFileFn WriteToFileFn) SetRegionHandler {
+func NewSetRegionHandler(app *kingpin.Application, config *config.Config, selectRegionFn SelectRegionFn, writeToFileFn WriteToFileFn) SetRegionHandler {
 	subCommand := app.Command("set-region", "set the region of the default profile")
 
 	return SetRegionHandler{
 		SubCommand:   subCommand,
 		SelectRegion: selectRegionFn,
 		WriteToFile:  writeToFileFn,
+		Config:       config,
 	}
 }
 
@@ -35,7 +38,7 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 		return false, fmt.Sprintf("Fail to read AWS config file: %v", err)
 	}
 
-	selectRegionResult, err := handler.SelectRegion(getAllRegions(), "Select an AWS region")
+	selectRegionResult, err := handler.SelectRegion(handler.Config.Regions, "Select an AWS region")
 	var cancelled *utils.CancelledError
 	if errors.As(err, &cancelled) {
 		return true, ""
@@ -53,34 +56,4 @@ func (handler SetRegionHandler) Handle(globalArguments GlobalArguments) (bool, s
 	}
 
 	return true, fmt.Sprintf("=== [region %s] -> [default.region] (%s)", trimmedSelectedRegionResult, globalArguments.ConfigFilePath)
-}
-
-func getAllRegions() []string {
-	return []string{
-		"af-south-1",
-		"ap-east-1",
-		"ap-northeast-1",
-		"ap-northeast-2",
-		"ap-northeast-3",
-		"ap-south-1",
-		"ap-southeast-1",
-		"ap-southeast-2",
-		"ca-central-1",
-		"cn-north-1",
-		"cn-northwest-1",
-		"eu-central-1",
-		"eu-north-1",
-		"eu-south-1",
-		"eu-west-1",
-		"eu-west-2",
-		"eu-west-3",
-		"me-south-1",
-		"sa-east-1",
-		"us-east-1",
-		"us-east-2",
-		"us-gov-east-1",
-		"us-gov-west-1",
-		"us-west-1",
-		"us-west-2",
-	}
 }

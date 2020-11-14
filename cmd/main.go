@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/hpcsc/aws-profile/internal/config"
 	"os"
 	"runtime"
 	"strings"
@@ -15,7 +16,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]handlers.Handler {
+func createHandlerMap(app *kingpin.Application, logger log.Logger, config *config.Config) map[string]handlers.Handler {
 	isWindows := runtime.GOOS == "windows"
 
 	getHandler := handlers.NewGetHandler(
@@ -26,7 +27,7 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 		io.WriteCachedCallerIdentity,
 	)
 	setHandler := handlers.NewSetHandler(app, tui.SelectProfileFromList, io.WriteToFile)
-	setRegionHandler := handlers.NewSetRegionHandler(app, tui.SelectValueFromList, io.WriteToFile)
+	setRegionHandler := handlers.NewSetRegionHandler(app, config, tui.SelectValueFromList, io.WriteToFile)
 	exportHandler := handlers.NewExportHandler(
 		app,
 		isWindows,
@@ -51,9 +52,16 @@ func createHandlerMap(app *kingpin.Application, logger log.Logger) map[string]ha
 func main() {
 	logger := log.NewLogrusLogger()
 
+	configPath := utils.GetEnvVariableOrDefault("AWS_PROFILE_CONFIG", "~/.aws-profile/config.yaml")
+	config, err := config.FromFile(utils.ExpandHomeDirectory(configPath))
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	app := kingpin.New("aws-profile", "simple tool to help switching among AWS profiles more easily")
 	app.HelpFlag.Short('h')
-	handlerMap := createHandlerMap(app, logger)
+	handlerMap := createHandlerMap(app, logger, config)
 
 	if len(os.Args) < 2 {
 		app.Usage([]string{})
