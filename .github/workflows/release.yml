@@ -21,7 +21,7 @@ jobs:
           prerelease: false
 
       - name: Download binaries from Bintray
-        run: curl --remote-name-all -Lf https://dl.bintray.com/hpcsc/aws-profile/aws-profile-{Linux,Windows,macOS}-${{github.sha}}
+        run: curl --remote-name-all -Lf https://dl.bintray.com/hpcsc/aws-profile/aws-profile-{linux,windows,macos}-${{github.sha}}
 
       - name: Attach Linux binary to Github release
         uses: actions/upload-release-asset@v1.0.1
@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./aws-profile-Linux-${{github.sha}}
+          asset_path: ./aws-profile-linux-${{github.sha}}
           asset_name: aws-profile-linux
           asset_content_type: application/octet-stream
 
@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./aws-profile-Windows-${{github.sha}}
+          asset_path: ./aws-profile-windows-${{github.sha}}
           asset_name: aws-profile-windows.exe
           asset_content_type: application/octet-stream
 
@@ -49,6 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./aws-profile-macOS-${{github.sha}}
+          asset_path: ./aws-profile-macos-${{github.sha}}
           asset_name: aws-profile-macos
           asset_content_type: application/octet-stream
