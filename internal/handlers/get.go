@@ -57,6 +57,13 @@ func (handler GetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 
 		var callerIdentityProfile, getCallerIdentityErr = handler.GetAWSCallerIdentityFn()
 		if getCallerIdentityErr != nil {
+			if strings.Contains(getCallerIdentityErr.Error(), "ExpiredToken") {
+				return true, "error: ExpiredToken"
+			}
+
+			// error returned by aws sometimes has format: "xxx (ErrorCode) yyy"
+			// try to parse and get that "ErrorCode" from error first
+			// if not possible to parse, return unknown to be printed out
 			errorRegex := regexp.MustCompile(`(\(.*?\))`)
 			errorMatch := errorRegex.FindStringSubmatch(getCallerIdentityErr.Error())
 			if len(errorMatch) < 2 {
@@ -64,7 +71,7 @@ func (handler GetHandler) Handle(globalArguments GlobalArguments) (bool, string)
 				return true, "unknown"
 			}
 
-			return true, errorMatch[1]
+			return true, fmt.Sprintf("error: %s", strings.Trim(errorMatch[1], "()"))
 		}
 
 		writeError := handler.WriteCachedCallerIdentityFn(callerIdentityProfile)

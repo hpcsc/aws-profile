@@ -125,12 +125,16 @@ func TestGetHandler(t *testing.T) {
 			expectedOutput string
 		}{
 			{
+				"ExpiredToken: The security token included in the request is expired",
+				"error: ExpiredToken",
+			},
+			{
 				"An error occurred (ExpiredToken) when calling the GetCallerIdentity operation: The security token included in the request is expired",
-				"ExpiredToken",
+				"error: ExpiredToken",
 			},
 			{
 				"An error occurred (InvalidClientTokenId) when calling the GetCallerIdentity operation: The security token included in the request is invalid",
-				"InvalidClientTokenId",
+				"error: InvalidClientTokenId",
 			},
 		}
 
