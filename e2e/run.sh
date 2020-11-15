@@ -41,6 +41,18 @@ function test_set_from_config() {
     fi;
 }
 
+function test_set_region() {
+    echo "========== Set region ==================="
+    ./e2e/expect/set-region.exp ${PATH_TO_EXECUTABLE}
+
+    local current_region=$(AWS_SHARED_CREDENTIALS_FILE=./e2e/tmp/credentials AWS_CONFIG_FILE=./e2e/tmp/config ${PATH_TO_EXECUTABLE} get-region)
+    local expected='us-east-1'
+    if [ "${current_region}" != "${expected}" ]; then
+        echo "FAILED: [set-region] expected [${expected}], but got [${current_region}]"
+        exit 1
+    fi;
+}
+
 function test_upgrade_to_stable() {
     echo "========= Upgrade to stable ============"
     # copy executable to separate file so that upgrade will not destroy original file
@@ -86,6 +98,7 @@ fi
 setup
 test_set_from_credentials
 test_set_from_config
+test_set_region
 test_upgrade_to_stable
 test_upgrade_to_prerelease
 teardown

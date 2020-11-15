@@ -1,0 +1,21 @@
+#!/usr/bin/env expect
+
+source ./e2e/expect/common.exp
+set running [init]
+
+if {[llength $argv] != 1} {
+    puts "Usage: set-region.exp path-to-executable"
+    exit 1
+}
+
+set pathToExecutable [lindex $argv 0]
+set env(AWS_CONFIG_FILE) ./e2e/tmp/config
+set env(AWS_SHARED_CREDENTIALS_FILE) ./e2e/tmp/credentials
+set env(AWS_PROFILE_CONFIG) ./e2e/config/set-region-config.yaml
+spawn $pathToExecutable set-region
+
+send -- "j"
+send -- "j"
+send -- "\r"
+
+expect eof
