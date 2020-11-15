@@ -3,7 +3,7 @@
 ### Build Status
 ![Build Status](https://github.com/hpcsc/aws-profile/workflows/Pipeline/badge.svg) [![codecov](https://codecov.io/gh/hpcsc/aws-profile/branch/master/graph/badge.svg?token=76OSPJNMON)](https://codecov.io/gh/hpcsc/aws-profile)
 
-[![Demo](https://github.com/hpcsc/aws-profile/raw/master/aws-profile.gif)](https://github.com/hpcsc/aws-profile/raw/master/aws-profile.gif)
+[![aws-profile](https://s8.gifyu.com/images/aws-profile.gif)](https://gifyu.com/image/iqT4)
 
 ### Installation
 
@@ -52,6 +52,12 @@ Commands:
   set [<pattern>]
     set default profile with credentials of selected profile
 
+  set-region
+    set the region of the default profile
+
+  get-region
+    get current region set in default profile
+
   export [<flags>] [<pattern>]
     print commands to set environment variables for assuming a AWS role
 
@@ -69,6 +75,9 @@ Commands:
     - For Linux/MacOS, execute: "eval $(aws-profile unset)"
 
     - For Windows, execute: "Invoke-Expression (path\to\aws-profile.exe unset)"
+
+  upgrade [<flags>]
+    upgrade to latest version
 
   version
     show aws-profile version
