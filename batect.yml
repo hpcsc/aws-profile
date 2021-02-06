@@ -105,3 +105,13 @@ tasks:
         ACCESS_TOKEN: ${ACCESS_TOKEN}
         NAME: aws-profile-uploader
         GROUP: aws-profile-uploader
+
+  upload-to-artifactory:
+    run:
+      container: jfrog
+      command: /app/scripts/upload-to-artifactory.sh
+      environment:
+        CI: "true"
+        REPOSITORY: aws-profile
+        ACCESS_TOKEN: ${ACCESS_TOKEN}
+        VERSION: ${VERSION}
