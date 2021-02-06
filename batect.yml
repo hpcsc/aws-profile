@@ -116,3 +116,14 @@ tasks:
         SOURCE_PATTERN: ./artifacts/aws-profile*
         ACCESS_TOKEN: ${ACCESS_TOKEN}
         VERSION_NUMBER: ${VERSION_NUMBER}
+
+  download-from-artifactory:
+    run:
+      container: jfrog
+      command: /app/scripts/download-from-artifactory.sh
+      environment:
+        CI: "true"
+        REPOSITORY: aws-profile
+        DESTINATION: ./artifacts/
+        ACCESS_TOKEN: ${ACCESS_TOKEN}
+        VERSION_NUMBER: ${VERSION_NUMBER}
