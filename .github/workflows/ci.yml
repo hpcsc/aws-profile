@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - master
-jobs:
 
+jobs:
   commit:
     name: Commit
     runs-on: ubuntu-18.04
@@ -66,13 +66,13 @@ jobs:
         ./batect build-linux
       env:
         VERSION_NUMBER: ${{github.sha}}
-        OUTPUT: bin/aws-profile-linux-${{github.sha}}
+        OUTPUT: bin/aws-profile-linux
 
     - name: Upload Linux binary as artifact
       uses: actions/upload-artifact@v1
       with:
-        name: aws-profile-linux-${{github.sha}}
-        path: ./bin/aws-profile-linux-${{github.sha}}
+        name: aws-profile-linux
+        path: ./bin/aws-profile-linux
 
 
   publishMacOS:
@@ -88,13 +88,13 @@ jobs:
         ./batect build-macos
       env:
         VERSION_NUMBER: ${{github.sha}}
-        OUTPUT: bin/aws-profile-macos-${{github.sha}}
+        OUTPUT: bin/aws-profile-macos
 
     - name: Upload MacOS binary as artifact
       uses: actions/upload-artifact@v1
       with:
-        name: aws-profile-macos-${{github.sha}}
-        path: ./bin/aws-profile-macos-${{github.sha}}
+        name: aws-profile-macos
+        path: ./bin/aws-profile-macos
 
   publishWindows:
     name: Publish Windows
@@ -109,13 +109,13 @@ jobs:
         ./batect build-windows
       env:
         VERSION_NUMBER: ${{github.sha}}
-        OUTPUT: bin/aws-profile-windows-${{github.sha}}
+        OUTPUT: bin/aws-profile-windows
 
     - name: Upload Windows binary as artifact
       uses: actions/upload-artifact@v1
       with:
-        name: aws-profile-windows-${{github.sha}}
-        path: ./bin/aws-profile-windows-${{github.sha}}
+        name: aws-profile-windows
+        path: ./bin/aws-profile-windows
 
   uploadToArtifactory:
     name: Upload to Artifactory
