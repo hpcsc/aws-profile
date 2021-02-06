@@ -74,15 +74,6 @@ jobs:
         name: aws-profile-linux-${{github.sha}}
         path: ./bin/aws-profile-linux-${{github.sha}}
 
-    - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1.1
-      with:
-        repository: aws-profile
-        package: master
-        version: ${{github.sha}}
-        sourcePath: ./bin/aws-profile*
-        username: hpcsc
-        apiKey: ${{secrets.BINTRAY_API_KEY}}
 
   publishMacOS:
     name: Publish MacOS
@@ -105,16 +96,6 @@ jobs:
         name: aws-profile-macos-${{github.sha}}
         path: ./bin/aws-profile-macos-${{github.sha}}
 
-    - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1.1
-      with:
-        repository: aws-profile
-        package: master
-        version: ${{github.sha}}
-        sourcePath: ./bin/aws-profile*
-        username: hpcsc
-        apiKey: ${{secrets.BINTRAY_API_KEY}}
-
   publishWindows:
     name: Publish Windows
     runs-on: ubuntu-18.04
@@ -136,12 +117,25 @@ jobs:
         name: aws-profile-windows-${{github.sha}}
         path: ./bin/aws-profile-windows-${{github.sha}}
 
-    - name: Upload to Bintray
-      uses: hpcsc/upload-bintray-docker-action@v1.1
+  uploadToArtifactory:
+    name: Upload to Artifactory
+    runs-on: ubuntu-18.04
+    needs: [publishLinux, publishMacOS, publishWindows]
+    steps:
+    - name: Check out
+      uses: actions/checkout@v1
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v2
       with:
-        repository: aws-profile
-        package: master
-        version: ${{github.sha}}
-        sourcePath: ./bin/aws-profile*
-        username: hpcsc
-        apiKey: ${{secrets.BINTRAY_API_KEY}}
+        path: artifacts
+
+    - name: Show downloaded artifacts
+      run: ls -laR ./artifacts
+
+    - name: Upload
+      run: |
+        ./batect upload-to-artifactory
+      env:
+        VERSION_NUMBER: ${{github.sha}}
+        ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
