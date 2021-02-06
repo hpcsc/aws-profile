@@ -17,6 +17,15 @@ containers:
     environment:
       GOCACHE: /go/cache
 
+  jfrog:
+    image: docker.bintray.io/jfrog/jfrog-cli-go:1.43.2
+    working_directory: /app
+    volumes:
+      - local: .
+        container: /app
+        options: cached
+
+
 tasks:
   clean:
     run:
@@ -86,3 +95,13 @@ tasks:
     run:
       container: build-env
       command: /app/scripts/scan-security.sh
+
+  generate-artifactory-token:
+    run:
+      container: jfrog
+      command: /app/scripts/generate-artifactory-token.sh
+      environment:
+        CI: "true"
+        ACCESS_TOKEN: ${ACCESS_TOKEN}
+        NAME: aws-profile-uploader
+        GROUP: aws-profile-uploader
