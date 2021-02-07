@@ -10,7 +10,7 @@ type checker interface {
 
 func NewChecker(os string, includePrerelease bool) checker {
 	if includePrerelease {
-		return newBintrayChecker(os, httpclient.GetUrl)
+		return newArtifactoryChecker(os, httpclient.GetUrl)
 	}
 
 	return newGithubChecker(os, httpclient.GetUrlWithAuthorization)

@@ -6,10 +6,10 @@ import (
 )
 
 func TestNewChecker(t *testing.T) {
-	t.Run("should return bintray checker if include prerelease is true", func(t *testing.T) {
+	t.Run("should return artifactory checker if include prerelease is true", func(t *testing.T) {
 		c := NewChecker("linux", true)
 
-		_, ok := c.(bintrayChecker)
+		_, ok := c.(artifactoryChecker)
 
 		require.True(t, ok)
 	})
