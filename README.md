@@ -24,7 +24,7 @@ This will download latest release from Github to `/usr/local/bin/aws-profile`
 #### Manual Installation
 
 - Release build [Github Releases](https://github.com/hpcsc/aws-profile/releases/latest)
-- Latest build from master branch: [ ![Download](https://api.bintray.com/packages/hpcsc/aws-profile/master/images/download.svg) ](https://bintray.com/hpcsc/aws-profile/master/_latestVersion#files)
+- Latest build from master branch [Artifactory](https://hpcsc.jfrog.io/artifactory/aws-profile/)
 
 After downloading binary file, rename it to `aws-profile` (or `aws-profile.exe` on Windows), `chmod +x` and move the executable to a location in your `PATH` (.e.g. `/usr/local/bin` for Linux/MacOS):
 

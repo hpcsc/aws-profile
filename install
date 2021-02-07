@@ -21,9 +21,8 @@ get_download_url() {
           grep ${file_name} | \
           cut -d '"' -f 4
   else
-    bintray_latest_version=$(curl -s https://api.bintray.com/packages/hpcsc/aws-profile/master | \
-                              sed 's/.*latest_version":"\([[:alnum:]]*\)".*/\1/g')
-    echo "https://dl.bintray.com/hpcsc/aws-profile/${file_name}-${bintray_latest_version}"
+    artifactory_latest_version=$(curl -s https://hpcsc.jfrog.io/artifactory/aws-profile/latest-version)
+    echo "https://hpcsc.jfrog.io/artifactory/aws-profile/${artifactory_latest_version}/${file_name}"
   fi
 }
 
